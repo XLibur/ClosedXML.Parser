@@ -13,6 +13,7 @@ internal static class ParserFactory
         parser.Register(TokenType.Number, new NumberParselet<TScalar, TNode, TContext>(factory, parser));
         parser.Register(TokenType.LeftParen, new GroupParselet<TNode, TContext>(parser));
         parser.Register(TokenType.Ident, new IdentParselet<TScalar, TNode, TContext>(factory, parser));
+        parser.Register(TokenType.QIdent, new QIdentParselet<TScalar, TNode, TContext>(factory, parser));
 
         // Register operation parselets
         parser.Register(TokenType.Plus, new BinaryOpParselet<TScalar, TNode, TContext>(factory, parser, BinaryOperation.Addition, BindingPower.Addition));

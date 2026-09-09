@@ -17,6 +17,12 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse a quoted sheet prefix in the Pratt parser. `QIdent` was lexed but no prefix
+  parselet was registered for it, so every quoted sheet reference failed — `'New York'!A1`
+  and `'Jane''s'!A1` as much as anything else a serializer quotes. The new parselet strips
+  the apostrophes, collapses the doubled ones, and handles `'sheet'!A1`, `'sheet'!name` and
+  `'first:last'!A1`. External workbook prefixes stay unsupported, as they are on the
+  unquoted path.
 - Write formula numbers with the invariant culture. `ToR1C1` used the current culture's
   negative sign, so under sv-SE, fi-FI or nb-NO (negative sign U+2212) it emitted
   `RC[−1]`, which the R1C1 reader could not parse back. Upstream issue
