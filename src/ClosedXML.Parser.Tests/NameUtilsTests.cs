@@ -160,6 +160,27 @@ public class NameUtilsTests
         Assert.Equal(isValid, NameUtils.IsSheetNameValid(name));
     }
 
+    /// <summary>
+    /// Excel refuses a sheet name containing any of these, so the data files leave them
+    /// out entirely rather than record an answer that could never be exercised.
+    /// </summary>
+    private static readonly int[] ForbiddenInSheetName = { '*', '/', ':', '?', '[', '\\', ']' };
+
+    [Theory]
+    [InlineData("ident-sheet-first.txt")]
+    [InlineData("ident-sheet-next.txt")]
+    public void Quotation_data_holds_one_row_per_codepoint_a_sheet_name_can_contain(string path)
+    {
+        // The comparison below only reaches codepoints the file actually lists, so on its
+        // own a truncated or partly deleted file passes while the masks keep stale values.
+        // Pin the coverage down first.
+        var codepoints = ReadQuotationData(path).Select(entry => entry.Codepoint).ToList();
+        var expected = Enumerable.Range(1, 0xFFFF).Where(cp => !ForbiddenInSheetName.Contains(cp));
+
+        Assert.Equal(codepoints.Count, codepoints.Distinct().Count());
+        Assert.Equal(expected, codepoints.OrderBy(codepoint => codepoint));
+    }
+
     [Fact]
     public void Quotation_bitmasks_match_the_data_they_were_generated_from()
     {

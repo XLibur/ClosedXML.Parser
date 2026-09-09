@@ -27,8 +27,9 @@ than from the UI, and why the two positions get separate tables.
 
 Needs Excel installed and PowerShell. Excel is driven over COM, invisibly.
 
-    # one batch of codepoints, one workbook
-    ./Collect-SheetQuotation.ps1 -cpFile batch.txt -out batch.xlsx -namesOut batch.csv -mode next
+    # one batch of codepoints, one workbook - once per mode
+    ./Collect-SheetQuotation.ps1 -cpFile batch.txt -out batch.xlsx -namesOut batch.csv -mode mid
+    ./Collect-SheetQuotation.ps1 -cpFile batch.txt -out batch-last.xlsx -namesOut batch-last.csv -mode last
 
 `-cpFile` is one 4-digit hex codepoint per line. `-mode first` puts the character first,
 `-mode mid` puts it between two letter runs, `-mode last` puts it at the end. The script
@@ -36,9 +37,16 @@ names one sheet per codepoint, references each from a `Probe` sheet, and saves. 
 stored `<f>` for each probe cell out of the saved XML: a leading apostrophe means the
 codepoint needs quotes.
 
-`mid` and `last` both describe a non-first character, so both feed `ident-sheet-next.txt`
-and their results must be unioned — the end of a name is a position Excel can treat
-specially, so neither alone is the whole answer.
+`first` feeds `ident-sheet-first.txt`. `mid` and `last` both describe a non-first
+character, so both feed `ident-sheet-next.txt` and **their results must be unioned** —
+the end of a name is a position Excel can treat specially, so running only one of them
+leaves half the answer uncollected.
+
+`-namesOut` is the mapping from codepoint to probe row, written as CSV with a header
+(`Codepoint,Status,Row,SheetName`). Read it with a real CSV parser: a sheet name is the
+character under test surrounded by tag letters, so it can contain a comma or a quote.
+`Status` is `OK` (row holds a formula), `INVALID` (Excel refused the name), `NOFORMULA`
+(Excel refused the reference) or `UNPROBEABLE` (skipped, see below).
 
 Batch it at about 1000 codepoints per workbook and run each batch with a timeout —
 around 45 seconds each, so a full BMP pass is roughly an hour per mode.
@@ -52,8 +60,9 @@ already caught, so the two non-first positions agree.
 - **U+0000–U+001F cannot be probed.** Renaming a sheet to a name holding U+0003 opens a
   modal dialog that `DisplayAlerts = $false` does not suppress, and the COM session
   wedges until Excel is killed. The MS-XLSX grammar singles out `END OF TEXT` as
-  forbidden. These codepoints keep their previous values.
-- **Lone surrogates cannot be probed** either, and keep their previous values.
+  forbidden. The script skips these rather than discovering them the hard way, and
+  records them as `UNPROBEABLE`; they keep their previous values.
+- **Lone surrogates cannot be probed** either. Skipped and recorded the same way.
 - **Sheet names must not look like a cell reference.** Excel quotes `S500` because it
   reads as one, not because of any character in it. The script's 5-letter tag is longer
   than the 3-letter column limit, which rules that out.
