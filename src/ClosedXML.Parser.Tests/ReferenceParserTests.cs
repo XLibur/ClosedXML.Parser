@@ -47,6 +47,39 @@ public class ReferenceParserTests
     }
 
     [Theory]
+    [MemberData(nameof(ParseR1C1TestCases))]
+    public void TryParseR1C1_parses_cell_area_or_rowspan_or_colspan(string text, ReferenceArea expectedReference)
+    {
+        var success = ReferenceParser.TryParseR1C1(text, out var area);
+        Assert.True(success);
+        Assert.Equal(expectedReference, area);
+    }
+
+    [Fact]
+    public void TryParseR1C1_requires_argument()
+    {
+        Assert.Throws<ArgumentNullException>(() => ReferenceParser.TryParseR1C1(null!, out _));
+    }
+
+    [Fact]
+    public void TryParseR1C1_returns_false_on_non_references()
+    {
+        var success = ReferenceParser.TryParseR1C1("HELLO", out var area);
+        Assert.False(success);
+        Assert.Equal(default, area);
+    }
+
+    [Fact]
+    public void TryParseR1C1_reads_the_text_in_R1C1_not_A1()
+    {
+        // C7 is a cell in A1 and a whole column in R1C1.
+        Assert.True(ReferenceParser.TryParseA1("C7", out var a1));
+        Assert.True(ReferenceParser.TryParseR1C1("C7", out var r1c1));
+        Assert.NotEqual(a1, r1c1);
+        Assert.Equal(new ReferenceArea(new RowCol(None, 0, Absolute, 7, R1C1)), r1c1);
+    }
+
+    [Theory]
     [MemberData(nameof(ParseSheetA1TestCases))]
     public void TryParseSheetA1_accepts_area_or_rowspan_or_colspan_with_sheet(string text, string expectedSheet, ReferenceArea expectedArea)
     {
@@ -215,6 +248,33 @@ public class ReferenceParserTests
                 "'!!WARN'!10:$15",
                 "!!WARN",
                 new ReferenceArea(new RowCol(Relative, 10, None, 0, A1), new RowCol(Absolute, 15, None, 0, A1)),
+            };
+        }
+    }
+
+    public static IEnumerable<object[]> ParseR1C1TestCases
+    {
+        get
+        {
+            yield return new object[]
+            {
+                "R7C3",
+                new ReferenceArea(new RowCol(Absolute, 7, Absolute, 3, R1C1)),
+            };
+            yield return new object[]
+            {
+                "R[-1]C",
+                new ReferenceArea(new RowCol(Relative, -1, Relative, 0, R1C1)),
+            };
+            yield return new object[]
+            {
+                "C75",
+                new ReferenceArea(new RowCol(None, 0, Absolute, 75, R1C1)),
+            };
+            yield return new object[]
+            {
+                "R1C1:R[2]C[2]",
+                new ReferenceArea(new RowCol(Absolute, 1, Absolute, 1, R1C1), new RowCol(Relative, 2, Relative, 2, R1C1)),
             };
         }
     }
