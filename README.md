@@ -20,7 +20,7 @@ Official source for the grammar is [MS-XML](https://learn.microsoft.com/en-us/op
 ## Visualizer
 There is a visualizer to display AST in a browser at **[https://parser.closedxml.io](https://parser.closedxml.io)**
 
-![image](https://github.com/XLibur/ClosedXML.Parser/assets/7634052/4beaab23-4599-44d4-be7b-705178b69f99)
+![image](assets/visualizer.png)
 
 # Goals
 
