@@ -10,6 +10,15 @@ under Unreleased with each change.
 
 ## Unreleased
 
+### Added
+
+- `ReferenceParser.TryParseR1C1`. Every public method of `ReferenceParser` lexed with the
+  A1 table, so a caller holding an R1C1 reference had no entry point at all, and the
+  library's own tests had to reach through `InternalsVisibleTo` to parse one. The
+  reference is read as written: a relative axis keeps its offset and is not resolved
+  against an anchor cell, so `R[-1]C` gives a relative row of -1 and a relative column of
+  0. The other five public methods keep their A1-only form.
+
 ### Changed
 
 - Forked from ClosedXML.Parser 2.0.0 and published as `XLibur.ClosedXML.Parser`. The
@@ -17,6 +26,15 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Read the called cell of a cell function in the formula's reference style.
+  `TokenParser.ExtractCellFunction` always read it as A1, so in R1C1 mode `R7C3(TRUE)` was
+  read as the A1 cell `R7` and the `C3` was thrown away. It failed silently, because what
+  it produced still looked like a plausible reference. `FormulaConverterToA1Tests` carried
+  the case as `Skip = "Parser bug"`, and its expectation was wrong as well — `R7C3` is
+  absolute row 7 and absolute column 3, so it converts to `$C$7`, not `$E$11`. The
+  reference style is now an adapter taken once beside the DFA table it belongs with, so
+  the table and the reader cannot disagree and there is no longer a style flag that can be
+  passed incorrectly.
 - Parse a quoted sheet prefix in the Pratt parser. `QIdent` was lexed but no prefix
   parselet was registered for it, so every quoted sheet reference failed — `'New York'!A1`
   and `'Jane''s'!A1` as much as anything else a serializer quotes. The new parselet strips
