@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System;
 
 namespace ClosedXML.Parser.Rolex;
@@ -46,14 +45,19 @@ internal class RolexLexer
     private static int Next(ReadOnlySpan<char> input, ref int index)
     {
         var c = input[index];
-        if (char.IsHighSurrogate(c))
-        {
-            if (index >= input.Length)
-                throw new IOException("Unexpected end of input while looking for Unicode low surrogate.");
 
-            var lowSurrogate = input[index + 1];
+        // Only a high surrogate that is actually followed by a low surrogate forms a
+        // codepoint. A trailing or mismatched surrogate is malformed UTF-16: step over the
+        // single unit and return it as it stands. No token contains a surrogate on its own,
+        // so the caller finds no transition for it and reports an error token, which is
+        // what the try-parse entry points need in order to return false.
+        if (char.IsHighSurrogate(c) &&
+            index + 1 < input.Length &&
+            char.IsLowSurrogate(input[index + 1]))
+        {
+            var codepoint = char.ConvertToUtf32(c, input[index + 1]);
             index += 2;
-            return char.ConvertToUtf32(c, lowSurrogate);
+            return codepoint;
         }
 
         ++index;

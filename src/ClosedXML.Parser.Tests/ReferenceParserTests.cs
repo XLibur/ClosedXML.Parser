@@ -69,6 +69,55 @@ public class ReferenceParserTests
         Assert.Equal(default, area);
     }
 
+    /// <summary>
+    /// Malformed UTF-16 used to reach the shared lexer's surrogate handling and throw out of
+    /// it - an out of range read for a trailing high surrogate, and an out of range argument
+    /// to <c>char.ConvertToUtf32</c> for a mismatched one. A try-parse has to report that as
+    /// a failure to parse.
+    /// </summary>
+    /// <remarks>
+    /// The cases are built here rather than passed as <c>InlineData</c>. xUnit serializes
+    /// theory arguments, a lone surrogate does not survive that round trip, and two cases
+    /// that differ only in their surrogates end up with the same test id - so one of them is
+    /// silently dropped and the rest never see malformed input at all.
+    /// </remarks>
+    [Fact]
+    public void TryParse_returns_false_on_malformed_utf16()
+    {
+        const char high = '\uD83D';
+        const char low = '\uDE00';
+        (string Case, string Text)[] cases =
+        {
+            ("high surrogate alone", $"{high}"),
+            ("low surrogate alone", $"{low}"),
+            ("high surrogate after a reference", $"R1C1{high}"),
+            ("high surrogate after an A1 reference", $"A1{high}"),
+            ("high surrogate followed by a letter", $"{high}A"),
+            ("high surrogate inside a reference", $"R{high}C"),
+            ("two high surrogates", $"{high}{high}"),
+            ("low surrogate before a high one", $"{low}{high}"),
+        };
+
+        foreach (var (name, text) in cases)
+        {
+            Assert.False(ReferenceParser.TryParseR1C1(text, out var r1c1), name);
+            Assert.Equal(default, r1c1);
+
+            Assert.False(ReferenceParser.TryParseA1(text, out var a1), name);
+            Assert.Equal(default, a1);
+        }
+    }
+
+    [Fact]
+    public void TryParse_still_accepts_a_paired_surrogate_in_a_sheet_name()
+    {
+        var success = ReferenceParser.TryParseSheetA1("'\uD83D\uDE00'!A1", out var sheet, out var area);
+
+        Assert.True(success);
+        Assert.Equal("\uD83D\uDE00", sheet);
+        Assert.Equal(new ReferenceArea(new RowCol(Relative, 1, Relative, 1, A1)), area);
+    }
+
     [Fact]
     public void TryParseR1C1_reads_the_text_in_R1C1_not_A1()
     {
