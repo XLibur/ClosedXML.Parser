@@ -26,9 +26,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private readonly TContext _context;
 
     /// <summary>
-    /// Is parser in A1 mode (true) or R1C1 mode (false)?
+    /// Reads the tokens and the references of the formula, in the style it is written in.
     /// </summary>
-    private readonly bool _a1Mode;
+    private readonly IReferenceStyle _style;
     private Token _tokenSource;
     private int _tokenIndex = -1;
 
@@ -45,11 +45,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         var trimmedFormula = formula.AsSpan().TrimEnd();
         _input = formula;
         _context = context;
-        _tokens = a1Mode
-            ? RolexLexer.GetTokensA1(trimmedFormula)
-            : RolexLexer.GetTokensR1C1(trimmedFormula);
+        // The DFA table and the reference reader have to be of the same style, so take both
+        // from one adapter instead of deciding the style twice.
+        _style = a1Mode ? TokenParser.A1Style : TokenParser.R1C1Style;
+        _tokens = RolexLexer.GetTokens(trimmedFormula, _style.DfaTable);
         _factory = factory;
-        _a1Mode = a1Mode;
         Consume();
     }
 
@@ -326,7 +326,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     isPureRef = false;
                     var start = _tokenSource.StartIndex;
-                    var cellReference = TokenParser.ExtractCellFunction(GetCurrentToken());
+                    var cellReference = _style.ParseCellFunction(GetCurrentToken());
                     Consume();
                     var args = ArgumentList();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -529,12 +529,12 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.A1_CELL:
                 {
                     var startIdx = _tokenSource.StartIndex;
-                    var area = TokenParser.ParseReference(GetCurrentToken(), _a1Mode);
+                    var area = _style.ParseReference(GetCurrentToken());
                     Consume();
                     if (_la == Token.COLON && LL(1) == Token.A1_CELL)
                     {
                         Consume();
-                        var secondCell = TokenParser.ParseReference(GetCurrentToken(), _a1Mode);
+                        var secondCell = _style.ParseReference(GetCurrentToken());
                         Consume();
                         area = new ReferenceArea(area.First, secondCell.First);
                     }
@@ -549,7 +549,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.A1_SPAN_REFERENCE:
                 {
                     var start = _tokenSource.StartIndex;
-                    var area = TokenParser.ParseReference(GetCurrentToken(), _a1Mode);
+                    var area = _style.ParseReference(GetCurrentToken());
                     Consume();
                     var end = _tokenSource.StartIndex;
                     var reference = _factory.Reference(_context, new SymbolRange(start, end), area);
@@ -569,7 +569,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                         return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), REF_ERROR.AsSpan());
                     }
 
-                    var reference = TokenParser.ParseReference(referenceToken, _a1Mode);
+                    var reference = _style.ParseReference(referenceToken);
                     Consume();
                     return _factory.BangReference(_context, new SymbolRange(start, _tokenSource.StartIndex), reference);
                 }
@@ -719,13 +719,13 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         if (_la == Token.A1_CELL)
         {
             var cellToken = GetCurrentToken();
-            var cell = TokenParser.ParseReference(cellToken, _a1Mode);
+            var cell = _style.ParseReference(cellToken);
             Consume();
             var area = cell;
             if (_la == Token.COLON && LL(1) == Token.A1_CELL)
             {
                 Consume();
-                var secondCell = TokenParser.ParseReference(GetCurrentToken(), _a1Mode);
+                var secondCell = _style.ParseReference(GetCurrentToken());
                 area = new ReferenceArea(cell.First, secondCell.First);
                 Consume();
             }
@@ -735,7 +735,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
         if (_la == Token.A1_SPAN_REFERENCE)
         {
-            var area = TokenParser.ParseReference(GetCurrentToken(), _a1Mode);
+            var area = _style.ParseReference(GetCurrentToken());
             Consume();
             return area;
         }

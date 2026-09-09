@@ -1,11 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using ClosedXML.Parser.Rolex;
 using static ClosedXML.Parser.ReferenceAxisType;
 
 namespace ClosedXML.Parser;
 
 internal static class TokenParser
 {
+    /// <summary>
+    /// Reads formulas written in the <see cref="ReferenceStyle.A1"/> reference style.
+    /// </summary>
+    internal static readonly IReferenceStyle A1Style = new A1ReferenceStyle();
+
+    /// <summary>
+    /// Reads formulas written in the <see cref="ReferenceStyle.R1C1"/> reference style.
+    /// </summary>
+    internal static readonly IReferenceStyle R1C1Style = new R1C1ReferenceStyle();
+
     /// <summary>
     /// Parse <see cref="Token.SINGLE_SHEET_PREFIX"/> token.
     /// </summary>
@@ -115,12 +127,6 @@ internal static class TokenParser
         return buffer.Slice(0, bufferIdx).ToString();
     }
 
-    internal static RowCol ExtractCellFunction(ReadOnlySpan<char> cellFunctionToken)
-    {
-        var i = 0;
-        return ReadA1Cell(cellFunctionToken, ref i);
-    }
-
     internal static ReadOnlySpan<char> ExtractLocalFunctionName(ReadOnlySpan<char> functionNameWithBrace)
     {
         // In most cases, there won't be any whitespace
@@ -129,11 +135,6 @@ internal static class TokenParser
             : functionNameWithBrace.LastIndexOf('(');
         var functionName = functionNameWithBrace.Slice(0, endPosition);
         return functionName;
-    }
-
-    internal static ReferenceArea ParseReference(ReadOnlySpan<char> input, bool isA1)
-    {
-        return isA1 ? ParseA1Reference(input) : ParseR1C1Reference(input);
     }
 
     /// <summary>
@@ -547,5 +548,31 @@ internal static class TokenParser
     private static Exception Bug()
     {
         throw new InvalidOperationException("Bug in token parser. Token doesn't have expected format.");
+    }
+
+    private sealed class A1ReferenceStyle : IReferenceStyle
+    {
+        public DfaEntry[] DfaTable => RolexA1Dfa.DfaTable;
+
+        public ReferenceArea ParseReference(ReadOnlySpan<char> token) => ParseA1Reference(token);
+
+        public RowCol ParseCellFunction(ReadOnlySpan<char> token)
+        {
+            var i = 0;
+            return ReadA1Cell(token, ref i);
+        }
+    }
+
+    private sealed class R1C1ReferenceStyle : IReferenceStyle
+    {
+        public DfaEntry[] DfaTable => RolexR1C1Dfa.DfaTable;
+
+        public ReferenceArea ParseReference(ReadOnlySpan<char> token) => ParseR1C1Reference(token);
+
+        public RowCol ParseCellFunction(ReadOnlySpan<char> token)
+        {
+            var i = 0;
+            return ParseR1C1Reference(token, ref i);
+        }
     }
 }

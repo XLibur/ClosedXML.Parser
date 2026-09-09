@@ -26,7 +26,7 @@ public class A1CellTokenTests
     private static void AssertAreaReferenceToken(string token, ReferenceArea expectedReference)
     {
         AssertFormula.AssertTokenType(token, Token.A1_CELL);
-        var reference = TokenParser.ParseReference(token, true);
+        var reference = TokenParser.A1Style.ParseReference(token);
         Assert.Equal(expectedReference, reference);
     }
 }

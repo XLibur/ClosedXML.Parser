@@ -9,7 +9,7 @@ public class ReferenceAreaTests
     public void DisplayStringA1_displays_reference_in_A1_style(ReferenceArea reference, string expectedString)
     {
         Assert.Equal(expectedString, reference.GetDisplayStringA1());
-        Assert.Equal(reference, TokenParser.ParseReference(expectedString, true));
+        Assert.Equal(reference, TokenParser.A1Style.ParseReference(expectedString));
     }
 
     [Theory]
@@ -17,7 +17,7 @@ public class ReferenceAreaTests
     public void DisplayStringR1C1_displays_reference_in_R1C1_style(ReferenceArea reference, string expectedString)
     {
         Assert.Equal(expectedString, reference.GetDisplayStringR1C1());
-        Assert.Equal(reference, TokenParser.ParseReference(expectedString, false));
+        Assert.Equal(reference, TokenParser.R1C1Style.ParseReference(expectedString));
     }
 
     public static IEnumerable<object[]> DisplayStringA1

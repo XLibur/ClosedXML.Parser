@@ -15,7 +15,8 @@ public class FormulaConverterToA1Tests
     [InlineData("C[-2]:C[1]", 4, 3, "A:D")]
     [InlineData("R[-2]:R[6]", 4, 3, "2:10")]
     [InlineData("Sheet4!R[2]C", 4, 2, "Sheet4!B6")] // Sheet reference
-    [InlineData("R7C3(TRUE)", 4, 2, "$E$11(TRUE)", Skip = "Parser bug")] // Cell function
+    [InlineData("R7C3(TRUE)", 4, 2, "$C$7(TRUE)")] // Cell function, absolute
+    [InlineData("R[7]C[3](TRUE)", 4, 2, "E11(TRUE)")] // Cell function, relative
     public void ExternalSheetReference(string r1c1, int row, int col, string a1)
     {
         Assert.Equal(a1, FormulaConverter.ToA1(r1c1, row, col));

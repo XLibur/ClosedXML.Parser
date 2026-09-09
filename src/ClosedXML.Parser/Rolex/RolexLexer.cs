@@ -24,7 +24,7 @@ internal class RolexLexer
         return GetTokens(formula, RolexR1C1Dfa.DfaTable);
     }
 
-    private static List<Token> GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
+    internal static List<Token> GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
     {
         var tokens = new List<Token>();
         for (var i = 0; i < formula.Length;)

@@ -32,7 +32,7 @@ public static class ReferenceParser
             throw new ArgumentNullException();
 
         sheetName = null;
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         if (TryParseA1(tokens, text, out area))
             return true;
 
@@ -61,7 +61,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException();
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParseA1(tokens, text, out area);
     }
 
@@ -108,7 +108,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParseSheetA1(tokens, text, out sheetName, out area);
     }
 
@@ -129,7 +129,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         if (tokens.Count == 2 &&
             tokens[0].SymbolId == Token.NAME &&
             tokens[1].SymbolId == Token.EofSymbolId)
@@ -156,7 +156,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParseSheetName(tokens, text, out sheetName, out name);
     }
 
@@ -169,7 +169,7 @@ public static class ReferenceParser
             return false;
         }
 
-        area = TokenParser.ParseReference(text.AsSpan(), isA1: true);
+        area = TokenParser.A1Style.ParseReference(text.AsSpan());
         return true;
     }
 
@@ -202,7 +202,7 @@ public static class ReferenceParser
         }
 
         var referenceArea = text.AsSpan().Slice(sheetPrefixToken.Length);
-        area = TokenParser.ParseReference(referenceArea, isA1: true);
+        area = TokenParser.A1Style.ParseReference(referenceArea);
         return true;
     }
 
