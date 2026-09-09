@@ -193,7 +193,18 @@ public static class ReferenceParser
             return false;
         }
 
-        area = style.ParseReference(text.AsSpan());
+        try
+        {
+            area = style.ParseReference(text.AsSpan());
+        }
+        catch (ParsingException)
+        {
+            // The token shape can be valid while the reader still rejects the text - the
+            // R1C1 lexer accepts a bare axis number of 0, for instance.
+            area = default;
+            return false;
+        }
+
         return true;
     }
 

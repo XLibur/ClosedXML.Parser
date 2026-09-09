@@ -217,6 +217,7 @@ internal static class TokenParser
         }
 
         // Axis is absolute or relative [0] without explicit number.
+        var numberStart = i;
         var absoluteNumber = 0;
         while (i < token.Length && token[i] >= '0' && token[i] <= '9')
             absoluteNumber = absoluteNumber * 10 + (token[i++] - '0');
@@ -224,8 +225,17 @@ internal static class TokenParser
         currentIdx = i;
 
         // There is no number after 'C'/'R' => it's a shorthand for `C[0]`/`R[0]`
-        if (absoluteNumber == 0)
+        if (i == numberStart)
             return (Relative, 0);
+
+        // A written number is absolute, and rows and columns are numbered from 1. Only the
+        // shorthand above and a bracketed `[0]` mean a relative zero. The R1C1 lexer admits
+        // a bare `C0`, so this is the only place that can tell a written zero from an absent
+        // number - counting the digits is what makes the two distinguishable.
+        if (absoluteNumber == 0)
+            throw new ParsingException(
+                "An R1C1 axis number of 0 is not valid. Rows and columns are numbered from 1; " +
+                "use 'R'/'C' or 'R[0]'/'C[0]' for an axis relative to the current cell.");
 
         return (Absolute, absoluteNumber);
     }

@@ -70,6 +70,42 @@ public class ReferenceParserTests
     }
 
     /// <summary>
+    /// A written axis number is absolute and starts at 1. Only a missing number (<c>R</c>,
+    /// <c>C</c>) and a bracketed zero (<c>R[0]</c>, <c>C[0]</c>) mean an axis relative to the
+    /// current cell. The R1C1 lexer admits a bare <c>C0</c>, so the reader has to reject it;
+    /// a bare <c>R0</c> the lexer already refuses.
+    /// </summary>
+    [Theory]
+    [InlineData("C0")]
+    [InlineData("R1C0")]
+    [InlineData("C0:C2")]
+    [InlineData("R0")]
+    [InlineData("R0C0")]
+    [InlineData("R0C1")]
+    [InlineData("R0:R2")]
+    public void TryParseR1C1_rejects_a_written_axis_number_of_zero(string text)
+    {
+        var success = ReferenceParser.TryParseR1C1(text, out var area);
+        Assert.False(success);
+        Assert.Equal(default, area);
+    }
+
+    [Theory]
+    [InlineData("R", Relative, 0, None, 0)]
+    [InlineData("C", None, 0, Relative, 0)]
+    [InlineData("RC", Relative, 0, Relative, 0)]
+    [InlineData("R[0]", Relative, 0, None, 0)]
+    [InlineData("C[0]", None, 0, Relative, 0)]
+    [InlineData("R[0]C[0]", Relative, 0, Relative, 0)]
+    public void TryParseR1C1_still_accepts_a_relative_zero_axis(string text, ReferenceAxisType rowType, int row, ReferenceAxisType colType, int col)
+    {
+        var success = ReferenceParser.TryParseR1C1(text, out var area);
+
+        Assert.True(success);
+        Assert.Equal(new ReferenceArea(new RowCol(rowType, row, colType, col, R1C1)), area);
+    }
+
+    /// <summary>
     /// Malformed UTF-16 used to reach the shared lexer's surrogate handling and throw out of
     /// it - an out of range read for a trailing high surrogate, and an out of range argument
     /// to <c>char.ConvertToUtf32</c> for a mismatched one. A try-parse has to report that as
