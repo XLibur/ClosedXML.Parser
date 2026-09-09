@@ -17,6 +17,12 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse a quoted sheet prefix in the Pratt parser. `QIdent` was lexed but no prefix
+  parselet was registered for it, so every quoted sheet reference failed — `'New York'!A1`
+  and `'Jane''s'!A1` as much as anything else a serializer quotes. The new parselet strips
+  the apostrophes, collapses the doubled ones, and handles `'sheet'!A1`, `'sheet'!name` and
+  `'first:last'!A1`. External workbook prefixes stay unsupported, as they are on the
+  unquoted path.
 - Quote sheet names the way Excel's file format requires, not the way its formula bar
   displays them. The quotation tables were collected from the formula bar, which is more
   permissive than the file format: Excel shows `ABC～!A1` for a sheet named `ABC～`
