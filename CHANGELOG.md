@@ -40,10 +40,11 @@ under Unreleased with each change.
   columns are numbered from 1; only a missing number (`R`, `C`) and a bracketed zero
   (`R[0]`, `C[0]`) mean an axis relative to the current cell. The axis reader could not
   tell an absent number from a written `0`, because both left its accumulator at zero.
-  Only columns were affected — the grammar admits a bare zero for a column but not for a
-  row, so `R0` and `R0C0` were already refused. The grammar still admits `C0` and the
-  reader now rejects it; regenerating the R1C1 DFA without the literal zero would be the
-  tidier fix, but the Rolex generator is not in the repository.
+  Only columns were affected — the grammar had a bare zero for a column but not for a row,
+  so `R0` and `R0C0` were already refused. The bare zero is now gone from the grammar and
+  the R1C1 DFA is regenerated, so `C0`, `R1C0` and `C0:C2` lex as a name rather than as a
+  reference and are refused before the reader sees them. `ToA1("C0")` now round trips it as
+  a defined name, which is what it is.
 - Read the called cell of a cell function in the formula's reference style.
   `TokenParser.ExtractCellFunction` always read it as A1, so in R1C1 mode `R7C3(TRUE)` was
   read as the A1 cell `R7` and the `C3` was thrown away. It failed silently, because what
