@@ -229,9 +229,10 @@ internal static class TokenParser
             return (Relative, 0);
 
         // A written number is absolute, and rows and columns are numbered from 1. Only the
-        // shorthand above and a bracketed `[0]` mean a relative zero. The R1C1 lexer admits
-        // a bare `C0`, so this is the only place that can tell a written zero from an absent
-        // number - counting the digits is what makes the two distinguishable.
+        // shorthand above and a bracketed `[0]` mean a relative zero. The grammar no longer
+        // admits a bare `C0`, so a token should never reach here with one; this stays as a
+        // guard, and counting the digits is what makes an absent number and a written zero
+        // distinguishable at all.
         if (absoluteNumber == 0)
             throw new ParsingException(
                 "An R1C1 axis number of 0 is not valid. Rows and columns are numbered from 1; " +
