@@ -208,13 +208,15 @@ arg_atom_expression
 /*
  * Name reference, where local and external name have been inlined to reduce nesting.
  *
- * external_name originally also had a `bang-name` alternative, but that rule
- * has been omitted, because [MS-XLSX] 2.2.2.1, cell formulas can't use it.
- * Some other usage of formula might, but that is for later.
+ * [MS-XLSX] 2.2.2.1 forbids the bang name in a cell formula, but the formula of a
+ * defined name uses it. A name can't be TRUE or FALSE, but the lexer can't exclude
+ * them from the name after the bang. The predicate refuses them the same way the
+ * recursive descent parser does, see FormulaParser.Predicates.cs.
  */
 name_reference
         : NAME                                                                 // local name
         | (SINGLE_SHEET_PREFIX | BOOK_PREFIX) NAME                             // external name
+        | {IsBangName(CurrentToken.Text)}? BANG_NAME                           // bang name
         ;
 
 /* ------------------------- Dynamic data exchange ------------------------- */

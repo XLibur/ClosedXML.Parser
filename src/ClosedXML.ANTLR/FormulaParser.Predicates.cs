@@ -22,4 +22,16 @@ public partial class FormulaParser
         var separatorIndex = name.IndexOf('|');
         return separatorIndex > 0 && separatorIndex < name.Length - 1;
     }
+
+    /// <summary>
+    /// Is the name of a <c>BANG_NAME</c> token (e.g. <c>!SomeName</c>) a valid name? A name can't be <c>TRUE</c> or
+    /// <c>FALSE</c>, but the lexer can't exclude them from the name after the bang. The recursive descent parser
+    /// checks the same when it reads the token.
+    /// </summary>
+    private static bool IsBangName(string token)
+    {
+        var name = token.Substring(1);
+        return !name.Equals("TRUE", System.StringComparison.OrdinalIgnoreCase) &&
+               !name.Equals("FALSE", System.StringComparison.OrdinalIgnoreCase);
+    }
 }

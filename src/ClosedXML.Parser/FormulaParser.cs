@@ -574,6 +574,20 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     return _factory.BangReference(_context, new SymbolRange(start, _tokenSource.StartIndex), reference);
                 }
 
+            // name_reference: BANG_NAME
+            case Token.BANG_NAME:
+                {
+                    // Slice away '!' from the bang name. The lexer can't exclude a logical constant from the name.
+                    var name = GetCurrentToken().Slice(1);
+                    if (name.Equals("TRUE".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+                        name.Equals("FALSE".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                        throw Error($"A name can't be TRUE or FALSE, so '!{name.ToString()}' is not a bang name.");
+
+                    var start = _tokenSource.StartIndex;
+                    Consume();
+                    return _factory.BangName(_context, new SymbolRange(start, _tokenSource.StartIndex), name.ToString());
+                }
+
             // external_cell_reference: SHEET_RANGE_PREFIX (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE)
             case Token.SHEET_RANGE_PREFIX:
                 {
