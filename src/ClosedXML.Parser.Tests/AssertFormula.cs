@@ -35,6 +35,13 @@ internal static class AssertFormula
         Assert.Equal(FormulaLexer.Eof, commonTokenStream.Get(1).Type);
     }
 
+    /// <summary>
+    /// Assert that ANTLR lexer and parser accept the formula.
+    /// </summary>
+    /// <remarks>
+    /// The parser recovers from an error in a nested rule without an exception in the top rule, so the error has
+    /// to be caught by a listener.
+    /// </remarks>
     public static void CstParsed(string formula)
     {
         var inputStream = new AntlrInputStream(formula);
@@ -47,20 +54,22 @@ internal static class AssertFormula
         {
             Interpreter = { PredictionMode = PredictionMode.SLL }
         };
-        parser.ErrorListeners.Clear();
+        var parserListener = new ParserErrorListener();
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(parserListener);
 
         var res = parser.formula();
 
         Assert.True(listener.ErrorStartIndex is null, $"{formula}  {listener.ErrorStartIndex}");
         Assert.True(res.exception is null, $"{formula} {res.exception}");
+        Assert.False(parserListener.HasError, $"ANTLR parser recovered from an error in {formula}.");
     }
 
     /// <summary>
     /// Assert that ANTLR lexer accepts the formula, but ANTLR parser rejects it.
     /// </summary>
     /// <remarks>
-    /// <see cref="CstParsed"/> can't be negated for this. It checks only the exception of the top rule, and the
-    /// parser recovers from an error in a nested rule, so the error has to be caught by a listener.
+    /// <see cref="CstParsed"/> can't be negated for this, because it also fails when the lexer rejects the formula.
     /// </remarks>
     public static void CstNotParsed(string formula)
     {
