@@ -72,3 +72,16 @@ jobs:
         with:
           name: test-results
           path: '**/TestResults/*.trx'
+
+  # The Rolex DFA tables are generated from the Rolex grammars (Lexer*.rl) by the vendored
+  # Rolex 91a2d6d build, a .NET Framework executable, so this check runs on Windows.
+  # RolexGrammarConverterTests covers the step before it, from FormulaLexer.g4 to the grammars.
+  rolex-tables:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the DFA tables are generated from the Rolex grammars
+        shell: bash
+        run: bash tools/rolex/generate-dfa-tables.sh --check

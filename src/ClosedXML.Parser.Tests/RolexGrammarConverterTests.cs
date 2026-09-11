@@ -10,7 +10,9 @@ public class RolexGrammarConverterTests
     /// <summary>
     /// Regenerates each committed Rolex grammar and compares it line by line, so a change to
     /// <c>FormulaLexer.g4</c> without a regenerated <c>.rl</c> (or a hand edit of a <c>.rl</c>)
-    /// fails here instead of surfacing as a lexer that silently disagrees with ANTLR.
+    /// fails here instead of surfacing as a lexer that silently disagrees with ANTLR. The next
+    /// step, from a <c>.rl</c> to its DFA table, needs the .NET Framework build of Rolex, so the
+    /// <c>rolex-tables</c> CI job checks it with <c>tools/rolex/generate-dfa-tables.sh --check</c>.
     /// </summary>
     [Theory]
     [InlineData(LexerStyle.A1, "Grammars/LexerA1.rl")]

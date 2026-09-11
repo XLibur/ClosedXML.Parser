@@ -48,7 +48,9 @@ under Unreleased with each change.
   `FormulaLexer.g4`, which now has it too. The generated grammars differ from the
   committed ones only in brackets (the hand-written `DDE_ITEM` and the absolute column),
   and both DFA tables regenerated from them match the committed tables byte for byte, so
-  the lexer is unchanged.
+  the lexer is unchanged. The Rolex build that generates the tables is now vendored in
+  `tools/rolex/91a2d6d`, and a Windows CI job regenerates both tables with it and fails
+  when a committed table differs, so a grammar can't be committed without its table.
 - `IAstFactory` has two new methods: `ExternalDynamicDataExchange` for the stored form of
   a DDE reference and `DynamicDataExchange` for the displayed form. This breaks every
   implementation, because the library targets netstandard2.0, which has no default

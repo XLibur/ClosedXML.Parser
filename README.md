@@ -96,12 +96,9 @@ The converter in *tools/Antlr2Rolex* generates both Rolex grammars from *Formula
 
 The R1C1 style uses the *Local R1C1 References* section of the grammar instead of the *Local A1 References* section. It drops each alternative that refers to a rule only the A1 section defines, and prints a warning for each one (today that is the `A1_RELATIVE_COLUMN ':' SHEET_NAME` alternative of `SHEET_RANGE`). The converter supports only the ANTLR syntax the grammar uses now, and reports anything else with its line.
 
-Fix Rolex generator
-* Fix bug in Rolex generator that doesn't recognize property \u1234 (just add `pc.Advance()` to FFA.cs `_ParseEscapePart` and `_ParseRangeEscapePart`]
+Generate the DFA tables
 
-Generate a DFA through Rolex
-* `Rolex.exe ClosedXML.Parser\Rolex\LexerA1.rl /noshared /output ClosedXML.Parser\Rolex\RolexA1Dfa.cs /namespace ClosedXML.Parser.Rolex`
-* `Rolex.exe ClosedXML.Parser\Rolex\LexerR1C1.rl /noshared /output ClosedXML.Parser\Rolex\RolexR1C1Dfa.cs /namespace ClosedXML.Parser.Rolex`
+`tools/rolex/generate-dfa-tables.sh` regenerates *RolexA1Dfa.cs* and *RolexR1C1Dfa.cs* from the Rolex grammars with the vendored Rolex build in *tools/rolex/91a2d6d*, the only build whose output matches the tables. It is a .NET Framework executable, so run the script from Git Bash on Windows. With `--check` it changes nothing and fails when a committed table differs. The `rolex-tables` CI job runs it that way, so a Rolex grammar committed without its regenerated table fails the build. *tools/rolex/README.md* records how that build was made.
 
 # TODO
 
