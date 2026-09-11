@@ -407,7 +407,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private TNode RefImplicitExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
     {
         var start = _tokenSource.StartIndex;
-        if (_la == Token.INTERSECT)
+
+        // The replaced atom has been read already, so an '@' after it can't be its prefix.
+        if (!replaceFirstAtom && _la == Token.INTERSECT)
         {
             Consume();
             var refNode = RefImplicitExpression(replaceFirstAtom, refAtom);

@@ -75,7 +75,11 @@ under Unreleased with each change.
   implicit intersection of the whole range. Excel displays a legacy formula the same way,
   e.g. `ABS(@A1:A10)`. The lexer puts the space before `@` into the `INTERSECT` token, so
   after a reference, a space before `@` is the intersection operator. Without the space,
-  `A1@B1` is still refused. The ANTLR grammar has the same rules and its parser is
+  `A1@B1` is still refused. A closing brace and the spill operator `#` take the space
+  after them into their own token, so `(A1) @B1` and `A1# @B1` are refused too. The
+  recursive descent parser also read an `@` after a reference in braces as the prefix of
+  that reference, so it accepted `(A1) @:B1` as `@((A1):B1)`. The ANTLR parser refused it,
+  and now both parsers do. The ANTLR grammar has the same rules and its parser is
   regenerated. The test helper `AssertFormula.CstParsed` also fails now when the ANTLR
   parser recovers from an error in a nested rule. Before this change, it accepted
   `D3:@A1:C2`, which the ANTLR parser did not parse.

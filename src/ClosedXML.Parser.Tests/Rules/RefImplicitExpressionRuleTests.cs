@@ -114,4 +114,30 @@ public class RefImplicitExpressionRuleTests
         AssertFormula.CheckParsingErrorContains(formula, $"The expression `{parsed}` was parsed, but the rest `{rest}` wasn't.");
         AssertFormula.CstNotParsed(formula);
     }
+
+    /// <summary>
+    /// The parser reads a reference in braces as an expression first and then goes back to the reference rules
+    /// with the braces already read. An <c>@</c> after them can't be their prefix.
+    /// </summary>
+    [Theory]
+    [InlineData("(A1) @:B1", "the rest `@:B1` wasn't.")]
+    [InlineData("SUM((A1) @:B1)", "Unexpected token INTERSECT")]
+    public void At_sign_after_reference_in_braces_is_not_its_prefix(string formula, string error)
+    {
+        AssertFormula.CheckParsingErrorContains(formula, error);
+        AssertFormula.CstNotParsed(formula);
+    }
+
+    /// <summary>
+    /// A closing brace and the spill operator take the whitespace after them into their token, so there is no space
+    /// before the <c>@</c> that could be the intersection operator.
+    /// </summary>
+    [Theory]
+    [InlineData("(A1) @B1")]
+    [InlineData("A1# @B1")]
+    public void Space_after_closing_brace_or_spill_is_not_intersection_operator(string formula)
+    {
+        AssertFormula.CheckParsingErrorContains(formula, "the rest `@B1` wasn't.");
+        AssertFormula.CstNotParsed(formula);
+    }
 }
