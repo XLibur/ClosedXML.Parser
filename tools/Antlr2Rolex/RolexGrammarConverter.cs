@@ -47,7 +47,8 @@ public sealed class AntlrGrammarException : Exception
 /// <c>((alt1)|(alt2))</c>, a rule reference inlines the alternation of the rule, a group is its
 /// alternation in one more pair of brackets, and an element with a suffix is
 /// <c>((element)?)</c>. A <c>\uXXXX</c> escape is kept as written and a <c>\u{XXXXX}</c> escape
-/// becomes the character itself.
+/// becomes the character itself, except a quote, a line break or another control character,
+/// which becomes a <c>\uXXXX</c> escape so the rule stays one single-quoted line.
 /// </para>
 /// </remarks>
 public static class RolexGrammarConverter
@@ -240,6 +241,11 @@ public static class RolexGrammarConverter
 
     private static string Escape(int codePoint, string metacharacters)
     {
+        // A quote would end the single-quoted expression and a line break would end the rule,
+        // so write those, and the other control characters, as a four digit Unicode escape.
+        if (codePoint is '\'' or 0x2028 or 0x2029 || (codePoint <= 0xFFFF && char.IsControl((char)codePoint)))
+            return "\\u" + codePoint.ToString("X4", CultureInfo.InvariantCulture);
+
         var text = char.ConvertFromUtf32(codePoint);
         return text.Length == 1 && metacharacters.Contains(text[0]) ? "\\" + text : text;
     }

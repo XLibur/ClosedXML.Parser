@@ -60,6 +60,22 @@ public class RolexGrammarConverterTests
         Assert.Equal("T = '(([\\u0020-\U0010FFFF]))'\n", result.RolexGrammar);
     }
 
+    /// <summary>
+    /// A quote would end the single-quoted expression of the rule and a line break would end the
+    /// rule itself, so a code point escape of either must stay an escape in the Rolex grammar.
+    /// </summary>
+    [Theory]
+    [InlineData("'\\u{27}'", "((\\u0027))")]
+    [InlineData("'\\u{A}'", "((\\u000A))")]
+    [InlineData("'\\u{D}'", "((\\u000D))")]
+    [InlineData("'\\u{27}' .. 'z'", "(([\\u0027-z]))")]
+    public void Code_point_escape_of_a_quote_or_line_break_is_written_as_a_Unicode_escape(string ruleBody, string expected)
+    {
+        var result = Convert($"lexer grammar G;\nT : {ruleBody} ;\n");
+
+        Assert.Equal($"T = '{expected}'\n", result.RolexGrammar);
+    }
+
     [Fact]
     public void Suffixed_element_is_wrapped_before_and_after_the_suffix()
     {
