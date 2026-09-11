@@ -50,6 +50,7 @@ public class DdeReferenceRuleTests
     public void Item_needs_book_prefix_or_application_and_topic(string formula)
     {
         AssertFormula.CheckParsingErrorContains(formula, "dynamic data exchange");
+        AssertFormula.CstNotParsed(formula);
     }
 
     [Theory]
@@ -58,6 +59,7 @@ public class DdeReferenceRuleTests
     public void Item_without_prefix_is_not_a_reference(string formula)
     {
         Assert.Throws<ParsingException>(() => FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F()));
+        AssertFormula.CstNotParsed(formula);
     }
 
     [Theory]

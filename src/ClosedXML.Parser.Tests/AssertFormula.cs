@@ -56,6 +56,33 @@ internal static class AssertFormula
     }
 
     /// <summary>
+    /// Assert that ANTLR lexer accepts the formula, but ANTLR parser rejects it.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="CstParsed"/> can't be negated for this. It checks only the exception of the top rule, and the
+    /// parser recovers from an error in a nested rule, so the error has to be caught by a listener.
+    /// </remarks>
+    public static void CstNotParsed(string formula)
+    {
+        var lexer = new FormulaLexer(new AntlrInputStream(formula));
+        var lexerListener = new LexerErrorListener();
+        lexer.RemoveErrorListeners();
+        lexer.AddErrorListener(lexerListener);
+        var parser = new FormulaParser(new CommonTokenStream(lexer), TextWriter.Null, TextWriter.Null)
+        {
+            Interpreter = { PredictionMode = PredictionMode.SLL }
+        };
+        var parserListener = new ParserErrorListener();
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(parserListener);
+
+        parser.formula();
+
+        Assert.True(lexerListener.ErrorStartIndex is null, $"{formula} has a lexer error at {lexerListener.ErrorStartIndex}, the parser isn't what rejects it.");
+        Assert.True(parserListener.HasError, $"ANTLR parser accepted {formula}.");
+    }
+
+    /// <summary>
     /// Get tokens from ANTLR lexer. If there is an error in the <paramref name="formula"/>, insert error token.
     /// </summary>
     public static IReadOnlyList<Token> GetAntlrTokens(string formula)
@@ -88,6 +115,16 @@ internal static class AssertFormula
         {
             // Params don't provide access to the stream char index property directly, so pass it through 
             ErrorStartIndex ??= ((Lexer)recognizer).TokenStartCharIndex;
+        }
+    }
+
+    private class ParserErrorListener : IAntlrErrorListener<IToken>
+    {
+        internal bool HasError { get; private set; }
+
+        public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+        {
+            HasError = true;
         }
     }
 }
