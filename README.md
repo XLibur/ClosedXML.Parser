@@ -88,10 +88,13 @@ It is rather complicated, but two times faster than ANTLR lexer (1.9 us vs 3.676
 ## Generate lexer
 
 Prepare rolex grammars
-* Run Antlr2Rolex over FormulaLexer.g4 with A1 version to *ClosedXML.Parser\Rolex\LexerA1.rl*
-* Add `/*` at the beginning of *Local A1 References* section. It comments out A1_REFERENCE and all its fragments
-* Remove `/*` at the beinning of *Local R1C1 References* section. It contains a different tokens for A1_REFERENCE and its fragments
-* Run Antlr2Rolex over FormulaLexer.g4 with R1C1 version to *ClosedXML.Parser\Rolex\LexerR1C1.rl*
+
+The converter in *tools/Antlr2Rolex* generates both Rolex grammars from *FormulaLexer.g4*. Never edit a *.rl* file by hand: `RolexGrammarConverterTests` regenerates both and fails when a committed file differs.
+
+* `dotnet run --project tools/Antlr2Rolex -- src/ClosedXML.ANTLR/FormulaLexer.g4 --style A1 --output src/ClosedXML.Parser/Rolex/LexerA1.rl`
+* `dotnet run --project tools/Antlr2Rolex -- src/ClosedXML.ANTLR/FormulaLexer.g4 --style R1C1 --output src/ClosedXML.Parser/Rolex/LexerR1C1.rl`
+
+The R1C1 style uses the *Local R1C1 References* section of the grammar instead of the *Local A1 References* section. It drops each alternative that refers to a rule only the A1 section defines, and prints a warning for each one (today that is the `A1_RELATIVE_COLUMN ':' SHEET_NAME` alternative of `SHEET_RANGE`). The converter supports only the ANTLR syntax the grammar uses now, and reports anything else with its line.
 
 Fix Rolex generator
 * Fix bug in Rolex generator that doesn't recognize property \u1234 (just add `pc.Advance()` to FFA.cs `_ParseEscapePart` and `_ParseRangeEscapePart`]

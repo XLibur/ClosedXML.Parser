@@ -13,12 +13,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClosedXML.Parser.Ast", "Clo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClosedXML.Parser.Function", "ClosedXML.Parser.Function\ClosedXML.Parser.Function.csproj", "{B5DC4995-59A8-42C0-8EC8-D1A314ADD538}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Antlr2Rolex", "..\tools\Antlr2Rolex\Antlr2Rolex.csproj", "{A7803E43-AA85-4F89-92A4-AA4A2B549600}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A7803E43-AA85-4F89-92A4-AA4A2B549600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7803E43-AA85-4F89-92A4-AA4A2B549600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7803E43-AA85-4F89-92A4-AA4A2B549600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7803E43-AA85-4F89-92A4-AA4A2B549600}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F7B1CA09-67E9-4342-9265-A437BF782DE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F7B1CA09-67E9-4342-9265-A437BF782DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7B1CA09-67E9-4342-9265-A437BF782DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU

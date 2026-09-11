@@ -8,8 +8,9 @@ regular expressions and emits a state machine as a C# source file.
 * Background: [Rolex: Unicode Enabled Lexer Generator in C#](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp)
 
 This project uses it for the formula lexer. ANTLR (`src/ClosedXML.ANTLR/FormulaLexer.g4`)
-is the source of truth for the grammar; it is converted to Rolex's regular expression
-format in `src/ClosedXML.Parser/Rolex/LexerA1.rl` and `LexerR1C1.rl`, and Rolex turns each
+is the source of truth for the grammar; `tools/Antlr2Rolex` converts it to Rolex's regular
+expression format in `src/ClosedXML.Parser/Rolex/LexerA1.rl` and `LexerR1C1.rl` (see the
+root `README.md`, *Generate lexer*), and Rolex turns each
 of those into a table - `RolexA1Dfa.cs` and `RolexR1C1Dfa.cs` - that `RolexLexer.cs` walks
 at run time. It is about twice as fast as the ANTLR lexer.
 

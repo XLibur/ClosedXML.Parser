@@ -32,6 +32,23 @@
   <ItemGroup>
     <ProjectReference Include="..\ClosedXML.ANTLR\ClosedXML.ANTLR.csproj" />
     <ProjectReference Include="..\ClosedXML.Parser.Ast\ClosedXML.Parser.Ast.csproj" />
+    <ProjectReference Include="..\..\tools\Antlr2Rolex\Antlr2Rolex.csproj" />
+  </ItemGroup>
+
+  <!--
+    The Rolex grammars are generated from the ANTLR lexer grammar. Copying all three next to
+    the tests lets a test regenerate the Rolex grammars and assert they match the committed ones.
+  -->
+  <ItemGroup>
+    <None Include="..\ClosedXML.ANTLR\FormulaLexer.g4" Link="Grammars\FormulaLexer.g4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\ClosedXML.Parser\Rolex\LexerA1.rl" Link="Grammars\LexerA1.rl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\ClosedXML.Parser\Rolex\LexerR1C1.rl" Link="Grammars\LexerR1C1.rl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
