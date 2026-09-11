@@ -368,11 +368,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     return _factory.ExternalFunction(_context, range, wbIndex, functionName, args);
                 }
 
-                // ref_expression 
+                // ref_expression
                 if (skipRangeUnion)
                 {
                     isPureRef = true;
-                    return RefIntersectionExpression();
+                    return RefImplicitExpression();
                 }
 
                 isPureRef = true;
@@ -401,11 +401,15 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     ///        | ref_intersection_expression
     ///        ;
     /// </code>
+    /// The <c>@</c> binds looser than the range and the intersection operators, so its operand is the rest of the
+    /// intersection, e.g. <c>@A1:A10 A5</c> is <c>@(A1:A10 A5)</c>.
     /// </summary>
     private TNode RefImplicitExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
     {
         var start = _tokenSource.StartIndex;
-        if (_la == Token.INTERSECT)
+
+        // The replaced atom has been read already, so an '@' after it can't be its prefix.
+        if (!replaceFirstAtom && _la == Token.INTERSECT)
         {
             Consume();
             var refNode = RefImplicitExpression(replaceFirstAtom, refAtom);
@@ -415,6 +419,13 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         return RefIntersectionExpression(replaceFirstAtom, refAtom);
     }
 
+    /// <summary>
+    /// <code>
+    /// ref_intersection_expression
+    ///     : ref_range_expression (SPACE ref_range_expression)* ({space before @}? INTERSECT ref_implicit_expression)?
+    ///     ;
+    /// </code>
+    /// </summary>
     private TNode RefIntersectionExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
     {
         var start = _tokenSource.StartIndex;
@@ -426,9 +437,34 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             leftNode = _factory.BinaryNode(_context, new SymbolRange(start, _tokenSource.StartIndex), BinaryOperation.Intersection, leftNode, rightNode);
         }
 
+        // The lexer puts the space before '@' into the INTERSECT token, so the token is the intersection operator
+        // too. The implicit intersection takes the rest of the intersection, so nothing follows it here.
+        if (_la == Token.INTERSECT && IsSpaceBeforeAt())
+        {
+            var rightNode = RefImplicitExpression();
+            leftNode = _factory.BinaryNode(_context, new SymbolRange(start, _tokenSource.StartIndex), BinaryOperation.Intersection, leftNode, rightNode);
+        }
+
         return leftNode;
     }
 
+    /// <summary>
+    /// Is there a space before the <c>@</c> of the current <c>INTERSECT</c> token? A line break alone is not the
+    /// intersection operator, the same as for a <c>SPACE</c> token.
+    /// </summary>
+    private bool IsSpaceBeforeAt()
+    {
+        var token = GetCurrentToken();
+        return token.Slice(0, token.IndexOf('@')).IndexOf(' ') >= 0;
+    }
+
+    /// <summary>
+    /// <code>
+    /// ref_range_expression
+    ///     : ref_spill_expression (COLON ref_spill_expression)* (COLON INTERSECT ref_implicit_expression)?
+    ///     ;
+    /// </code>
+    /// </summary>
     private TNode RefRangeExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
     {
         var start = _tokenSource.StartIndex;
@@ -436,7 +472,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         while (_la == Token.COLON)
         {
             Consume();
-            var rightNode = RefSpillExpression();
+
+            // The implicit intersection takes the rest of the intersection, so it ends the range.
+            var rightNode = _la == Token.INTERSECT ? RefImplicitExpression() : RefSpillExpression();
             leftNode = _factory.BinaryNode(_context, new SymbolRange(start, _tokenSource.StartIndex), BinaryOperation.Range, leftNode, rightNode);
         }
 

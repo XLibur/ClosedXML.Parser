@@ -73,12 +73,19 @@ ref_implicit_expression
         | ref_intersection_expression
         ;
 
+/*
+ * `@` binds looser than ` ` and `:`, so an operand that starts with `@` takes the
+ * rest of the intersection with it: D3:@A1:C2 is D3:(@(A1:C2)). The lexer puts the
+ * space before `@` into the INTERSECT token, so after a reference, an INTERSECT with a
+ * space is the intersection operator too. The predicate checks the space the same way
+ * the recursive descent parser does, see FormulaParser.Predicates.cs.
+ */
 ref_intersection_expression
-        : ref_range_expression (SPACE ref_range_expression)*
+        : ref_range_expression (SPACE ref_range_expression)* ({IsSpaceBeforeAt(CurrentToken.Text)}? INTERSECT ref_implicit_expression)?
         ;
 
 ref_range_expression
-        : ref_spill_expression (COLON ref_spill_expression)*
+        : ref_spill_expression (COLON ref_spill_expression)* (COLON INTERSECT ref_implicit_expression)?
         ;
 
 ref_spill_expression
@@ -195,7 +202,7 @@ arg_prefix_atom_expression
  * to have duplicate rules. It's enough that an argument expression in the first
  * level (=no braces) doesn't have ability to call ',' union operation.
  * Union is at the very top of ref expression hierarchy, so it is enough to
- * use `ref_intersection_expression` in the argument atom here. The nodes below
+ * use `ref_implicit_expression` in the argument atom here. The nodes below
  * are identical to arg ref nodes to the expression ref nodex.
  */
 arg_atom_expression

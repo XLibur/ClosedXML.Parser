@@ -34,4 +34,16 @@ public partial class FormulaParser
         return !name.Equals("TRUE", System.StringComparison.OrdinalIgnoreCase) &&
                !name.Equals("FALSE", System.StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Is there a space before the <c>@</c> of an <c>INTERSECT</c> token (e.g. <c> @</c>)? The lexer puts the
+    /// whitespace before <c>@</c> into the token, so after a reference, the space is the intersection operator. A line
+    /// break alone is not, the same as for a <c>SPACE</c> token. The recursive descent parser checks the same in
+    /// <c>IsSpaceBeforeAt</c>.
+    /// </summary>
+    private static bool IsSpaceBeforeAt(string token)
+    {
+        var atIndex = token.IndexOf('@');
+        return atIndex >= 0 && token.Substring(0, atIndex).Contains(" ");
+    }
 }

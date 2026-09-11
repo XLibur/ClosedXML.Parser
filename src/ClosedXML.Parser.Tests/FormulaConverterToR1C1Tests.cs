@@ -31,6 +31,17 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
+    [InlineData("@A1:A4", "@RC:R[3]C")]
+    [InlineData("SUM(@A1:A4)", "SUM(@RC:R[3]C)")]
+    [InlineData("IF(@A1,1,2)", "IF(@RC,1,2)")]
+    [InlineData("D3:@A1:C2", "R[2]C[3]:@RC:R[1]C[2]")]
+    [InlineData("A1:B2 @C1:C9", "RC:R[1]C[1] @RC[2]:R[8]C[2]")]
+    public void Implicit_intersection(string a1, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, 1, 1));
+    }
+
+    [Theory]
     [InlineData(" { 1 }   ", " { 1 }   ")]
     [InlineData("{1,2}", "{1,2}")]
     [InlineData("{1;2}", "{1;2}")]

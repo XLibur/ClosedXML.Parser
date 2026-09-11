@@ -63,6 +63,27 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse the implicit intersection operator `@` wherever a reference operand can start.
+  It parsed only at the head of a whole reference expression. `SUM(@A1:A4)`,
+  `IF(@A1,1,2)` and `D3:@A1:C2` failed with `Unexpected token INTERSECT`, and
+  `A1:B2 @C1:C9` stopped after `A1:B2`. R1C1 had the same failures, e.g.
+  `SUM(@RC:R[3]C)`. An argument entered the reference rules one level below the only rule
+  that accepts `@`. The ANTLR grammar already went through that rule, so only the
+  recursive descent parser refused `@` in an argument. The precedence of `@` does not
+  change. It binds looser than `:` and the space, so an operand that starts with `@` takes
+  the rest of the intersection: `D3:@A1:C2` is `D3:(@(A1:C2))`, and `SUM(@A1:A4)` takes the
+  implicit intersection of the whole range. Excel displays a legacy formula the same way,
+  e.g. `ABS(@A1:A10)`. The lexer puts the space before `@` into the `INTERSECT` token, so
+  after a reference, a space before `@` is the intersection operator. Without the space,
+  `A1@B1` is still refused. A closing brace and the spill operator `#` take the space
+  after them into their own token, so `(A1) @B1` and `A1# @B1` are refused too. The
+  recursive descent parser also read an `@` after a reference in braces as the prefix of
+  that reference, so it accepted `(A1) @:B1` as `@((A1):B1)`. The ANTLR parser refused it,
+  and now both parsers do. The ANTLR grammar has the same rules and its parser is
+  regenerated. The test helper `AssertFormula.CstParsed` also fails now when the ANTLR
+  parser recovers from an error in a nested rule. Before this change, it accepted
+  `D3:@A1:C2`, which the ANTLR parser did not parse.
+  [#13](https://github.com/XLibur/ClosedXML.Parser/issues/13)
 - Parse a bang name, e.g. `!SomeName`. The lexer had no token for a name after a bang, so
   `!SomeName` and `SUM(!SomeName)` failed in both reference styles with `Unable to
   determine token`, although `IAstFactory.BangName`, `BangNameNode` and
