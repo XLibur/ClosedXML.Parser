@@ -6,14 +6,14 @@ public class CellFunctionListTokenTests
     public void Ignores_trailing_whitespaces()
     {
         var expected = new RowCol(1, 1, A1);
-        Assert.Equal(expected, TokenParser.ExtractCellFunction("A1(  "));
+        Assert.Equal(expected, TokenParser.A1Style.ParseCellFunction("A1(  "));
     }
 
     [Theory]
     [MemberData(nameof(TestData))]
     public void Accepts_absolute_and_relative_cell_addresses(string token, RowCol expectedCell)
     {
-        Assert.Equal(expectedCell, TokenParser.ExtractCellFunction(token));
+        Assert.Equal(expectedCell, TokenParser.A1Style.ParseCellFunction(token));
     }
 
     public static IEnumerable<object[]> TestData

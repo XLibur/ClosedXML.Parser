@@ -32,8 +32,8 @@ public static class ReferenceParser
             throw new ArgumentNullException();
 
         sheetName = null;
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
-        if (TryParseA1(tokens, text, out area))
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        if (TryParse(tokens, text, TokenParser.A1Style, out area))
             return true;
 
         if (TryParseSheetA1(tokens, text, out sheetName, out area))
@@ -61,8 +61,32 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException();
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
-        return TryParseA1(tokens, text, out area);
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        return TryParse(tokens, text, TokenParser.A1Style, out area);
+    }
+
+    /// <summary>
+    /// Parses area reference in R1C1 form. The possibilities are
+    /// <list type="bullet">
+    ///   <item>Cell (e.g. <c>R7C3</c>, <c>R[-1]C</c>).</item>
+    ///   <item>Area (e.g. <c>R1C1:R[2]C[2]</c>).</item>
+    ///   <item>Colspan (e.g. <c>C2:C[4]</c>).</item>
+    ///   <item>Rowspan (e.g. <c>R3:R[5]</c>).</item>
+    /// </list>
+    /// Doesn't allow any whitespaces or extra values inside. The reference is read as
+    /// written, so a relative axis keeps its offset and is not resolved against a cell.
+    /// </summary>
+    /// <param name="text">Text to parse.</param>
+    /// <param name="area">Parsed area.</param>
+    /// <returns><c>true</c> if parsing was a success, <c>false</c> otherwise.</returns>
+    [PublicAPI]
+    public static bool TryParseR1C1(string text, out ReferenceArea area)
+    {
+        if (text is null)
+            throw new ArgumentNullException(nameof(text));
+
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.R1C1Style.DfaTable);
+        return TryParse(tokens, text, TokenParser.R1C1Style, out area);
     }
 
     /// <summary>
@@ -108,7 +132,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParseSheetA1(tokens, text, out sheetName, out area);
     }
 
@@ -129,7 +153,7 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         if (tokens.Count == 2 &&
             tokens[0].SymbolId == Token.NAME &&
             tokens[1].SymbolId == Token.EofSymbolId)
@@ -156,20 +180,20 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokensA1(text.AsSpan());
+        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParseSheetName(tokens, text, out sheetName, out name);
     }
 
-    private static bool TryParseA1(List<Token> tokens, string text, out ReferenceArea area)
+    private static bool TryParse(List<Token> tokens, string text, IReferenceStyle style, out ReferenceArea area)
     {
-        var isValid = IsA1Reference(tokens);
+        var isValid = IsReference(tokens);
         if (!isValid)
         {
             area = default;
             return false;
         }
 
-        area = TokenParser.ParseReference(text.AsSpan(), isA1: true);
+        area = style.ParseReference(text.AsSpan());
         return true;
     }
 
@@ -194,7 +218,7 @@ public static class ReferenceParser
         }
 
         tokens.RemoveAt(0);
-        if (!IsA1Reference(tokens))
+        if (!IsReference(tokens))
         {
             sheetName = string.Empty;
             area = default;
@@ -202,11 +226,15 @@ public static class ReferenceParser
         }
 
         var referenceArea = text.AsSpan().Slice(sheetPrefixToken.Length);
-        area = TokenParser.ParseReference(referenceArea, isA1: true);
+        area = TokenParser.A1Style.ParseReference(referenceArea);
         return true;
     }
 
-    private static bool IsA1Reference(IReadOnlyList<Token> tokens)
+    /// <summary>
+    /// Both DFA tables emit these token ids for a reference, so the shape of the token list
+    /// is the same in either reference style.
+    /// </summary>
+    private static bool IsReference(IReadOnlyList<Token> tokens)
     {
         // a1_reference : A1_CELL
         //              | A1_CELL COLON A1_CELL
