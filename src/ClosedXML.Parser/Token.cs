@@ -65,6 +65,7 @@ internal readonly struct Token
     public const int USER_DEFINED_FUNCTION_NAME = 37;
     public const int NAME = 38;
     public const int INTRA_TABLE_REFERENCE = 39;
+    public const int DDE_ITEM = 40;
 
     /// <summary>
     /// A token ID or TokenType. Non-negative integer. The values are from Antlr grammar, starting with 1.

@@ -332,6 +332,29 @@ public class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, Mod
     }
 
     /// <inheritdoc />
+    public virtual TransformedSymbol ExternalDynamicDataExchange(ModContext ctx, SymbolRange range, int workbookIndex, string item)
+    {
+        var sb = new StringBuilder(BOOK_PREFIX_LEN + SHEET_SEPARATOR_LEN + item.Length + QUOTE_RESERVE);
+        var nodeText = sb
+            .AppendBookIndex(workbookIndex)
+            .AppendReferenceSeparator()
+            .AppendDdeItem(item)
+            .ToString();
+        return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
+    }
+
+    /// <inheritdoc />
+    public virtual TransformedSymbol DynamicDataExchange(ModContext ctx, SymbolRange range, string application, string topic, string item)
+    {
+        var sb = new StringBuilder(application.Length + topic.Length + 1 + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + item.Length + QUOTE_RESERVE);
+        var nodeText = sb
+            .AppendDdeLink(application, topic)
+            .AppendDdeItem(item)
+            .ToString();
+        return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
+    }
+
+    /// <inheritdoc />
     public virtual TransformedSymbol BinaryNode(ModContext ctx, SymbolRange range, BinaryOperation operation, TransformedSymbol leftNode, TransformedSymbol rightNode)
     {
         var sb = new StringBuilder(leftNode.Length + rightNode.OriginalRange.Start - leftNode.OriginalRange.End + rightNode.Length)

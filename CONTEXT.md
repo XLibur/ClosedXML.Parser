@@ -62,3 +62,16 @@ _Avoid_: table reference, intra-table reference
 A call that uses a cell reference as the function being called (`R7C3(TRUE)`), rather
 than a function name. A macro-sheet construct, and written in the formula's reference
 style like any other reference.
+
+**Dynamic data exchange reference**:
+A reference to an item that another application serves over dynamic data exchange (DDE).
+Stored after the book prefix of its DDE link (`[1]!'id1?req?AAPL'`) and displayed after the
+link's application and topic (`Sdemo123|tik!'id1?req?AAPL'`). The parser recognises one only
+when the item is quoted: a bare item (`MT4|BID!EURUSD`) reads as a name in a sheet called
+`MT4|BID`.
+_Avoid_: DDE formula, DDE name
+
+**DDE link**:
+The application and the topic a dynamic data exchange reference reads from, written
+`application|topic`. Stored as a `ddeLink` in an external link part.
+_Avoid_: DDE server (for the pair), DDE topic (for the pair)

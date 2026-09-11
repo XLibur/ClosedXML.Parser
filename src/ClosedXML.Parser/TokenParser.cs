@@ -554,6 +554,36 @@ internal static class TokenParser
         return index.Value;
     }
 
+    /// <summary>
+    /// Parse <see cref="Token.DDE_ITEM"/> token. A tick inside is doubled, same as in a quoted sheet name.
+    /// </summary>
+    internal static string ParseDdeItem(ReadOnlySpan<char> input)
+    {
+        // Strip the enclosing ticks. The lexer guarantees there is at least one character between them
+        // and that the ticks inside come in pairs. Unlike a sheet name, an item has no length limit, so
+        // it isn't unescaped through a stack buffer.
+        return input.Slice(1, input.Length - 2).ToString().Replace("''", "'");
+    }
+
+    /// <summary>
+    /// Split a name of <see cref="Token.SINGLE_SHEET_PREFIX"/> into the application and the topic of
+    /// a DDE link (e.g. <c>Sdemo123|tik</c>). Both parts must be non-empty.
+    /// </summary>
+    internal static bool TrySplitDdeLink(string prefixName, out string application, out string topic)
+    {
+        var separatorIndex = prefixName.IndexOf('|');
+        if (separatorIndex <= 0 || separatorIndex == prefixName.Length - 1)
+        {
+            application = string.Empty;
+            topic = string.Empty;
+            return false;
+        }
+
+        application = prefixName.Substring(0, separatorIndex);
+        topic = prefixName.Substring(separatorIndex + 1);
+        return true;
+    }
+
     private static bool IsLetter(char c) => (c is >= 'A' and <= 'Z') || (c is >= 'a' and <= 'z');
 
     private static Exception Bug()

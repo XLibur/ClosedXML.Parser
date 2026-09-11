@@ -98,6 +98,7 @@ ref_atom_expression
         | ref_function_call
         | name_reference
         | structure_reference
+        | dde_reference
         ;
 
 /* ------------------------------- Constants ------------------------------- */
@@ -214,6 +215,21 @@ arg_atom_expression
 name_reference
         : NAME                                                                 // local name
         | (SINGLE_SHEET_PREFIX | BOOK_PREFIX) NAME                             // external name
+        ;
+
+/* ------------------------- Dynamic data exchange ------------------------- */
+
+/*
+ * An item of a dynamic data exchange (DDE) link. Excel stores it after the book
+ * prefix of the link ([1]!'item') and displays it after the application and the
+ * topic of the link (Sdemo123|tik!'item'), which lex as a sheet prefix. A sheet
+ * prefix is a DDE link only when it has no workbook index and a non-empty part on
+ * each side of the first |. The predicate checks that the same way the recursive
+ * descent parser does, see FormulaParser.Predicates.cs.
+ */
+dde_reference
+        : BOOK_PREFIX DDE_ITEM
+        | {IsDdeLinkPrefix(CurrentToken.Text)}? SINGLE_SHEET_PREFIX DDE_ITEM
         ;
 
 /* -------------------------- Structure reference -------------------------- */

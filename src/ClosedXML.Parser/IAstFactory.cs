@@ -312,6 +312,28 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     TNode ExternalSheetName(TContext context, SymbolRange range, int workbookIndex, string sheet, string name);
 
     /// <summary>
+    /// Create a node for an item of a dynamic data exchange (DDE) link, written after the book prefix
+    /// of the link (e.g. <c>[1]!'id1?req?AAPL'</c>). This is how Excel stores a DDE formula in a workbook.
+    /// </summary>
+    /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
+    /// <param name="range">Range in a formula that contains the book prefix and the item.</param>
+    /// <param name="workbookIndex">Id of the link in workbook part, <c>externalReferences</c> tag. Its external link part holds the link, a <c>ddeLink</c> with the application and the topic. An item of an <c>oleLink</c> is written the same way.</param>
+    /// <param name="item">The item, without the enclosing ticks and with a doubled tick unescaped.</param>
+    TNode ExternalDynamicDataExchange(TContext context, SymbolRange range, int workbookIndex, string item);
+
+    /// <summary>
+    /// Create a node for an item of a dynamic data exchange (DDE) link, written after the application
+    /// and the topic of the link (e.g. <c>Sdemo123|tik!'id1?req?AAPL'</c>). This is how Excel displays
+    /// a DDE formula.
+    /// </summary>
+    /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
+    /// <param name="range">Range in a formula that contains the application, the topic and the item.</param>
+    /// <param name="application">The DDE server application, the part of the prefix before the first <c>|</c>.</param>
+    /// <param name="topic">The topic, the rest of the prefix after the first <c>|</c>.</param>
+    /// <param name="item">The item, without the enclosing ticks and with a doubled tick unescaped.</param>
+    TNode DynamicDataExchange(TContext context, SymbolRange range, string application, string topic, string item);
+
+    /// <summary>
     /// Create a node that performs a binary operation on values from another nodes.
     /// </summary>
     /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>

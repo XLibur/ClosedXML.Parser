@@ -19,7 +19,6 @@ public class DataSetTests
             "./data/enron/formulas.csv",
             new[]
             {
-                "./data/enron/invalid-external-cell-reference.csv",
                 "./data/enron/known-fails.csv",
             });
     }
@@ -31,7 +30,6 @@ public class DataSetTests
             "./data/euses/formulas.csv",
             new[]
             {
-                "./data/euses/invalid-external-cell-reference.csv",
                 "./data/euses/known-fails.csv",
             });
     }
@@ -55,15 +53,22 @@ public class DataSetTests
         foreach (var formula in formulas)
         {
             formulaCount++;
+            string? error = null;
             try
             {
                 _ = FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F());
-                Assert.False(badFormulas.Contains(formula), formula);
             }
             catch (Exception e)
             {
-                Assert.True(badFormulas.Contains(formula), $"Parsing formula '{formula}' failed: {e.Message}");
+                error = e.Message;
             }
+
+            // Assert outside of the try block. An assert inside it throws, the catch would take that for
+            // a parsing failure, and a formula listed as failing would pass even when it was parsed.
+            if (badFormulas.Contains(formula))
+                Assert.True(error is not null, $"Formula '{formula}' is listed as failing, but it was parsed.");
+            else
+                Assert.True(error is null, $"Parsing formula '{formula}' failed: {error}");
         }
 
         sw.Stop();
