@@ -63,6 +63,15 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Lex the error values Excel added after [MS-XLSX] was written: `#SPILL!`, `#CALC!`,
+  `#FIELD!`, `#BLOCKED!`, `#CONNECT!`, `#BUSY!`, `#UNKNOWN!`, `#EXTERNAL!`, `#PYTHON!` and
+  `#TIMEOUT!`. The lexer knew only the [MS-XLSX] list, which ends at `#GETTING_DATA`, so a
+  formula such as `ERROR.TYPE(#SPILL!)` failed in both reference styles with `Unexpected
+  token SPILL`. That names the token of a bare `#`, the spill operator, not the error. They
+  are error constants like the others, so `IAstFactory.ErrorValue` receives them in upper
+  case and no parser rule changes. The list is Microsoft's `ErrorCellValueType` plus
+  `#UNKNOWN!` from Python in Excel. The internal Pratt lexer accepts them too.
+  [#12](https://github.com/XLibur/ClosedXML.Parser/issues/12)
 - Treat malformed UTF-16 as invalid input instead of throwing out of the lexer. A trailing
   high surrogate read past the end of the input: the bounds check was `index >=
   input.Length`, which can never be true, because the caller only calls into the reader

@@ -108,6 +108,10 @@ public class LexerTests
     [InlineData("#REF!")]
     [InlineData("#VALUE!")]
     [InlineData("#ref!")]
+    [InlineData("#spill!")]
+    [InlineData("#calc!")]
+    [InlineData("#busy!")]
+    [MemberData(nameof(ErrorValues.AddedAfterMsXlsx), MemberType = typeof(ErrorValues))]
     [Theory]
     public void Error_ok(string input)
     {

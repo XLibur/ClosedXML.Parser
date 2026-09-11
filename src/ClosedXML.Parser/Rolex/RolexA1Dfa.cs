@@ -42,7 +42,7 @@ namespace ClosedXML.Parser.Rolex {
                                         35}, 162),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 194),
+                                        36}, 237),
                             new DfaTransitionEntry(new int[] {
                                         37,
                                         37}, 6),
@@ -51,7 +51,7 @@ namespace ClosedXML.Parser.Rolex {
                                         38}, 7),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 246),
+                                        39}, 289),
                             new DfaTransitionEntry(new int[] {
                                         40,
                                         40}, 8),
@@ -72,19 +72,19 @@ namespace ClosedXML.Parser.Rolex {
                                         45}, 13),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         47,
                                         47}, 14),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 265),
+                                        48}, 308),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 266),
+                                        49}, 309),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 277),
+                                        57}, 320),
                             new DfaTransitionEntry(new int[] {
                                         58,
                                         58}, 15),
@@ -127,52 +127,52 @@ namespace ClosedXML.Parser.Rolex {
                                         112,
                                         115,
                                         117,
-                                        119}, 278),
+                                        119}, 321),
                             new DfaTransitionEntry(new int[] {
                                         67,
                                         67,
                                         99,
-                                        99}, 305),
+                                        99}, 348),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 312),
+                                        102}, 355),
                             new DfaTransitionEntry(new int[] {
                                         73,
                                         73,
                                         105,
-                                        105}, 317),
+                                        105}, 360),
                             new DfaTransitionEntry(new int[] {
                                         79,
                                         79,
                                         111,
-                                        111}, 326),
+                                        111}, 369),
                             new DfaTransitionEntry(new int[] {
                                         84,
                                         84,
                                         116,
-                                        116}, 330),
+                                        116}, 373),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 333),
+                                        120}, 376),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 303),
+                                        122}, 346),
                             new DfaTransitionEntry(new int[] {
                                         91,
-                                        91}, 335),
+                                        91}, 378),
                             new DfaTransitionEntry(new int[] {
                                         92,
                                         92,
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         94,
                                         94}, 90),
@@ -184,7 +184,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         123,
                                         123}, 91),
@@ -2360,183 +2360,231 @@ namespace ClosedXML.Parser.Rolex {
                                         32,
                                         32}, 5),
                             new DfaTransitionEntry(new int[] {
-                                        68,
-                                        68,
-                                        100,
-                                        100}, 163),
+                                        66,
+                                        66,
+                                        98,
+                                        98}, 163),
                             new DfaTransitionEntry(new int[] {
-                                        71,
-                                        71,
-                                        103,
-                                        103}, 169),
-                            new DfaTransitionEntry(new int[] {
-                                        78,
-                                        78,
-                                        110,
-                                        110}, 180),
-                            new DfaTransitionEntry(new int[] {
-                                        82,
-                                        82,
-                                        114,
-                                        114}, 186),
-                            new DfaTransitionEntry(new int[] {
-                                        86,
-                                        86,
-                                        118,
-                                        118}, 190)}, 27),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        73,
-                                        73,
-                                        105,
-                                        105}, 164)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        86,
-                                        86,
-                                        118,
-                                        118}, 165)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        47,
-                                        47}, 166)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        48,
-                                        48}, 167)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        33,
-                                        33}, 168)}, -1),
-                new DfaEntry(new DfaTransitionEntry[0], 1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        69,
-                                        69,
-                                        101,
-                                        101}, 170)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        84,
-                                        84,
-                                        116,
-                                        116}, 171)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        84,
-                                        84,
-                                        116,
-                                        116}, 172)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        73,
-                                        73,
-                                        105,
-                                        105}, 173)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        78,
-                                        78,
-                                        110,
-                                        110}, 174)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        71,
-                                        71,
-                                        103,
-                                        103}, 175)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        95,
-                                        95}, 176)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
+                                        67,
+                                        67,
+                                        99,
+                                        99}, 173),
                             new DfaTransitionEntry(new int[] {
                                         68,
                                         68,
                                         100,
-                                        100}, 177)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        65,
-                                        65,
-                                        97,
-                                        97}, 178)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        84,
-                                        84,
-                                        116,
-                                        116}, 179)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        65,
-                                        65,
-                                        97,
-                                        97}, 168)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        47,
-                                        47}, 179),
-                            new DfaTransitionEntry(new int[] {
-                                        65,
-                                        65,
-                                        97,
-                                        97}, 181),
-                            new DfaTransitionEntry(new int[] {
-                                        85,
-                                        85,
-                                        117,
-                                        117}, 184)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        77,
-                                        77,
-                                        109,
-                                        109}, 182)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
+                                        100}, 181),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 183)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        63,
-                                        63}, 168)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        76,
-                                        76,
-                                        108,
-                                        108}, 185),
-                            new DfaTransitionEntry(new int[] {
-                                        77,
-                                        77,
-                                        109,
-                                        109}, 167)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        76,
-                                        76,
-                                        108,
-                                        108}, 167)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        69,
-                                        69,
-                                        101,
-                                        101}, 187)}, -1),
-                new DfaEntry(new DfaTransitionEntry[] {
+                                        101}, 185),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 188)}, -1),
+                                        102}, 192),
+                            new DfaTransitionEntry(new int[] {
+                                        71,
+                                        71,
+                                        103,
+                                        103}, 195),
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 206),
+                            new DfaTransitionEntry(new int[] {
+                                        80,
+                                        80,
+                                        112,
+                                        112}, 211),
+                            new DfaTransitionEntry(new int[] {
+                                        82,
+                                        82,
+                                        114,
+                                        114}, 216),
+                            new DfaTransitionEntry(new int[] {
+                                        83,
+                                        83,
+                                        115,
+                                        115}, 220),
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 223),
+                            new DfaTransitionEntry(new int[] {
+                                        85,
+                                        85,
+                                        117,
+                                        117}, 228),
+                            new DfaTransitionEntry(new int[] {
+                                        86,
+                                        86,
+                                        118,
+                                        118}, 233)}, 27),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 164),
+                            new DfaTransitionEntry(new int[] {
+                                        85,
+                                        85,
+                                        117,
+                                        117}, 171)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        79,
+                                        79,
+                                        111,
+                                        111}, 165)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        67,
+                                        67,
+                                        99,
+                                        99}, 166)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        75,
+                                        75,
+                                        107,
+                                        107}, 167)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 168)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        68,
+                                        68,
+                                        100,
+                                        100}, 169)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 189)}, -1),
-                new DfaEntry(new DfaTransitionEntry[0], 0),
+                                        33}, 170)}, -1),
+                new DfaEntry(new DfaTransitionEntry[0], 1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        83,
+                                        83,
+                                        115,
+                                        115}, 172)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        89,
+                                        89,
+                                        121,
+                                        121}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        65,
+                                        65,
+                                        97,
+                                        97}, 174),
+                            new DfaTransitionEntry(new int[] {
+                                        79,
+                                        79,
+                                        111,
+                                        111}, 176)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 175)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        67,
+                                        67,
+                                        99,
+                                        99}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 177)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 178)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 179)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        67,
+                                        67,
+                                        99,
+                                        99}, 180)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        73,
+                                        73,
+                                        105,
+                                        105}, 182)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        86,
+                                        86,
+                                        118,
+                                        118}, 183)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        47,
+                                        47}, 184)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        48,
+                                        48}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        88,
+                                        88,
+                                        120,
+                                        120}, 186)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 187)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 188)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        82,
+                                        82,
+                                        114,
+                                        114}, 189)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 190)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
@@ -2548,19 +2596,279 @@ namespace ClosedXML.Parser.Rolex {
                                         76,
                                         76,
                                         108,
-                                        108}, 192)}, -1),
+                                        108}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        73,
+                                        73,
+                                        105,
+                                        105}, 193)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 194)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 168)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 196)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 197)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 198)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        73,
+                                        73,
+                                        105,
+                                        105}, 199)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 200)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        71,
+                                        71,
+                                        103,
+                                        103}, 201)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        95,
+                                        95}, 202)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        68,
+                                        68,
+                                        100,
+                                        100}, 203)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        65,
+                                        65,
+                                        97,
+                                        97}, 204)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 205)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        65,
+                                        65,
+                                        97,
+                                        97}, 170)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        47,
+                                        47}, 205),
+                            new DfaTransitionEntry(new int[] {
+                                        65,
+                                        65,
+                                        97,
+                                        97}, 207),
+                            new DfaTransitionEntry(new int[] {
+                                        85,
+                                        85,
+                                        117,
+                                        117}, 210)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        77,
+                                        77,
+                                        109,
+                                        109}, 208)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 209)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        63,
+                                        63}, 170)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 191),
+                            new DfaTransitionEntry(new int[] {
+                                        77,
+                                        77,
+                                        109,
+                                        109}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        89,
+                                        89,
+                                        121,
+                                        121}, 212)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        84,
+                                        84,
+                                        116,
+                                        116}, 213)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        72,
+                                        72,
+                                        104,
+                                        104}, 214)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        79,
+                                        79,
+                                        111,
+                                        111}, 215)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 169)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 217)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        70,
+                                        70,
+                                        102,
+                                        102}, 218)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        33,
+                                        33}, 219)}, -1),
+                new DfaEntry(new DfaTransitionEntry[0], 0),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        80,
+                                        80,
+                                        112,
+                                        112}, 221)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        73,
+                                        73,
+                                        105,
+                                        105}, 222)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 191)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        73,
+                                        73,
+                                        105,
+                                        105}, 224)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        77,
+                                        77,
+                                        109,
+                                        109}, 225)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        69,
+                                        69,
+                                        101,
+                                        101}, 226)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        79,
+                                        79,
+                                        111,
+                                        111}, 227)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         85,
                                         85,
                                         117,
-                                        117}, 193)}, -1),
+                                        117}, 180)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 229)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        75,
+                                        75,
+                                        107,
+                                        107}, 230)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        78,
+                                        78,
+                                        110,
+                                        110}, 231)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        79,
+                                        79,
+                                        111,
+                                        111}, 232)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        87,
+                                        87,
+                                        119,
+                                        119}, 215)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        65,
+                                        65,
+                                        97,
+                                        97}, 234)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        76,
+                                        76,
+                                        108,
+                                        108}, 235)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        85,
+                                        85,
+                                        117,
+                                        117}, 236)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 167)}, -1),
+                                        101}, 169)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2594,25 +2902,25 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 195),
+                                        49}, 238),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 220),
+                                        57}, 263),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         87,
                                         97,
-                                        119}, 221),
+                                        119}, 264),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 244),
+                                        120}, 287),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 242)}, -1),
+                                        122}, 285)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2644,13 +2952,13 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 196),
+                                        48}, 239),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        57}, 197),
+                                        57}, 240),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2682,16 +2990,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        51}, 197),
+                                        51}, 240),
                             new DfaTransitionEntry(new int[] {
                                         52,
-                                        52}, 216),
+                                        52}, 259),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        57}, 198),
+                                        57}, 241),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2723,10 +3031,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 198),
+                                        57}, 241),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2758,10 +3066,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 199),
+                                        57}, 242),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2793,10 +3101,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 200),
+                                        57}, 243),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2828,10 +3136,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 201),
+                                        57}, 244),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2865,96 +3173,96 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 203),
+                                        36}, 246),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 204),
+                                        49}, 247),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 215)}, -1),
+                                        57}, 258)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 204),
+                                        49}, 247),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 215)}, -1),
+                                        57}, 258)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 205),
+                                        48}, 248),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        57}, 206)}, 33),
+                                        57}, 249)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        51}, 206),
+                                        51}, 249),
                             new DfaTransitionEntry(new int[] {
                                         52,
-                                        52}, 211),
+                                        52}, 254),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        57}, 207)}, 33),
+                                        57}, 250)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 207)}, 33),
+                                        57}, 250)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 208)}, 33),
+                                        57}, 251)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 209)}, 33),
+                                        57}, 252)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 210)}, 33),
+                                        57}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[0], 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        55}, 207),
+                                        55}, 250),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        56}, 212),
+                                        56}, 255),
                             new DfaTransitionEntry(new int[] {
                                         57,
-                                        57}, 208)}, 33),
+                                        57}, 251)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        52}, 208),
+                                        52}, 251),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        53}, 213),
+                                        53}, 256),
                             new DfaTransitionEntry(new int[] {
                                         54,
-                                        57}, 209)}, 33),
+                                        57}, 252)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 209),
+                                        54}, 252),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        55}, 214),
+                                        55}, 257),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        57}, 210)}, 33),
+                                        57}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 210)}, 33),
+                                        54}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 206)}, 33),
+                                        57}, 249)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -2986,16 +3294,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        55}, 198),
+                                        55}, 241),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        56}, 217),
+                                        56}, 260),
                             new DfaTransitionEntry(new int[] {
                                         57,
-                                        57}, 199),
+                                        57}, 242),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3027,16 +3335,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        52}, 199),
+                                        52}, 242),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        53}, 218),
+                                        53}, 261),
                             new DfaTransitionEntry(new int[] {
                                         54,
-                                        57}, 200),
+                                        57}, 243),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3068,16 +3376,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 200),
+                                        54}, 243),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        55}, 219),
+                                        55}, 262),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        57}, 201),
+                                        57}, 244),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3111,10 +3419,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 201),
+                                        54}, 244),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3146,10 +3454,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 197),
+                                        57}, 240),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202)}, -1),
+                                        58}, 245)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3181,21 +3489,21 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235),
+                                        57}, 278),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 236),
+                                        58}, 279),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 242)}, -1),
+                                        122}, 285)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3229,10 +3537,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235)}, -1),
+                                        57}, 278)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3264,13 +3572,13 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 225),
+                                        48}, 268),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        57}, 226)}, 32),
+                                        57}, 269)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         10,
@@ -3278,7 +3586,7 @@ namespace ClosedXML.Parser.Rolex {
                                         13,
                                         13,
                                         32,
-                                        32}, 224)}, 35),
+                                        32}, 267)}, 35),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3310,16 +3618,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        51}, 226),
+                                        51}, 269),
                             new DfaTransitionEntry(new int[] {
                                         52,
-                                        52}, 231),
+                                        52}, 274),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        57}, 227)}, 32),
+                                        57}, 270)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3351,10 +3659,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 227)}, 32),
+                                        57}, 270)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3386,10 +3694,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 228)}, 32),
+                                        57}, 271)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3421,10 +3729,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 229)}, 32),
+                                        57}, 272)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3456,10 +3764,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 230)}, 32),
+                                        57}, 273)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3493,7 +3801,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224)}, 32),
+                                        40}, 267)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3525,16 +3833,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        55}, 227),
+                                        55}, 270),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        56}, 232),
+                                        56}, 275),
                             new DfaTransitionEntry(new int[] {
                                         57,
-                                        57}, 228)}, 32),
+                                        57}, 271)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3566,16 +3874,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        52}, 228),
+                                        52}, 271),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        53}, 233),
+                                        53}, 276),
                             new DfaTransitionEntry(new int[] {
                                         54,
-                                        57}, 229)}, 32),
+                                        57}, 272)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3607,16 +3915,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 229),
+                                        54}, 272),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        55}, 234),
+                                        55}, 277),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        57}, 230)}, 32),
+                                        57}, 273)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3650,10 +3958,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 230)}, 32),
+                                        54}, 273)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3685,79 +3993,79 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 224),
+                                        40}, 267),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 226)}, 32),
+                                        57}, 269)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 237),
+                                        36}, 280),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         87,
                                         97,
-                                        119}, 238),
+                                        119}, 281),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 240),
+                                        120}, 283),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 239)}, -1),
+                                        122}, 282)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         87,
                                         97,
-                                        119}, 238),
+                                        119}, 281),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 240),
+                                        120}, 283),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 239)}, -1),
+                                        122}, 282)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 239)}, 33),
+                                        122}, 282)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 210)}, 33),
+                                        122}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
                                         97,
-                                        101}, 239),
+                                        101}, 282),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 241),
+                                        102}, 284),
                             new DfaTransitionEntry(new int[] {
                                         71,
                                         90,
                                         103,
-                                        122}, 210)}, 33),
+                                        122}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         68,
                                         97,
-                                        100}, 210)}, 33),
+                                        100}, 253)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3789,21 +4097,21 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235),
+                                        57}, 278),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 236),
+                                        58}, 279),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 243)}, -1),
+                                        122}, 286)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3835,16 +4143,16 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235),
+                                        57}, 278),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 236)}, -1),
+                                        58}, 279)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3876,31 +4184,31 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235),
+                                        57}, 278),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 236),
+                                        58}, 279),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
                                         97,
-                                        101}, 242),
+                                        101}, 285),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 245),
+                                        102}, 288),
                             new DfaTransitionEntry(new int[] {
                                         71,
                                         90,
                                         103,
-                                        122}, 243)}, -1),
+                                        122}, 286)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3936,21 +4244,21 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 223),
+                                        49}, 266),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 235),
+                                        57}, 278),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 236),
+                                        58}, 279),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         68,
                                         97,
-                                        100}, 243)}, -1),
+                                        100}, 286)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -3974,10 +4282,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 247),
+                                        1114111}, 290),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 255),
+                                        39}, 298),
                             new DfaTransitionEntry(new int[] {
                                         42,
                                         42,
@@ -3988,10 +4296,10 @@ namespace ClosedXML.Parser.Rolex {
                                         63,
                                         63,
                                         92,
-                                        93}, 249),
+                                        93}, 292),
                             new DfaTransitionEntry(new int[] {
                                         91,
-                                        91}, 256)}, -1),
+                                        91}, 299)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4015,10 +4323,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 247),
+                                        1114111}, 290),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 248),
+                                        39}, 291),
                             new DfaTransitionEntry(new int[] {
                                         42,
                                         42,
@@ -4027,17 +4335,17 @@ namespace ClosedXML.Parser.Rolex {
                                         63,
                                         63,
                                         91,
-                                        93}, 249),
+                                        93}, 292),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 251)}, -1),
+                                        58}, 294)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         33,
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 247)}, 39),
+                                        39}, 290)}, 39),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4051,52 +4359,14 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 249),
+                                        1114111}, 292),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 250)}, -1),
+                                        39}, 293)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 249)}, 39),
-                new DfaEntry(new DfaTransitionEntry[] {
-                            new DfaTransitionEntry(new int[] {
-                                        9,
-                                        10,
-                                        13,
-                                        13,
-                                        32,
-                                        38,
-                                        40,
-                                        41,
-                                        43,
-                                        46,
-                                        48,
-                                        57,
-                                        59,
-                                        62,
-                                        64,
-                                        90,
-                                        94,
-                                        55295,
-                                        57344,
-                                        65533,
-                                        65536,
-                                        1114111}, 252),
-                            new DfaTransitionEntry(new int[] {
-                                        39,
-                                        39}, 250),
-                            new DfaTransitionEntry(new int[] {
-                                        42,
-                                        42,
-                                        47,
-                                        47,
-                                        58,
-                                        58,
-                                        63,
-                                        63,
-                                        91,
-                                        93}, 249)}, -1),
+                                        39}, 292)}, 39),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4120,10 +4390,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 252),
+                                        1114111}, 295),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 253),
+                                        39}, 293),
                             new DfaTransitionEntry(new int[] {
                                         42,
                                         42,
@@ -4134,19 +4404,57 @@ namespace ClosedXML.Parser.Rolex {
                                         63,
                                         63,
                                         91,
-                                        93}, 249)}, -1),
+                                        93}, 292)}, -1),
+                new DfaEntry(new DfaTransitionEntry[] {
+                            new DfaTransitionEntry(new int[] {
+                                        9,
+                                        10,
+                                        13,
+                                        13,
+                                        32,
+                                        38,
+                                        40,
+                                        41,
+                                        43,
+                                        46,
+                                        48,
+                                        57,
+                                        59,
+                                        62,
+                                        64,
+                                        90,
+                                        94,
+                                        55295,
+                                        57344,
+                                        65533,
+                                        65536,
+                                        1114111}, 295),
+                            new DfaTransitionEntry(new int[] {
+                                        39,
+                                        39}, 296),
+                            new DfaTransitionEntry(new int[] {
+                                        42,
+                                        42,
+                                        47,
+                                        47,
+                                        58,
+                                        58,
+                                        63,
+                                        63,
+                                        91,
+                                        93}, 292)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 252)}, 39),
+                                        39}, 295)}, 39),
                 new DfaEntry(new DfaTransitionEntry[0], 30),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 249)}, -1),
+                                        39}, 292)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4162,13 +4470,13 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 249),
+                                        1114111}, 292),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 250),
+                                        39}, 293),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 257)}, -1),
+                                        57}, 300)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4186,16 +4494,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 249),
+                                        1114111}, 292),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 250),
+                                        39}, 293),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 257),
+                                        57}, 300),
                             new DfaTransitionEntry(new int[] {
                                         93,
-                                        93}, 258)}, -1),
+                                        93}, 301)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4219,10 +4527,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 247),
+                                        1114111}, 290),
                             new DfaTransitionEntry(new int[] {
                                         39,
-                                        39}, 250),
+                                        39}, 293),
                             new DfaTransitionEntry(new int[] {
                                         42,
                                         42,
@@ -4233,7 +4541,7 @@ namespace ClosedXML.Parser.Rolex {
                                         63,
                                         63,
                                         91,
-                                        93}, 249)}, -1),
+                                        93}, 292)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4265,7 +4573,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 260)}, -1),
+                                        57}, 303)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4301,12 +4609,12 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 260),
+                                        57}, 303),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4340,18 +4648,18 @@ namespace ClosedXML.Parser.Rolex {
                                         43,
                                         43,
                                         45,
-                                        45}, 262),
+                                        45}, 305),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 264)}, -1),
+                                        57}, 307)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 263)}, -1),
+                                        57}, 306)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 263)}, 3),
+                                        57}, 306)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4383,7 +4691,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 264)}, 3),
+                                        57}, 307)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4417,15 +4725,15 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 265),
+                                        57}, 308),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4459,21 +4767,21 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 267),
+                                        48}, 310),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        57}, 268),
+                                        57}, 311),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4507,24 +4815,24 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        51}, 268),
+                                        51}, 311),
                             new DfaTransitionEntry(new int[] {
                                         52,
-                                        52}, 273),
+                                        52}, 316),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        57}, 269),
+                                        57}, 312),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4558,18 +4866,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 269),
+                                        57}, 312),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4603,18 +4911,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 270),
+                                        57}, 313),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4648,18 +4956,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 271),
+                                        57}, 314),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4693,18 +5001,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 272),
+                                        57}, 315),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4738,18 +5046,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 265),
+                                        57}, 308),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4783,24 +5091,24 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        55}, 269),
+                                        55}, 312),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        56}, 274),
+                                        56}, 317),
                             new DfaTransitionEntry(new int[] {
                                         57,
-                                        57}, 270),
+                                        57}, 313),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4834,24 +5142,24 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        52}, 270),
+                                        52}, 313),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        53}, 275),
+                                        53}, 318),
                             new DfaTransitionEntry(new int[] {
                                         54,
-                                        57}, 271),
+                                        57}, 314),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4885,24 +5193,24 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 271),
+                                        54}, 314),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        55}, 276),
+                                        55}, 319),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        57}, 272),
+                                        57}, 315),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4936,21 +5244,21 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 272),
+                                        54}, 315),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        57}, 265),
+                                        57}, 308),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -4984,18 +5292,18 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         46,
-                                        46}, 259),
+                                        46}, 302),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 268),
+                                        57}, 311),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 202),
+                                        58}, 245),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 261)}, 3),
+                                        101}, 304)}, 3),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5019,10 +5327,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5035,16 +5343,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5053,12 +5361,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 303)}, 37),
+                                        122}, 346)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         10,
@@ -5066,7 +5374,7 @@ namespace ClosedXML.Parser.Rolex {
                                         13,
                                         13,
                                         32,
-                                        32}, 279)}, 36),
+                                        32}, 322)}, 36),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5092,7 +5400,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5109,7 +5417,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5118,11 +5426,11 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 37),
+                                        65535}, 324)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5139,7 +5447,7 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         122,
                                         128,
-                                        1114111}, 281)}, 37),
+                                        1114111}, 324)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5165,7 +5473,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5180,13 +5488,13 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        48}, 284),
+                                        48}, 327),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        57}, 285),
+                                        57}, 328),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5195,7 +5503,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         10,
@@ -5203,7 +5511,7 @@ namespace ClosedXML.Parser.Rolex {
                                         13,
                                         13,
                                         32,
-                                        32}, 283)}, 35),
+                                        32}, 326)}, 35),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5229,7 +5537,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5244,16 +5552,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        51}, 285),
+                                        51}, 328),
                             new DfaTransitionEntry(new int[] {
                                         52,
-                                        52}, 290),
+                                        52}, 333),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        57}, 286),
+                                        57}, 329),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5262,7 +5570,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5288,7 +5596,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5303,10 +5611,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 286),
+                                        57}, 329),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5315,7 +5623,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5341,7 +5649,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5356,10 +5664,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 287),
+                                        57}, 330),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5368,7 +5676,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5394,7 +5702,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5409,10 +5717,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 288),
+                                        57}, 331),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5421,7 +5729,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5447,7 +5755,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5462,10 +5770,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 289),
+                                        57}, 332),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5474,7 +5782,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5500,7 +5808,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5517,7 +5825,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5526,7 +5834,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5552,7 +5860,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5567,16 +5875,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        55}, 286),
+                                        55}, 329),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        56}, 291),
+                                        56}, 334),
                             new DfaTransitionEntry(new int[] {
                                         57,
-                                        57}, 287),
+                                        57}, 330),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5585,7 +5893,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5611,7 +5919,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5626,16 +5934,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        52}, 287),
+                                        52}, 330),
                             new DfaTransitionEntry(new int[] {
                                         53,
-                                        53}, 292),
+                                        53}, 335),
                             new DfaTransitionEntry(new int[] {
                                         54,
-                                        57}, 288),
+                                        57}, 331),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5644,7 +5952,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5670,7 +5978,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5685,16 +5993,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 288),
+                                        54}, 331),
                             new DfaTransitionEntry(new int[] {
                                         55,
-                                        55}, 293),
+                                        55}, 336),
                             new DfaTransitionEntry(new int[] {
                                         56,
-                                        57}, 289),
+                                        57}, 332),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5703,7 +6011,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5729,7 +6037,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5746,10 +6054,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        54}, 289),
+                                        54}, 332),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5758,7 +6066,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5784,7 +6092,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 283),
+                                        40}, 326),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -5799,10 +6107,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 285),
+                                        57}, 328),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -5811,7 +6119,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 32),
+                                        65535}, 324)}, 32),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5837,25 +6145,25 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 297),
+                                        36}, 340),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         87,
                                         97,
-                                        119}, 298),
+                                        119}, 341),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 301),
+                                        120}, 344),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 299)}, -1),
+                                        122}, 342)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5883,10 +6191,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254)}, -1),
+                                        33}, 297)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5914,25 +6222,25 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         87,
                                         97,
-                                        119}, 298),
+                                        119}, 341),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 301),
+                                        120}, 344),
                             new DfaTransitionEntry(new int[] {
                                         89,
                                         90,
                                         121,
-                                        122}, 299)}, -1),
+                                        122}, 342)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5960,15 +6268,15 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 299)}, 33),
+                                        122}, 342)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -5996,15 +6304,15 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 300)}, 33),
+                                        122}, 343)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6032,10 +6340,10 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254)}, 33),
+                                        33}, 297)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6063,25 +6371,25 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
                                         97,
-                                        101}, 299),
+                                        101}, 342),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 302),
+                                        102}, 345),
                             new DfaTransitionEntry(new int[] {
                                         71,
                                         90,
                                         103,
-                                        122}, 300)}, 33),
+                                        122}, 343)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6113,15 +6421,15 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296),
+                                        1114111}, 339),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 254),
+                                        33}, 297),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         68,
                                         97,
-                                        100}, 300)}, 33),
+                                        100}, 343)}, 33),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6145,10 +6453,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6161,16 +6469,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6179,12 +6487,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 304)}, 37),
+                                        122}, 347)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6208,10 +6516,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6228,16 +6536,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6246,7 +6554,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 37),
+                                        65535}, 324)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6270,10 +6578,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6286,16 +6594,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6304,7 +6612,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         71,
@@ -6313,12 +6621,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         103,
                                         105,
-                                        122}, 303),
+                                        122}, 346),
                             new DfaTransitionEntry(new int[] {
                                         72,
                                         72,
                                         104,
-                                        104}, 306)}, 37),
+                                        104}, 349)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6342,10 +6650,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6358,16 +6666,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6376,7 +6684,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         78,
@@ -6385,12 +6693,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         110,
                                         112,
-                                        122}, 304),
+                                        122}, 347),
                             new DfaTransitionEntry(new int[] {
                                         79,
                                         79,
                                         111,
-                                        111}, 307)}, 37),
+                                        111}, 350)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6414,10 +6722,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6438,16 +6746,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6456,12 +6764,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         79,
                                         79,
                                         111,
-                                        111}, 308)}, 37),
+                                        111}, 351)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6487,7 +6795,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6508,7 +6816,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6517,12 +6825,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         83,
                                         83,
                                         115,
-                                        115}, 309)}, 37),
+                                        115}, 352)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6548,7 +6856,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6569,7 +6877,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6578,12 +6886,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 310)}, 37),
+                                        101}, 353)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6609,7 +6917,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 311),
+                                        40}, 354),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6626,7 +6934,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6635,7 +6943,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 37),
+                                        65535}, 324)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         10,
@@ -6643,7 +6951,7 @@ namespace ClosedXML.Parser.Rolex {
                                         13,
                                         13,
                                         32,
-                                        32}, 311)}, 34),
+                                        32}, 354)}, 34),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6667,10 +6975,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6683,16 +6991,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6701,17 +7009,17 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         65,
                                         97,
-                                        97}, 313),
+                                        97}, 356),
                             new DfaTransitionEntry(new int[] {
                                         66,
                                         90,
                                         98,
-                                        122}, 303)}, 37),
+                                        122}, 346)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6735,10 +7043,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6751,16 +7059,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6769,7 +7077,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         75,
@@ -6778,12 +7086,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         107,
                                         109,
-                                        122}, 304),
+                                        122}, 347),
                             new DfaTransitionEntry(new int[] {
                                         76,
                                         76,
                                         108,
-                                        108}, 314)}, 37),
+                                        108}, 357)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6807,10 +7115,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6831,16 +7139,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6849,12 +7157,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         83,
                                         83,
                                         115,
-                                        115}, 315)}, 37),
+                                        115}, 358)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6880,7 +7188,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6901,7 +7209,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6910,12 +7218,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 316)}, 37),
+                                        101}, 359)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6941,7 +7249,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -6958,7 +7266,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -6967,7 +7275,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281)}, 2),
+                                        65535}, 324)}, 2),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -6991,10 +7299,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7007,16 +7315,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7025,7 +7333,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
@@ -7038,17 +7346,17 @@ namespace ClosedXML.Parser.Rolex {
                                         103,
                                         109,
                                         111,
-                                        122}, 303),
+                                        122}, 346),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 318),
+                                        102}, 361),
                             new DfaTransitionEntry(new int[] {
                                         78,
                                         78,
                                         110,
-                                        110}, 319)}, 37),
+                                        110}, 362)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7072,10 +7380,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 311),
+                                        40}, 354),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7088,16 +7396,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7106,12 +7414,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         90,
                                         97,
-                                        122}, 304)}, 37),
+                                        122}, 347)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7135,10 +7443,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7151,16 +7459,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7169,7 +7477,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         67,
@@ -7178,12 +7486,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         99,
                                         101,
-                                        122}, 304),
+                                        122}, 347),
                             new DfaTransitionEntry(new int[] {
                                         68,
                                         68,
                                         100,
-                                        100}, 320)}, 37),
+                                        100}, 363)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7207,10 +7515,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7235,16 +7543,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7253,17 +7561,17 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 321),
+                                        101}, 364),
                             new DfaTransitionEntry(new int[] {
                                         73,
                                         73,
                                         105,
-                                        105}, 322)}, 37),
+                                        105}, 365)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7289,7 +7597,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7310,7 +7618,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7319,12 +7627,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         88,
                                         88,
                                         120,
-                                        120}, 310)}, 37),
+                                        120}, 353)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7350,7 +7658,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7371,7 +7679,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7380,12 +7688,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         82,
                                         82,
                                         114,
-                                        114}, 323)}, 37),
+                                        114}, 366)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7411,7 +7719,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7432,7 +7740,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7441,12 +7749,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 324)}, 37),
+                                        101}, 367)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7472,7 +7780,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7493,7 +7801,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7502,12 +7810,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         67,
                                         67,
                                         99,
-                                        99}, 325)}, 37),
+                                        99}, 368)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7533,7 +7841,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7554,7 +7862,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7563,12 +7871,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         84,
                                         84,
                                         116,
-                                        116}, 310)}, 37),
+                                        116}, 353)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7592,10 +7900,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7608,16 +7916,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7626,7 +7934,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
@@ -7635,12 +7943,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         101,
                                         103,
-                                        122}, 303),
+                                        122}, 346),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 327)}, 37),
+                                        102}, 370)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7664,10 +7972,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7680,16 +7988,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7698,7 +8006,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
@@ -7707,12 +8015,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         101,
                                         103,
-                                        122}, 304),
+                                        122}, 347),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 328)}, 37),
+                                        102}, 371)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7736,10 +8044,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7760,16 +8068,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7778,12 +8086,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         83,
                                         83,
                                         115,
-                                        115}, 329)}, 37),
+                                        115}, 372)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7809,7 +8117,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7830,7 +8138,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7839,12 +8147,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 325)}, 37),
+                                        101}, 368)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7868,10 +8176,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7884,16 +8192,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7902,7 +8210,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         81,
@@ -7911,12 +8219,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         113,
                                         115,
-                                        122}, 303),
+                                        122}, 346),
                             new DfaTransitionEntry(new int[] {
                                         82,
                                         82,
                                         114,
-                                        114}, 331)}, 37),
+                                        114}, 374)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -7940,10 +8248,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -7956,16 +8264,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -7974,7 +8282,7 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         84,
@@ -7983,12 +8291,12 @@ namespace ClosedXML.Parser.Rolex {
                                         97,
                                         116,
                                         118,
-                                        122}, 304),
+                                        122}, 347),
                             new DfaTransitionEntry(new int[] {
                                         85,
                                         85,
                                         117,
-                                        117}, 332)}, 37),
+                                        117}, 375)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8012,10 +8320,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -8036,16 +8344,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -8054,12 +8362,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         69,
                                         69,
                                         101,
-                                        101}, 316)}, 37),
+                                        101}, 359)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8083,10 +8391,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -8099,16 +8407,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -8117,22 +8425,22 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         69,
                                         97,
-                                        101}, 303),
+                                        101}, 346),
                             new DfaTransitionEntry(new int[] {
                                         70,
                                         70,
                                         102,
-                                        102}, 334),
+                                        102}, 377),
                             new DfaTransitionEntry(new int[] {
                                         71,
                                         90,
                                         103,
-                                        122}, 304)}, 37),
+                                        122}, 347)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8156,10 +8464,10 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         36,
-                                        36}, 222),
+                                        36}, 265),
                             new DfaTransitionEntry(new int[] {
                                         40,
-                                        40}, 279),
+                                        40}, 322),
                             new DfaTransitionEntry(new int[] {
                                         46,
                                         46,
@@ -8176,16 +8484,16 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 280),
+                                        1114111}, 323),
                             new DfaTransitionEntry(new int[] {
                                         49,
-                                        49}, 282),
+                                        49}, 325),
                             new DfaTransitionEntry(new int[] {
                                         50,
-                                        57}, 294),
+                                        57}, 337),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 295),
+                                        58}, 338),
                             new DfaTransitionEntry(new int[] {
                                         63,
                                         63,
@@ -8194,12 +8502,12 @@ namespace ClosedXML.Parser.Rolex {
                                         55296,
                                         57343,
                                         65534,
-                                        65535}, 281),
+                                        65535}, 324),
                             new DfaTransitionEntry(new int[] {
                                         65,
                                         68,
                                         97,
-                                        100}, 304)}, 37),
+                                        100}, 347)}, 37),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8227,22 +8535,22 @@ namespace ClosedXML.Parser.Rolex {
                                         13}, 36),
                             new DfaTransitionEntry(new int[] {
                                         32,
-                                        32}, 336),
+                                        32}, 379),
                             new DfaTransitionEntry(new int[] {
                                         35,
-                                        35}, 338),
+                                        35}, 381),
                             new DfaTransitionEntry(new int[] {
                                         39,
                                         39}, 28),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 361),
+                                        57}, 404),
                             new DfaTransitionEntry(new int[] {
                                         91,
                                         91}, 37),
                             new DfaTransitionEntry(new int[] {
                                         93,
-                                        93}, 337)}, -1),
+                                        93}, 380)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8268,7 +8576,7 @@ namespace ClosedXML.Parser.Rolex {
                                         13}, 36),
                             new DfaTransitionEntry(new int[] {
                                         32,
-                                        32}, 336),
+                                        32}, 379),
                             new DfaTransitionEntry(new int[] {
                                         39,
                                         39}, 28),
@@ -8277,112 +8585,112 @@ namespace ClosedXML.Parser.Rolex {
                                         91}, 37),
                             new DfaTransitionEntry(new int[] {
                                         93,
-                                        93}, 337)}, -1),
+                                        93}, 380)}, -1),
                 new DfaEntry(new DfaTransitionEntry[0], 38),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         65,
-                                        65}, 339),
+                                        65}, 382),
                             new DfaTransitionEntry(new int[] {
                                         68,
-                                        68}, 342),
+                                        68}, 385),
                             new DfaTransitionEntry(new int[] {
                                         72,
-                                        72}, 345),
+                                        72}, 388),
                             new DfaTransitionEntry(new int[] {
                                         84,
-                                        84}, 351)}, -1),
+                                        84}, 394)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         108,
-                                        108}, 340)}, -1),
+                                        108}, 383)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         108,
-                                        108}, 341)}, -1),
+                                        108}, 384)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         93,
-                                        93}, 337)}, -1),
+                                        93}, 380)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         97,
-                                        97}, 343)}, -1),
+                                        97}, 386)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         116,
-                                        116}, 344)}, -1),
+                                        116}, 387)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         97,
-                                        97}, 341)}, -1),
+                                        97}, 384)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         101,
-                                        101}, 346)}, -1),
+                                        101}, 389)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         97,
-                                        97}, 347)}, -1),
+                                        97}, 390)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         100,
-                                        100}, 348)}, -1),
+                                        100}, 391)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         101,
-                                        101}, 349)}, -1),
+                                        101}, 392)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         114,
-                                        114}, 350)}, -1),
+                                        114}, 393)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         115,
-                                        115}, 341)}, -1),
+                                        115}, 384)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         104,
-                                        104}, 352),
+                                        104}, 395),
                             new DfaTransitionEntry(new int[] {
                                         111,
-                                        111}, 358)}, -1),
+                                        111}, 401)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         105,
-                                        105}, 353)}, -1),
+                                        105}, 396)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         115,
-                                        115}, 354)}, -1),
+                                        115}, 397)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         32,
-                                        32}, 355)}, -1),
+                                        32}, 398)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         82,
-                                        82}, 356)}, -1),
+                                        82}, 399)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         111,
-                                        111}, 357)}, -1),
+                                        111}, 400)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         119,
-                                        119}, 341)}, -1),
+                                        119}, 384)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         116,
-                                        116}, 359)}, -1),
+                                        116}, 402)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         97,
-                                        97}, 360)}, -1),
+                                        97}, 403)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         108,
-                                        108}, 350)}, -1),
+                                        108}, 393)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8410,13 +8718,13 @@ namespace ClosedXML.Parser.Rolex {
                                         39}, 28),
                             new DfaTransitionEntry(new int[] {
                                         48,
-                                        57}, 361),
+                                        57}, 404),
                             new DfaTransitionEntry(new int[] {
                                         91,
                                         91}, 30),
                             new DfaTransitionEntry(new int[] {
                                         93,
-                                        93}, 362)}, -1),
+                                        93}, 405)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8442,18 +8750,18 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 363),
+                                        1114111}, 406),
                             new DfaTransitionEntry(new int[] {
                                         10,
                                         10,
                                         13,
-                                        13}, 365),
+                                        13}, 408),
                             new DfaTransitionEntry(new int[] {
                                         32,
                                         32}, 35),
                             new DfaTransitionEntry(new int[] {
                                         33,
-                                        33}, 366)}, 38),
+                                        33}, 409)}, 38),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8481,13 +8789,13 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 363),
+                                        1114111}, 406),
                             new DfaTransitionEntry(new int[] {
                                         33,
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 364)}, -1),
+                                        58}, 407)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8515,7 +8823,7 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 296)}, -1),
+                                        1114111}, 339)}, -1),
                 new DfaEntry(new DfaTransitionEntry[] {
                             new DfaTransitionEntry(new int[] {
                                         9,
@@ -8541,12 +8849,12 @@ namespace ClosedXML.Parser.Rolex {
                                         57344,
                                         65533,
                                         65536,
-                                        1114111}, 363),
+                                        1114111}, 406),
                             new DfaTransitionEntry(new int[] {
                                         10,
                                         10,
                                         13,
-                                        13}, 365),
+                                        13}, 408),
                             new DfaTransitionEntry(new int[] {
                                         32,
                                         32}, 35),
@@ -8555,7 +8863,7 @@ namespace ClosedXML.Parser.Rolex {
                                         33}, 2),
                             new DfaTransitionEntry(new int[] {
                                         58,
-                                        58}, 364)}, 38),
+                                        58}, 407)}, 38),
                 new DfaEntry(new DfaTransitionEntry[0], 28)};
         internal static int[] NodeFlags = new int[] {
                 0,
