@@ -18,11 +18,36 @@ under Unreleased with each change.
   reference is read as written: a relative axis keeps its offset and is not resolved
   against an anchor cell, so `R[-1]C` gives a relative row of -1 and a relative column of
   0. The other five public methods keep their A1-only form.
+- Parse dynamic data exchange (DDE) references. Excel stores one as the book prefix of
+  its link followed by the quoted item, `[1]!'id1?req?AAPL'`, and displays it with the
+  application and the topic of the link instead, `Sdemo123|tik!'id1?req?AAPL'`. Both
+  forms now parse. A quoted item was a lexer error, so every such formula failed,
+  including 3,276 formulas in the Enron and EUSES data sets that the tests had filed as
+  invalid external references. [MS-XLSX] has no production for DDE, so the item is a new
+  token, `DDE_ITEM`. It is the last token of `FormulaLexer.g4`, so no other token ID
+  moves, and the ANTLR lexer and both Rolex DFA tables are regenerated. Before the token
+  was added, the tables were regenerated from the unchanged grammar and matched the
+  committed ones byte for byte, so they differ only by the new token. A sheet name can
+  contain `|`, so a prefix is read as a DDE link only when a quoted item follows it:
+  `a|b!A1` is still a reference into the sheet `a|b`. This is what the skipped ClosedXML
+  test `Reference_can_be_dynamic_data_exchange` needs. Two displayed forms are still not
+  recognised. A bare item (`MT4|BID!EURUSD`) cannot be told from a name in a sheet called
+  `MT4|BID` and still parses as one. A quoted topic (`App|'topic'!'item'`) still does not
+  parse.
 
 ### Changed
 
 - Forked from ClosedXML.Parser 2.0.0 and published as `XLibur.ClosedXML.Parser`. The
   `ClosedXML.Parser` namespace is unchanged.
+- `IAstFactory` has two new methods: `ExternalDynamicDataExchange` for the stored form of
+  a DDE reference and `DynamicDataExchange` for the displayed form. This breaks every
+  implementation, because the library targets netstandard2.0, which has no default
+  interface methods. `CopyVisitor` and `RefModVisitor` write a DDE reference back in the
+  form it was written in, normalised the way a sheet reference is (e.g. a space after the
+  `!` is dropped). The `application|topic` prefix of the displayed form is not a sheet, so a sheet
+  rename leaves it alone. It stays bare, the way Excel writes it, although a sheet of the
+  same name would be quoted because of the `|`; it is quoted only when it would not read
+  back as the same link, e.g. with a space.
 
 ### Fixed
 
