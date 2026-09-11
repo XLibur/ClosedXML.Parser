@@ -39,6 +39,18 @@ under Unreleased with each change.
 
 - Forked from ClosedXML.Parser 2.0.0 and published as `XLibur.ClosedXML.Parser`. The
   `ClosedXML.Parser` namespace is unchanged.
+- The Rolex grammars `LexerA1.rl` and `LexerR1C1.rl` are generated from `FormulaLexer.g4`
+  by a new converter, `tools/Antlr2Rolex`. It replaces the Antlr2Rolex tool the README
+  named, which was never published, so the grammars had been edited by hand. A test
+  regenerates both and fails when a committed one differs, so the ANTLR grammar and the
+  Rolex lexer can no longer drift apart unnoticed. The first run found such a drift: the
+  fix that made `C0` a name had edited `LexerR1C1.rl` but not the R1C1 section of
+  `FormulaLexer.g4`, which now has it too. The generated grammars differ from the
+  committed ones only in brackets (the hand-written `DDE_ITEM` and the absolute column),
+  and both DFA tables regenerated from them match the committed tables byte for byte, so
+  the lexer is unchanged. The Rolex build that generates the tables is now vendored in
+  `tools/rolex/91a2d6d`, and a Windows CI job regenerates both tables with it and fails
+  when a committed table differs, so a grammar can't be committed without its table.
 - `IAstFactory` has two new methods: `ExternalDynamicDataExchange` for the stored form of
   a DDE reference and `DynamicDataExchange` for the displayed form. This breaks every
   implementation, because the library targets netstandard2.0, which has no default

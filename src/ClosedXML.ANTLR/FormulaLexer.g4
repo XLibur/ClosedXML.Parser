@@ -379,8 +379,9 @@ fragment ROW_BASE_DIGIT_SEQUENCE
         | '104857' [0-5]
         ;
 
+// Not COLUMN_RELATIVE_DIGIT_SEQUENCE, because a bare zero is not a column (C0 is a name).
 fragment COLUMN_ABSOLUTE_DIGIT_SEQUENCE
-        : COLUMN_RELATIVE_DIGIT_SEQUENCE
+        : COLUMN_BASE_DIGIT_SEQUENCE
         | '16384'
         ;
 
