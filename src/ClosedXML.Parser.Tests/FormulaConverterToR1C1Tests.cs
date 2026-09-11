@@ -15,6 +15,22 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
+    [MemberData(nameof(ErrorValues.AddedAfterMsXlsx), MemberType = typeof(ErrorValues))]
+    public void Error_added_after_MS_XLSX(string error)
+    {
+        var formula = $"ERROR.TYPE({error})";
+        Assert.Equal(formula, FormulaConverter.ToR1C1(formula, 5, 5));
+    }
+
+    [Theory]
+    [InlineData("A1#", "RC#")]
+    [InlineData("SUM(A1#)", "SUM(RC#)")]
+    public void Spill_operator_is_not_an_error_value(string a1, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, 1, 1));
+    }
+
+    [Theory]
     [InlineData(" { 1 }   ", " { 1 }   ")]
     [InlineData("{1,2}", "{1,2}")]
     [InlineData("{1;2}", "{1;2}")]

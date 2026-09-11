@@ -260,6 +260,40 @@ internal class Lexer
                     return Error("#VALUE!", 2);
                 case 'G' or 'g':
                     return Error("#GETTING_DATA", 2);
+                case 'S' or 's':
+                    return Error("#SPILL!", 2);
+                case 'F' or 'f':
+                    return Error("#FIELD!", 2);
+                case 'U' or 'u':
+                    return Error("#UNKNOWN!", 2);
+                case 'E' or 'e':
+                    return Error("#EXTERNAL!", 2);
+                case 'P' or 'p':
+                    return Error("#PYTHON!", 2);
+                case 'T' or 't':
+                    return Error("#TIMEOUT!", 2);
+                case 'C' or 'c':
+                    {
+                        var char2 = ToUpperAlpha(Advance());
+                        if (char2 == 'A')
+                            return Error("#CALC!", 3);
+
+                        if (char2 == 'O')
+                            return Error("#CONNECT!", 3);
+
+                        throw ParsingException.TokenPartialMatch(_start, TokenType.Error);
+                    }
+                case 'B' or 'b':
+                    {
+                        var char2 = ToUpperAlpha(Advance());
+                        if (char2 == 'L')
+                            return Error("#BLOCKED!", 3);
+
+                        if (char2 == 'U')
+                            return Error("#BUSY!", 3);
+
+                        throw ParsingException.TokenPartialMatch(_start, TokenType.Error);
+                    }
                 case 'N' or 'n':
                     {
                         var char2 = Advance();

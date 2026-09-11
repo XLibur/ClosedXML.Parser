@@ -10,6 +10,7 @@ public class ConstantRuleTests
     [InlineData("#NUM!")]
     [InlineData("#VALUE!")]
     [InlineData("#GETTING_DATA")]
+    [MemberData(nameof(ErrorValues.AddedAfterMsXlsx), MemberType = typeof(ErrorValues))]
     public void NonRefErrors(string error)
     {
         AssertFormula.SingleNodeParsed(error, new ValueNode("Error", error));
@@ -78,6 +79,7 @@ public class ConstantRuleTests
     [InlineData("#NUM!")]
     [InlineData("#VALUE!")]
     [InlineData("#GETTING_DATA")]
+    [MemberData(nameof(ErrorValues.AddedAfterMsXlsx), MemberType = typeof(ErrorValues))]
     public void Array_can_contain_errors(string error)
     {
         AssertFormula.SingleNodeParsed($"{{{error}}}", new ArrayNode(1, 1, new[] { new ScalarValue("Error", error) }));

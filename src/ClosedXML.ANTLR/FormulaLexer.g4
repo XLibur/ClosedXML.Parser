@@ -5,6 +5,9 @@ REF_CONSTANT
         : '#' R E F '!'
         ;
 
+// [MS-XLSX] lists the errors up to #GETTING_DATA. Excel added the rest later, e.g. #SPILL!
+// and #CALC! with dynamic arrays and #PYTHON! with Python in Excel. A bare '#' is the spill
+// operator, so an error is the longer match only when the whole error is there.
 NONREF_ERRORS
         : '#' D I V '/0!'
         | '#' N '/' A
@@ -13,6 +16,16 @@ NONREF_ERRORS
         | '#' N U M '!'
         | '#' V A L U E '!'
         | '#' G E T T I N G '_' D A T A
+        | '#' S P I L L '!'
+        | '#' C A L C '!'
+        | '#' F I E L D '!'
+        | '#' B L O C K E D '!'
+        | '#' C O N N E C T '!'
+        | '#' B U S Y '!'
+        | '#' U N K N O W N '!'
+        | '#' E X T E R N A L '!'
+        | '#' P Y T H O N '!'
+        | '#' T I M E O U T '!'
         ;
 
 /* ------------------------- Logical constant ------------------------------ */
