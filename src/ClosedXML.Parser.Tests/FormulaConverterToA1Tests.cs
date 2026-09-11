@@ -39,6 +39,14 @@ public class FormulaConverterToA1Tests
     }
 
     [Theory]
+    [InlineData("!SomeName", "!SomeName")]
+    [InlineData("SUM(!Rate,!SomeName)", "SUM(!Rate,!SomeName)")]
+    public void Bang_name(string r1c1, string a1)
+    {
+        Assert.Equal(a1, FormulaConverter.ToA1(r1c1, 1, 1));
+    }
+
+    [Theory]
     [InlineData("R[-4]C", 4, 1, "#REF!")]
     [InlineData("R[1048575]C", 2, 1, "#REF!")]
     [InlineData("RC[-4]", 1, 4, "#REF!")]

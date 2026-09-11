@@ -209,6 +209,14 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
+    [InlineData("!SomeName", 1, 1, "!SomeName")]
+    [InlineData("SUM(!SomeName, !A1B)", 1, 1, "SUM(!SomeName, !A1B)")]
+    public void BangName(string a1, int row, int col, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, row, col));
+    }
+
+    [Theory]
     [InlineData("[0]Sheet5!name", 1, 1, "[0]Sheet5!name")]
     [InlineData("'[4]Happy sheet'!data", 1, 1, "'[4]Happy sheet'!data")]
     public void ExternalSheetName(string a1, int row, int col, string r1c1)

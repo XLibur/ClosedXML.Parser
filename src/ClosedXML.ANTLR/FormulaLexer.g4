@@ -617,9 +617,9 @@ fragment SPACED_RBRACKET
  * with the application and the topic of the link instead (Sdemo123|tik!'id1?req?AAPL').
  * The parser accepts the token only after one of these prefixes.
  *
- * Must stay the last token, so the IDs of the other tokens don't change. The Rolex
- * tables share them. A quoted sheet prefix (e.g. 'Sheet 1'!) is always a longer
- * match than an item over the same text, so the prefix still wins.
+ * Declared after the tokens above, so their IDs don't change. The Rolex tables share
+ * them. A quoted sheet prefix (e.g. 'Sheet 1'!) is always a longer match than an item
+ * over the same text, so the prefix still wins.
  */
 DDE_ITEM
         : TICK DDE_ITEM_CHARACTER+ TICK
@@ -635,6 +635,21 @@ fragment DDE_ITEM_CHARACTER
         | '\u0028' .. '\uD7FF'
         | '\uE000' .. '\uFFFD'
         | '\u{10000}' .. '\u{10FFFF}'
+        ;
+
+/* ------------------------------- Bang name ------------------------------- */
+
+/*
+ * A name after a bang, e.g. !SomeName. [MS-XLSX] 2.2.2.1 forbids it in a cell formula,
+ * but the formula of a defined name uses it. A name can't be TRUE or FALSE, but the
+ * lexer can't exclude them here, so the parser refuses them.
+ *
+ * Declared last, so no other token ID changes. A reference such as A1 is also a valid
+ * name, so BANG_REFERENCE and BANG_NAME match !A1 to the same length. ANTLR and Rolex
+ * both take the rule declared first on a tie, so !A1 stays a bang reference.
+ */
+BANG_NAME
+        : '!' NAME
         ;
 
 /* ---------------------------- Case Insensitive Fragments ---------------------------- */

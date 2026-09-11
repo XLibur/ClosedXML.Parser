@@ -83,6 +83,16 @@ public class AstFactoryTests
     }
 
     [Theory]
+    [InlineData("name + !SomeName ", 7, 16)]
+    [InlineData("1+!Rate", 2, 7)]
+    public void BangNameRange(string formula, int start, int end)
+    {
+        var result = new Result();
+        FormulaParser<object?, string, Result>.CellFormulaA1(formula, result, new BangNameVisitor());
+        Assert.Equal(new SymbolRange(start, end), result.Value);
+    }
+
+    [Theory]
     [InlineData("Jan:Feb!A1", 0, 10)]
     [InlineData("1+Zara:Beta!$A$1:$B4+4", 2, 20)]
     [InlineData("1+'2022 Q1:2024 Q1'!Z26", 2, 23)]
@@ -329,6 +339,15 @@ public class AstFactoryTests
     private class BangReferenceVisitor : BaseVisitor
     {
         public override string BangReference(Result context, SymbolRange range, ReferenceArea reference)
+        {
+            context.Value = range;
+            return string.Empty;
+        }
+    }
+
+    private class BangNameVisitor : BaseVisitor
+    {
+        public override string BangName(Result context, SymbolRange range, string name)
         {
             context.Value = range;
             return string.Empty;
@@ -684,7 +703,7 @@ public class AstFactoryTests
             return _defaultNode;
         }
 
-        public TNode BangName(TContext context, SymbolRange range, string name)
+        public virtual TNode BangName(TContext context, SymbolRange range, string name)
         {
             return _defaultNode;
         }

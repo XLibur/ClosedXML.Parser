@@ -63,6 +63,19 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse a bang name, e.g. `!SomeName`. The lexer had no token for a name after a bang, so
+  `!SomeName` and `SUM(!SomeName)` failed in both reference styles with `Unable to
+  determine token`, although `IAstFactory.BangName`, `BangNameNode` and
+  `CopyVisitor.BangName` were already in place. [MS-XLSX] 2.2.2.1 forbids a bang name in a
+  cell formula, but the formula of a defined name uses it. The name is a new token,
+  `BANG_NAME`, declared last in `FormulaLexer.g4` so no other token ID moves, and the ANTLR
+  lexer and parser, both Rolex grammars and both DFA tables are regenerated. A reference
+  such as `A1` is also a valid name, so the two tokens tie on `!A1`, and the bang reference
+  is declared first and wins: `!A1`, `!$A$1`, `!A1:B2` and, in R1C1, `!RC` are still bang
+  references. A name can't be `TRUE` or `FALSE`, so `!TRUE` and `!FALSE` are refused. A bang
+  before a structure reference (`!Sales[Amount]`) is still refused, because [MS-XLSX]
+  defines a bang name as a plain name.
+  [#14](https://github.com/XLibur/ClosedXML.Parser/issues/14)
 - Lex the error values Excel added after [MS-XLSX] was written: `#SPILL!`, `#CALC!`,
   `#FIELD!`, `#BLOCKED!`, `#CONNECT!`, `#BUSY!`, `#UNKNOWN!`, `#EXTERNAL!`, `#PYTHON!` and
   `#TIMEOUT!`. The lexer knew only the [MS-XLSX] list, which ends at `#GETTING_DATA`, so a
