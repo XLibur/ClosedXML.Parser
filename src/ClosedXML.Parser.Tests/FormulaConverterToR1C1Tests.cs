@@ -201,6 +201,22 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
+    [InlineData("[1]!'id1?req?AAPL_STK_SMART_USD_~/'", 1, 1, "[1]!'id1?req?AAPL_STK_SMART_USD_~/'")]
+    [InlineData("[2]!'It''s'/B3", 1, 1, "[2]!'It''s'/R[2]C[1]")]
+    public void ExternalDynamicDataExchange(string a1, int row, int col, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, row, col));
+    }
+
+    [Theory]
+    [InlineData("Sdemo123|tik!'id1?req?AAPL_STK_SMART_USD_~/'", 1, 1, "Sdemo123|tik!'id1?req?AAPL_STK_SMART_USD_~/'")]
+    [InlineData("'My App|Topic 1'!'a''b'", 1, 1, "'My App|Topic 1'!'a''b'")]
+    public void DynamicDataExchange(string a1, int row, int col, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, row, col));
+    }
+
+    [Theory]
     [InlineData("+B3", 1, 1, "+R[2]C[1]")]
     [InlineData("-8", 1, 1, "-8")]
     [InlineData(" - 8 ", 1, 1, " - 8 ")]

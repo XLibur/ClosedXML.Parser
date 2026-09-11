@@ -60,6 +60,16 @@ public class RefModVisitorTests
         AssertChangesA1(formula, factory, modifiedFormula);
     }
 
+    [Theory]
+    [InlineData("Sdemo123|tik!'item'", "Sdemo123|tik", "New", "Sdemo123|tik!'item'")]
+    [InlineData("Sdemo123|tik!'item'", "Sdemo123|tik", null, "Sdemo123|tik!'item'")]
+    [InlineData("'My App|Topic 1'!'item'", "My App|Topic 1", "New", "'My App|Topic 1'!'item'")]
+    public void DynamicDataExchange_prefix_is_not_a_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var factory = new FormulaVisitor { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertChangesA1(formula, factory, modifiedFormula);
+    }
+
     #endregion
 
     [Theory]

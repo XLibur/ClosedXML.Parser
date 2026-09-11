@@ -266,6 +266,19 @@ public class RefModVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     }
 
     /// <inheritdoc />
+    public TransformedSymbol ExternalDynamicDataExchange(ModContext ctx, SymbolRange range, int workbookIndex, string item)
+    {
+        return s_copyVisitor.ExternalDynamicDataExchange(ctx, range, workbookIndex, item);
+    }
+
+    /// <inheritdoc />
+    public TransformedSymbol DynamicDataExchange(ModContext ctx, SymbolRange range, string application, string topic, string item)
+    {
+        // The prefix is the application and the topic of a DDE link, not a sheet, so a sheet rename doesn't apply.
+        return s_copyVisitor.DynamicDataExchange(ctx, range, application, topic, item);
+    }
+
+    /// <inheritdoc />
     public TransformedSymbol BinaryNode(ModContext ctx, SymbolRange range, BinaryOperation operation, TransformedSymbol leftNode, TransformedSymbol rightNode)
     {
         return s_copyVisitor.BinaryNode(ctx, range, operation, leftNode, rightNode);

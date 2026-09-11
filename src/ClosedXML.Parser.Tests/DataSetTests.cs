@@ -19,7 +19,6 @@ public class DataSetTests
             "./data/enron/formulas.csv",
             new[]
             {
-                "./data/enron/invalid-external-cell-reference.csv",
                 "./data/enron/known-fails.csv",
             });
     }
@@ -31,7 +30,6 @@ public class DataSetTests
             "./data/euses/formulas.csv",
             new[]
             {
-                "./data/euses/invalid-external-cell-reference.csv",
                 "./data/euses/known-fails.csv",
             });
     }

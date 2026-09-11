@@ -638,12 +638,21 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     return _factory.Name(_context, new SymbolRange(start, _tokenSource.StartIndex), localName.ToString());
                 }
 
-            // reference to another workbook
+            // reference to another workbook or to an item of a DDE link
             case Token.BOOK_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
                     var bookPrefix = TokenParser.ParseBookPrefix(GetCurrentToken());
                     Consume();
+
+                    // dde_reference: BOOK_PREFIX DDE_ITEM
+                    if (_la == Token.DDE_ITEM)
+                    {
+                        var item = TokenParser.ParseDdeItem(GetCurrentToken());
+                        Consume();
+                        return _factory.ExternalDynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, item);
+                    }
+
                     var externalName = GetCurrentToken();
                     Match(Token.NAME);
                     if (_la == Token.INTRA_TABLE_REFERENCE)
@@ -658,6 +667,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 }
             // name_reference: SINGLE_SHEET_PREFIX NAME
             // external_cell_reference: SINGLE_SHEET_PREFIX (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE | REF_CONSTANT)
+            // dde_reference: SINGLE_SHEET_PREFIX DDE_ITEM
             case Token.SINGLE_SHEET_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
@@ -679,6 +689,18 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                         var error = GetCurrentToken(); // Sheet1!#REF! is a valid
                         Consume();
                         return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), error);
+                    }
+
+                    // The prefix of a displayed DDE formula is the application and the topic of the link, e.g. `Sdemo123|tik!`.
+                    // A sheet name can contain `|` too, but only a DDE link is followed by a quoted item.
+                    if (_la == Token.DDE_ITEM)
+                    {
+                        if (wbIdx is not null || !TokenParser.TrySplitDdeLink(sheetName, out var application, out var topic))
+                            throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{sheetPrefix.ToString()}'.");
+
+                        var item = TokenParser.ParseDdeItem(GetCurrentToken());
+                        Consume();
+                        return _factory.DynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), application, topic, item);
                     }
 
                     // name_reference

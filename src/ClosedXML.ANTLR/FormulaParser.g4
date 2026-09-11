@@ -98,6 +98,7 @@ ref_atom_expression
         | ref_function_call
         | name_reference
         | structure_reference
+        | dde_reference
         ;
 
 /* ------------------------------- Constants ------------------------------- */
@@ -214,6 +215,19 @@ arg_atom_expression
 name_reference
         : NAME                                                                 // local name
         | (SINGLE_SHEET_PREFIX | BOOK_PREFIX) NAME                             // external name
+        ;
+
+/* ------------------------- Dynamic data exchange ------------------------- */
+
+/*
+ * An item of a dynamic data exchange (DDE) link. Excel stores it after the book
+ * prefix of the link ([1]!'item') and displays it after the application and the
+ * topic of the link (Sdemo123|tik!'item'), which lex as a sheet prefix. Only a
+ * sheet prefix of the form application|topic is a DDE link, the recursive descent
+ * parser checks that.
+ */
+dde_reference
+        : (BOOK_PREFIX | SINGLE_SHEET_PREFIX) DDE_ITEM
         ;
 
 /* -------------------------- Structure reference -------------------------- */

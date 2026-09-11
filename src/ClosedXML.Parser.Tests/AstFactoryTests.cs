@@ -221,6 +221,24 @@ public class AstFactoryTests
         Assert.Equal(new SymbolRange(start, end), result.Value);
     }
 
+    [Theory]
+    [InlineData("+[7]!'item' + 4", 1, 11)]
+    public void ExternalDynamicDataExchangeRange(string formula, int start, int end)
+    {
+        var result = new Result();
+        FormulaParser<object?, string, Result>.CellFormulaA1(formula, result, new ExternalDynamicDataExchangeVisitor());
+        Assert.Equal(new SymbolRange(start, end), result.Value);
+    }
+
+    [Theory]
+    [InlineData("+App|Topic!'item' + 4", 1, 17)]
+    public void DynamicDataExchangeRange(string formula, int start, int end)
+    {
+        var result = new Result();
+        FormulaParser<object?, string, Result>.CellFormulaA1(formula, result, new DynamicDataExchangeVisitor());
+        Assert.Equal(new SymbolRange(start, end), result.Value);
+    }
+
     [Fact]
     public void BinaryOperationRange()
     {
@@ -452,6 +470,24 @@ public class AstFactoryTests
         }
     }
 
+    private class ExternalDynamicDataExchangeVisitor : BaseVisitor
+    {
+        public override string ExternalDynamicDataExchange(Result context, SymbolRange range, int workbookIndex, string item)
+        {
+            context.Value = range;
+            return string.Empty;
+        }
+    }
+
+    private class DynamicDataExchangeVisitor : BaseVisitor
+    {
+        public override string DynamicDataExchange(Result context, SymbolRange range, string application, string topic, string item)
+        {
+            context.Value = range;
+            return string.Empty;
+        }
+    }
+
     private class BinaryOperationVisitor : BaseVisitor<object?, string, List<SymbolRange>>
     {
         public BinaryOperationVisitor()
@@ -659,6 +695,16 @@ public class AstFactoryTests
         }
 
         public virtual TNode ExternalSheetName(TContext context, SymbolRange range, int workbookIndex, string sheet, string name)
+        {
+            return _defaultNode;
+        }
+
+        public virtual TNode ExternalDynamicDataExchange(TContext context, SymbolRange range, int workbookIndex, string item)
+        {
+            return _defaultNode;
+        }
+
+        public virtual TNode DynamicDataExchange(TContext context, SymbolRange range, string application, string topic, string item)
         {
             return _defaultNode;
         }

@@ -594,6 +594,35 @@ fragment SPACED_RBRACKET
         : WHITESPACES CLOSE_SQUARE
         ;
 
+/* ------------------------- Dynamic data exchange ------------------------- */
+
+/*
+ * The quoted item of a dynamic data exchange (DDE) link, e.g. 'id1?req?AAPL'.
+ * [MS-XLSX] has no production for it, but Excel stores a DDE formula as the book
+ * prefix of the link followed by the item ([1]!'id1?req?AAPL') and displays it
+ * with the application and the topic of the link instead (Sdemo123|tik!'id1?req?AAPL').
+ * The parser accepts the token only after one of these prefixes.
+ *
+ * Must stay the last token, so the IDs of the other tokens don't change. The Rolex
+ * tables share them. A quoted sheet prefix (e.g. 'Sheet 1'!) is always a longer
+ * match than an item over the same text, so the prefix still wins.
+ */
+DDE_ITEM
+        : TICK DDE_ITEM_CHARACTER+ TICK
+        ;
+
+// Character as defined by the production Char in the [W3C-XML] section 2.2, with a doubled tick for a tick.
+fragment DDE_ITEM_CHARACTER
+        : TICK TICK
+        | '\u0009'
+        | '\u000A'
+        | '\u000D'
+        | '\u0020' .. '\u0026' // 0027 '
+        | '\u0028' .. '\uD7FF'
+        | '\uE000' .. '\uFFFD'
+        | '\u{10000}' .. '\u{10FFFF}'
+        ;
+
 /* ---------------------------- Case Insensitive Fragments ---------------------------- */
 
 fragment A : [Aa];

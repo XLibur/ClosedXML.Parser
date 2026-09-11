@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using ClosedXML.Parser.Rolex;
 
 namespace ClosedXML.Parser;
 
@@ -63,6 +64,39 @@ internal static class StringBuilderExtensions
     {
         var startIndex = sb.Length;
         return sb.Append(sheetName).Replace("'", "''", startIndex, sheetName.Length);
+    }
+
+    /// <summary>
+    /// Append the application and the topic of a DDE link as a prefix (e.g. <c>Sdemo123|tik!</c>).
+    /// </summary>
+    /// <remarks>
+    /// Excel writes the link bare, although <see cref="NameUtils.ShouldQuote"/> would quote it as a
+    /// sheet name, because of the <c>|</c>. The link stays bare whenever the lexer reads it back as
+    /// the same link, and is quoted only when it wouldn't be (e.g. with a space).
+    /// </remarks>
+    public static StringBuilder AppendDdeLink(this StringBuilder sb, string application, string topic)
+    {
+        var link = application + '|' + topic;
+        var prefix = link + '!';
+        var tokens = RolexLexer.GetTokensA1(prefix.AsSpan());
+        if (tokens.Count == 2 && tokens[0].SymbolId == Token.SINGLE_SHEET_PREFIX && tokens[0].Length == prefix.Length)
+        {
+            TokenParser.ParseSingleSheetPrefix(prefix.AsSpan(), out var workbookIndex, out var name);
+            if (workbookIndex is null && name == link)
+                return sb.Append(prefix);
+        }
+
+        return sb.Append('\'').AppendEscapedSheetName(link).Append('\'').AppendReferenceSeparator();
+    }
+
+    /// <summary>
+    /// Append an item of a DDE link, enclosed in ticks and with a tick doubled (e.g. <c>'It''s'</c>).
+    /// </summary>
+    public static StringBuilder AppendDdeItem(this StringBuilder sb, string item)
+    {
+        sb.Append('\'');
+        var startIndex = sb.Length;
+        return sb.Append(item).Replace("'", "''", startIndex, item.Length).Append('\'');
     }
 
     public static StringBuilder AppendReferenceSeparator(this StringBuilder sb)

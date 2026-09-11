@@ -158,6 +158,16 @@ public class F : IAstFactory<ScalarValue, AstNode, Ctx>
         return new ExternalSheetNameNode(workbookIndex, sheet, name);
     }
 
+    public AstNode ExternalDynamicDataExchange(Ctx _, SymbolRange range, int workbookIndex, string item)
+    {
+        return new ExternalDynamicDataExchangeNode(workbookIndex, item);
+    }
+
+    public AstNode DynamicDataExchange(Ctx _, SymbolRange range, string application, string topic, string item)
+    {
+        return new DynamicDataExchangeNode(application, topic, item);
+    }
+
     public AstNode BinaryNode(Ctx _, SymbolRange range, BinaryOperation operation, AstNode leftNode, AstNode rightNode)
     {
         return new BinaryNode(operation, leftNode, rightNode);
