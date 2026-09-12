@@ -12,6 +12,8 @@ under Unreleased with each change.
 
 ### Added
 
+- `FormulaConverter.ModifyR1C1`, the R1C1 counterpart of `ModifyA1`. `ModContext.IsA1` tells a
+  modifier the reference style of the formula, and a reference it gets is in that style.
 - `ReferenceParser.TryParseR1C1`. Every public method of `ReferenceParser` lexed with the
   A1 table, so a caller holding an R1C1 reference had no entry point at all, and the
   library's own tests had to reach through `InternalsVisibleTo` to parse one. The
@@ -37,6 +39,26 @@ under Unreleased with each change.
 
 ### Changed
 
+- Replace `RefModVisitor` with `FormulaModifier`, which has only the methods a modification
+  overrides: `ModifySheet`, `ModifyTable`, `ModifyFunction`, `ModifyRef` and
+  `ModifyCellFunction`. A method that returns `null` still replaces the part with `#REF!`.
+  `RefModVisitor` implemented the 34 methods of `IAstFactory`, 22 of them only to pass the
+  call on, and the formula text was rebuilt from offsets by it, by `CopyVisitor` and by
+  `ModContext`, all of them public. Now that is inside the library. The breaking changes:
+  - `RefModVisitor` is renamed `FormulaModifier` and doesn't implement `IAstFactory`.
+    `FormulaConverter.ModifyA1` takes a `FormulaModifier`. To migrate, derive from
+    `FormulaModifier`; an override of `ModifySheet`, `ModifyTable` or `ModifyFunction`
+    doesn't change.
+  - `ModifyRef` and `ModifyCellFunction` are protected, so they can be overridden outside the
+    library, e.g. to shift references when rows are inserted. They were internal, although
+    the class invited overriding them.
+  - `CopyVisitor` and `TransformedSymbol` are internal. `RefModVisitor` used a `CopyVisitor` of
+    its own, so an override of `CopyVisitor` never changed a modification.
+  - A `ModContext` can't be created outside the library, and it doesn't expose the text of the
+    formula any more, so a modifier can't cut the formula by offsets. `Sheet`, `Row`, `Col`
+    and `IsA1` stay.
+  - The obsolete `FormulaConverter.ModifyA1` overload without a sheet and the obsolete
+    `ModContext` constructor are removed.
 - Forked from ClosedXML.Parser 2.0.0 and published as `XLibur.ClosedXML.Parser`. The
   `ClosedXML.Parser` namespace is unchanged.
 - The Rolex grammars `LexerA1.rl` and `LexerR1C1.rl` are generated from `FormulaLexer.g4`

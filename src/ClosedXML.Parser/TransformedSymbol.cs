@@ -6,7 +6,7 @@ namespace ClosedXML.Parser;
 /// <summary>
 /// A symbol that represents a transformed symbol value. Should be used during AST transformation.
 /// </summary>
-public readonly struct TransformedSymbol
+internal readonly struct TransformedSymbol
 {
     private readonly string _formulaText;
 

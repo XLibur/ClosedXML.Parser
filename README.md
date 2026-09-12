@@ -28,7 +28,7 @@ There is a visualizer to display AST in a browser at **[https://xlibur.github.io
 # Goals
 
 * __Performance__ - [ClosedXML](https://github.com/ClosedXML/ClosedXML) needs to parse formula really fast. Limit allocation and so on.
-* __Evaluation oriented__ - Parser should concentrates on creation of abstract syntax trees, not concrete syntax tree. Goal is evaluation of formulas, not transformation.
+* __Evaluation oriented__ - Parser creates abstract syntax trees, not concrete syntax trees, because the goal is evaluation of formulas. Formula modification is supported too: `FormulaConverter` converts a formula between A1 and R1C1, and with a `FormulaModifier`, renames or deletes sheets, tables and functions and shifts references, writing the rest of the formula back as it was.
 * __Multi-use__ - Formulas are mostly used in cells, but there are other places with different grammar rules (e.g. sparklines, data validation)
 * __Multi notation (A1 or R1C1)__ - Parser should be able to parse both A1 and R1C1 formulas. I.e. `SUM(R5)` can mean return sum of cell `R5` in _A1_ notation, but return sum of all cells on row 5 in _R1C1_ notation.
 

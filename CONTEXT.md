@@ -75,3 +75,11 @@ _Avoid_: DDE formula, DDE name
 The application and the topic a dynamic data exchange reference reads from, written
 `application|topic`. Stored as a `ddeLink` in an external link part.
 _Avoid_: DDE server (for the pair), DDE topic (for the pair)
+
+### Changing formulas
+
+**Formula modification**:
+Rewriting a stored formula so its sheets, tables, functions and references follow a change
+to the workbook, such as a renamed or deleted sheet, while the rest of its text stays as
+written. A sheet behind a book prefix belongs to another workbook and is never renamed.
+_Avoid_: transformation, rewrite

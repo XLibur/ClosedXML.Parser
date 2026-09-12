@@ -8,9 +8,9 @@ namespace ClosedXML.Parser;
 /// <summary>
 /// A visitor that generates the identical formula for the parsed formula based on passed arguments.
 /// CopyVisitor doesn't make any judgements if passed arguments have been modified. It just makes
-/// a newly allocated copy based on passed values.
+/// a newly allocated copy based on passed values. A part of <see cref="FormulaModifier"/>.
 /// </summary>
-public class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, ModContext>
+internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, ModContext>
 {
     // 1 quote on left, 1 quote on right size and at most 4 quotes inside.
     private const int QUOTE_RESERVE = 6;

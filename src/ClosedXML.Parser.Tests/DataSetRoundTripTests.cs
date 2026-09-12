@@ -19,7 +19,7 @@ public class DataSetRoundTripTests
     private const int Row = 1000;
     private const int Col = 100;
 
-    private static readonly RefModVisitor IdentityVisitor = new();
+    private static readonly FormulaModifier IdentityModifier = new();
 
     [Theory]
     [InlineData("enron")]
@@ -48,7 +48,7 @@ public class DataSetRoundTripTests
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         foreach (var formula in formulas)
         {
-            var identity = Convert(() => FormulaConverter.ModifyA1(formula, "Sheet1", Row, Col, IdentityVisitor));
+            var identity = Convert(() => FormulaConverter.ModifyA1(formula, "Sheet1", Row, Col, IdentityModifier));
             if (identity != formula)
                 actualDiffs.Add(new[] { Identity, formula, identity });
 
