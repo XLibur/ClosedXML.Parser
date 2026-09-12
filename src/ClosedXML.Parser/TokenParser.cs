@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ClosedXML.Parser.Rolex;
@@ -6,8 +6,21 @@ using static ClosedXML.Parser.ReferenceAxisType;
 
 namespace ClosedXML.Parser;
 
+/// <summary>
+/// Reads the meaning out of the tokens of a formula. A caller hands over a token and the formula it was
+/// lexed from, and gets back what the token says, e.g. a workbook index and an unescaped sheet name, or a
+/// reference area. No caller has to know how the text of a token is written, and a caller can't pass the
+/// wrong slice of a formula. It also recognizes the patterns of tokens that several callers look for, e.g.
+/// the tokens of a reference.
+/// </summary>
+/// <remarks>
+/// The literal constants (numbers, strings, errors and logical values) are read by the parser, their
+/// only reader.
+/// </remarks>
 internal static class TokenParser
 {
+    private const string REF_ERROR = "#REF!";
+
     /// <summary>
     /// Reads formulas written in the <see cref="ReferenceStyle.A1"/> reference style.
     /// </summary>
@@ -19,15 +32,17 @@ internal static class TokenParser
     internal static readonly IReferenceStyle R1C1Style = new R1C1ReferenceStyle();
 
     /// <summary>
-    /// Parse <see cref="Token.SINGLE_SHEET_PREFIX"/> token.
+    /// Read a <see cref="Token.SINGLE_SHEET_PREFIX"/> token, e.g. <c>'[1]Jane''s'!</c>.
     /// </summary>
-    internal static void ParseSingleSheetPrefix(ReadOnlySpan<char> input, out int? index, out string sheetName)
+    internal static void ParseSingleSheetPrefix(ReadOnlySpan<char> formula, Token token, out int? index, out string sheetName)
     {
+        Debug.Assert(token.SymbolId == Token.SINGLE_SHEET_PREFIX);
+
         // There can be whitespaces after exclamation mark at the end of a token.
-        input = input.TrimEnd();
+        var input = Text(formula, token).TrimEnd();
         var isEscaped = input[0] == '\'';
         input = isEscaped
-            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!). 
+            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!).
             : input.Slice(0, input.Length - 1); // only strip exclamation mark
 
         // Parse optional WORKBOOK_INDEX
@@ -46,13 +61,16 @@ internal static class TokenParser
     }
 
     /// <summary>
-    /// Parse token <see cref="Token.SHEET_RANGE_PREFIX"/>
+    /// Read a <see cref="Token.SHEET_RANGE_PREFIX"/> token, e.g. <c>'[1]first:second'!</c>.
     /// </summary>
-    internal static void ParseSheetRangePrefix(ReadOnlySpan<char> input, out int? index, out string firstSheetName, out string secondSheetName)
+    internal static void ParseSheetRangePrefix(ReadOnlySpan<char> formula, Token token, out int? index, out string firstSheetName, out string secondSheetName)
     {
+        Debug.Assert(token.SymbolId == Token.SHEET_RANGE_PREFIX);
+
+        var input = Text(formula, token);
         var isEscaped = input[0] == '\'';
         input = isEscaped
-            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!). 
+            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!).
             : input.Slice(0, input.Length - 1); // only strip exclamation mark
 
         // Parse optional WORKBOOK_INDEX
@@ -71,6 +89,288 @@ internal static class TokenParser
         // Parse SHEET_NAME_SPECIAL which can contain escaped tick (') as double tick
         firstSheetName = GetEscapedSheetName(ref input, ':'); // Even escaped sheet name can't contain :
         secondSheetName = GetEscapedSheetName(input);
+    }
+
+    /// <summary>
+    /// Read the workbook index of a <see cref="Token.BOOK_PREFIX"/> token, e.g. <c>[1]</c>.
+    /// </summary>
+    internal static int ParseBookPrefix(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId == Token.BOOK_PREFIX);
+        ExtractWorkbookIndex(Text(formula, token), out var index);
+        Debug.Assert(index.HasValue);
+        return index!.Value;
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.NAME"/> token, i.e. a defined name or a name of a table.
+    /// </summary>
+    internal static string ParseName(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId == Token.NAME);
+        return Text(formula, token).ToString();
+    }
+
+    /// <summary>
+    /// Read the name of a function from a token of a function name with its opening brace, e.g. <c>SUM (</c>.
+    /// </summary>
+    internal static ReadOnlySpan<char> ParseFunctionName(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId is Token.USER_DEFINED_FUNCTION_NAME or Token.REF_FUNCTION_LIST);
+        var functionNameWithBrace = Text(formula, token);
+
+        // In most cases, there won't be any whitespace
+        var endPosition = functionNameWithBrace[functionNameWithBrace.Length - 1] == '('
+            ? functionNameWithBrace.Length - 1
+            : functionNameWithBrace.LastIndexOf('(');
+        return functionNameWithBrace.Slice(0, endPosition);
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.BANG_NAME"/> token, e.g. <c>!SomeName</c>. A name can't be <c>TRUE</c> or
+    /// <c>FALSE</c>, but the lexer can't exclude them from the name after the bang.
+    /// </summary>
+    /// <param name="formula">The formula the token was lexed from.</param>
+    /// <param name="token">The token.</param>
+    /// <param name="name">The name after the bang, even if it isn't a valid name.</param>
+    /// <returns><c>true</c> if the name is a valid name.</returns>
+    internal static bool TryParseBangName(ReadOnlySpan<char> formula, Token token, out string name)
+    {
+        Debug.Assert(token.SymbolId == Token.BANG_NAME);
+        var nameText = Text(formula, token).Slice(1);
+        name = nameText.ToString();
+        return !nameText.Equals("TRUE".AsSpan(), StringComparison.OrdinalIgnoreCase) &&
+               !nameText.Equals("FALSE".AsSpan(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Is there a space before the <c>@</c> of an <see cref="Token.INTERSECT"/> token? The lexer puts the
+    /// whitespace before <c>@</c> into the token, so after a reference, the space is the intersection operator.
+    /// A line break alone is not, the same as for a <see cref="Token.SPACE"/> token.
+    /// </summary>
+    internal static bool IsSpaceBeforeAt(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId == Token.INTERSECT);
+        var text = Text(formula, token);
+        return text.Slice(0, text.IndexOf('@')).IndexOf(' ') >= 0;
+    }
+
+    /// <summary>
+    /// Read a reference from the tokens at <paramref name="index"/>.
+    /// <code>
+    /// a1_reference
+    ///     : A1_CELL
+    ///     | A1_CELL COLON A1_CELL
+    ///     | A1_SPAN_REFERENCE
+    ///     ;
+    /// </code>
+    /// Both DFA tables emit these token IDs for a reference, so the pattern is the same in either style.
+    /// </summary>
+    /// <param name="style">The reference style the tokens were lexed in.</param>
+    /// <param name="formula">The formula the tokens were lexed from.</param>
+    /// <param name="tokens">The tokens of the formula. The last one is an end of file or an error token.</param>
+    /// <param name="index">The index of the first token of the reference. When a reference is read, it is moved to the token after it.</param>
+    /// <param name="area">The read reference.</param>
+    /// <returns><c>true</c> if the tokens at <paramref name="index"/> are a reference.</returns>
+    internal static bool TryReadReference(IReferenceStyle style, ReadOnlySpan<char> formula, List<Token> tokens, ref int index, out ReferenceArea area)
+    {
+        var first = tokens[index];
+        if (first.SymbolId == Token.A1_SPAN_REFERENCE)
+        {
+            area = style.ParseReference(formula, first);
+            index++;
+            return true;
+        }
+
+        if (first.SymbolId != Token.A1_CELL)
+        {
+            area = default;
+            return false;
+        }
+
+        area = style.ParseReference(formula, first);
+        index++;
+        if (index + 1 < tokens.Count && tokens[index].SymbolId == Token.COLON && tokens[index + 1].SymbolId == Token.A1_CELL)
+        {
+            var secondCell = style.ParseReference(formula, tokens[index + 1]);
+            area = new ReferenceArea(area.First, secondCell.First);
+            index += 2;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.BANG_REFERENCE"/> token, e.g. <c>!$A$1</c>.
+    /// </summary>
+    /// <returns><c>false</c> for a bang reference to a deleted cell (<c>!#REF!</c>), which has no reference to read.</returns>
+    internal static bool TryParseBangReference(IReferenceStyle style, ReadOnlySpan<char> formula, Token token, out ReferenceArea area)
+    {
+        Debug.Assert(token.SymbolId == Token.BANG_REFERENCE);
+        if (Text(formula, token).Slice(1).Equals(REF_ERROR.AsSpan(), StringComparison.OrdinalIgnoreCase))
+        {
+            area = default;
+            return false;
+        }
+
+        area = style.ParseReference(formula, token);
+        return true;
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.INTRA_TABLE_REFERENCE"/> token, e.g. <c>[[#Data],[First]:[Last]]</c>.
+    /// </summary>
+    internal static void ParseIntraTableReference(ReadOnlySpan<char> formula, Token token, out StructuredReferenceArea area, out string? firstColumn, out string? lastColumn)
+    {
+        Debug.Assert(token.SymbolId == Token.INTRA_TABLE_REFERENCE);
+        var input = Text(formula, token);
+
+        // Skip first char, it's always '['
+        var i = 1;
+        if (input[i] == '#')
+        {
+            // Pattern is a KEYWORD
+            area = GetArea(input, i);
+            firstColumn = null;
+            lastColumn = null;
+            return;
+        }
+
+        if (input[i] != '[' && input[i] != ' ')
+        {
+            // Pattern is '[]', '[First]' or '[First:Last]' or '[First:[Last]]'
+            // because simple column can't start with a space.
+            area = StructuredReferenceArea.None;
+            if (input[i] == ']')
+            {
+                // Pattern is '[]', i.e. whole table.
+                firstColumn = null;
+                lastColumn = null;
+                return;
+            }
+
+            // Read simple column
+            i = GetStructuredName(input, i, out firstColumn);
+            if (i < input.Length && input[i] == ':')
+                GetStructuredName(input, i + 1, out lastColumn);
+            else
+                lastColumn = null;
+
+            return;
+        }
+
+        // Pattern is SPACED_LBRACKET INNER_REFERENCE SPACED_RBRACKET
+
+        // Skip potential whitespaces at the beginning of a structured reference (SPACED_LBRACKET)
+        i = SkipWhitespaces(input, i);
+        area = StructuredReferenceArea.None;
+        if (input[i + 1] == '#')
+        {
+            // Inner reference contains a keyword.
+            var listItem = GetArea(input, ++i);
+            i += GetLength(listItem) + 1;
+            area |= listItem;
+
+            // `INNER_REFERENCE : KEYWORD_LIST`, i.e. the keyword list is the whole inner
+            // reference and no column range follows it (e.g. '[[#All]]').
+            if (IsEndOfInnerReference(input, i))
+            {
+                firstColumn = null;
+                lastColumn = null;
+                return;
+            }
+
+            i = SkipComma(input, i);
+        }
+
+        if (input[i + 1] == '#')
+        {
+            // Item is a keyword list, either
+            // * '[#Headers]' SPACED_COMMA '[#Data]'
+            // * '[#Data]' SPACED_COMMA '[#Totals]'
+            var listItem = GetArea(input, ++i);
+            i += GetLength(listItem) + 1;
+            area |= listItem;
+
+            // As above, for a two keyword list (e.g. '[[#Headers],[#Data]]').
+            if (IsEndOfInnerReference(input, i))
+            {
+                firstColumn = null;
+                lastColumn = null;
+                return;
+            }
+
+            i = SkipComma(input, i);
+        }
+
+        // KEYWORD_LIST can contain at most two item specifiers.
+        // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
+        i = GetStructuredName(input, i, out firstColumn);
+        if (i < input.Length && input[i] == ':')
+            GetStructuredName(input, i + 1, out lastColumn);
+        else
+            lastColumn = null;
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.DDE_ITEM"/> token. A tick inside is doubled, same as in a quoted sheet name.
+    /// </summary>
+    internal static string ParseDdeItem(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId == Token.DDE_ITEM);
+
+        // Strip the enclosing ticks. The lexer guarantees there is at least one character between them
+        // and that the ticks inside come in pairs. Unlike a sheet name, an item has no length limit, so
+        // it isn't unescaped through a stack buffer.
+        var input = Text(formula, token);
+        return input.Slice(1, input.Length - 2).ToString().Replace("''", "'");
+    }
+
+    /// <summary>
+    /// Read a <see cref="Token.SINGLE_SHEET_PREFIX"/> token as the application and the topic of a DDE link
+    /// (e.g. <c>Sdemo123|tik!</c>). It must have no workbook index and a non-empty part on each side of the
+    /// first <c>|</c>.
+    /// </summary>
+    internal static bool TryParseDdeLinkPrefix(ReadOnlySpan<char> formula, Token token, out string application, out string topic)
+    {
+        ParseSingleSheetPrefix(formula, token, out var index, out var name);
+        var separatorIndex = name.IndexOf('|');
+        if (index is not null || separatorIndex <= 0 || separatorIndex == name.Length - 1)
+        {
+            application = string.Empty;
+            topic = string.Empty;
+            return false;
+        }
+
+        application = name.Substring(0, separatorIndex);
+        topic = name.Substring(separatorIndex + 1);
+        return true;
+    }
+
+    /// <summary>
+    /// Does <paramref name="prefix"/> read back as the sheet prefix of <paramref name="name"/>, with no
+    /// workbook index? A writer uses it to find out whether a prefix can stay unquoted.
+    /// </summary>
+    internal static bool ReadsBackAsSheetPrefix(string prefix, string name)
+    {
+        var tokens = RolexLexer.GetTokensA1(prefix.AsSpan());
+        if (tokens.Count != 2 || tokens[0].SymbolId != Token.SINGLE_SHEET_PREFIX || tokens[0].Length != prefix.Length)
+            return false;
+
+        ParseSingleSheetPrefix(prefix.AsSpan(), tokens[0], out var workbookIndex, out var sheetName);
+        return workbookIndex is null && sheetName == name;
+    }
+
+    private static ReadOnlySpan<char> Text(ReadOnlySpan<char> formula, Token token) => formula.Slice(token.StartIndex, token.Length);
+
+    /// <summary>
+    /// The text of a token of a reference, without the <c>!</c> of a bang reference.
+    /// </summary>
+    private static ReadOnlySpan<char> ReferenceText(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId is Token.A1_CELL or Token.A1_SPAN_REFERENCE or Token.BANG_REFERENCE);
+        var text = Text(formula, token);
+        return token.SymbolId == Token.BANG_REFERENCE ? text.Slice(1) : text;
     }
 
     private static ReadOnlySpan<char> ExtractWorkbookIndex(ReadOnlySpan<char> input, out int? wbIndex)
@@ -127,20 +427,10 @@ internal static class TokenParser
         return buffer.Slice(0, bufferIdx).ToString();
     }
 
-    internal static ReadOnlySpan<char> ExtractLocalFunctionName(ReadOnlySpan<char> functionNameWithBrace)
-    {
-        // In most cases, there won't be any whitespace
-        var endPosition = functionNameWithBrace[functionNameWithBrace.Length - 1] == '('
-            ? functionNameWithBrace.Length - 1
-            : functionNameWithBrace.LastIndexOf('(');
-        var functionName = functionNameWithBrace.Slice(0, endPosition);
-        return functionName;
-    }
-
     /// <summary>
-    /// Parse <c>A1_REFERENCE</c> token in R1C1 mode.
+    /// Parse the text of a reference in R1C1 mode.
     /// </summary>
-    /// <param name="token">The span of a token.</param>
+    /// <param name="token">The text of a reference.</param>
     private static ReferenceArea ParseR1C1Reference(ReadOnlySpan<char> token)
     {
         var i = 0;
@@ -242,7 +532,7 @@ internal static class TokenParser
     }
 
     /// <summary>
-    /// Extract info about cell reference from a <c>A1_REFERENCE</c> token.
+    /// Extract info about cell reference from the text of a reference in A1 mode.
     /// </summary>
     private static ReferenceArea ParseA1Reference(ReadOnlySpan<char> input)
     {
@@ -301,7 +591,7 @@ internal static class TokenParser
             return new ReferenceArea(cell, cell);
         }
 
-        // A1_AREA
+        // A1_AREA, e.g. the reference of a bang reference `!A1:B2`
         i++; // Skip ':'
         var secondCell = ReadA1Cell(input, ref i);
         return new ReferenceArea(cell, secondCell);
@@ -333,7 +623,7 @@ internal static class TokenParser
         do
         {
             var c = input[i];
-            var letter = c < 'a' // A is before a 
+            var letter = c < 'a' // A is before a
                 ? c - 'A' + 1
                 : c - 'a' + 1;
             column = column * 26 + letter;
@@ -357,95 +647,6 @@ internal static class TokenParser
 
         startIdx = i;
         return row;
-    }
-
-    internal static void ParseIntraTableReference(ReadOnlySpan<char> input, out StructuredReferenceArea area, out string? firstColumn, out string? lastColumn)
-    {
-        // Skip first char, it's always '['
-        var i = 1;
-        if (input[i] == '#')
-        {
-            // Pattern is a KEYWORD
-            area = GetArea(input, i);
-            firstColumn = null;
-            lastColumn = null;
-            return;
-        }
-
-        if (input[i] != '[' && input[i] != ' ')
-        {
-            // Pattern is '[]', '[First]' or '[First:Last]' or '[First:[Last]]'
-            // because simple column can't start with a space.
-            area = StructuredReferenceArea.None;
-            if (input[i] == ']')
-            {
-                // Pattern is '[]', i.e. whole table.
-                firstColumn = null;
-                lastColumn = null;
-                return;
-            }
-
-            // Read simple column
-            i = GetStructuredName(input, i, out firstColumn);
-            if (i < input.Length && input[i] == ':')
-                GetStructuredName(input, i + 1, out lastColumn);
-            else
-                lastColumn = null;
-
-            return;
-        }
-
-        // Pattern is SPACED_LBRACKET INNER_REFERENCE SPACED_RBRACKET
-
-        // Skip potential whitespaces at the beginning of a structured reference (SPACED_LBRACKET)
-        i = SkipWhitespaces(input, i);
-        area = StructuredReferenceArea.None;
-        if (input[i + 1] == '#')
-        {
-            // Inner reference contains a keyword.
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
-
-            // `INNER_REFERENCE : KEYWORD_LIST`, i.e. the keyword list is the whole inner
-            // reference and no column range follows it (e.g. '[[#All]]').
-            if (IsEndOfInnerReference(input, i))
-            {
-                firstColumn = null;
-                lastColumn = null;
-                return;
-            }
-
-            i = SkipComma(input, i);
-        }
-
-        if (input[i + 1] == '#')
-        {
-            // Item is a keyword list, either
-            // * '[#Headers]' SPACED_COMMA '[#Data]'
-            // * '[#Data]' SPACED_COMMA '[#Totals]'
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
-
-            // As above, for a two keyword list (e.g. '[[#Headers],[#Data]]').
-            if (IsEndOfInnerReference(input, i))
-            {
-                firstColumn = null;
-                lastColumn = null;
-                return;
-            }
-
-            i = SkipComma(input, i);
-        }
-
-        // KEYWORD_LIST can contain at most two item specifiers.
-        // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
-        i = GetStructuredName(input, i, out firstColumn);
-        if (i < input.Length && input[i] == ':')
-            GetStructuredName(input, i + 1, out lastColumn);
-        else
-            lastColumn = null;
     }
 
     /// <summary>
@@ -547,43 +748,6 @@ internal static class TokenParser
         return c is ' ' or '\n' or '\r';
     }
 
-    internal static int ParseBookPrefix(ReadOnlySpan<char> input)
-    {
-        ExtractWorkbookIndex(input, out var index);
-        Debug.Assert(index.HasValue);
-        return index.Value;
-    }
-
-    /// <summary>
-    /// Parse <see cref="Token.DDE_ITEM"/> token. A tick inside is doubled, same as in a quoted sheet name.
-    /// </summary>
-    internal static string ParseDdeItem(ReadOnlySpan<char> input)
-    {
-        // Strip the enclosing ticks. The lexer guarantees there is at least one character between them
-        // and that the ticks inside come in pairs. Unlike a sheet name, an item has no length limit, so
-        // it isn't unescaped through a stack buffer.
-        return input.Slice(1, input.Length - 2).ToString().Replace("''", "'");
-    }
-
-    /// <summary>
-    /// Split a name of <see cref="Token.SINGLE_SHEET_PREFIX"/> into the application and the topic of
-    /// a DDE link (e.g. <c>Sdemo123|tik</c>). Both parts must be non-empty.
-    /// </summary>
-    internal static bool TrySplitDdeLink(string prefixName, out string application, out string topic)
-    {
-        var separatorIndex = prefixName.IndexOf('|');
-        if (separatorIndex <= 0 || separatorIndex == prefixName.Length - 1)
-        {
-            application = string.Empty;
-            topic = string.Empty;
-            return false;
-        }
-
-        application = prefixName.Substring(0, separatorIndex);
-        topic = prefixName.Substring(separatorIndex + 1);
-        return true;
-    }
-
     private static bool IsLetter(char c) => (c is >= 'A' and <= 'Z') || (c is >= 'a' and <= 'z');
 
     private static Exception Bug()
@@ -595,12 +759,13 @@ internal static class TokenParser
     {
         public DfaEntry[] DfaTable => RolexA1Dfa.DfaTable;
 
-        public ReferenceArea ParseReference(ReadOnlySpan<char> token) => ParseA1Reference(token);
+        public ReferenceArea ParseReference(ReadOnlySpan<char> formula, Token token) => ParseA1Reference(ReferenceText(formula, token));
 
-        public RowCol ParseCellFunction(ReadOnlySpan<char> token)
+        public RowCol ParseCellFunction(ReadOnlySpan<char> formula, Token token)
         {
+            Debug.Assert(token.SymbolId == Token.CELL_FUNCTION_LIST);
             var i = 0;
-            return ReadA1Cell(token, ref i);
+            return ReadA1Cell(Text(formula, token), ref i);
         }
     }
 
@@ -608,12 +773,13 @@ internal static class TokenParser
     {
         public DfaEntry[] DfaTable => RolexR1C1Dfa.DfaTable;
 
-        public ReferenceArea ParseReference(ReadOnlySpan<char> token) => ParseR1C1Reference(token);
+        public ReferenceArea ParseReference(ReadOnlySpan<char> formula, Token token) => ParseR1C1Reference(ReferenceText(formula, token));
 
-        public RowCol ParseCellFunction(ReadOnlySpan<char> token)
+        public RowCol ParseCellFunction(ReadOnlySpan<char> formula, Token token)
         {
+            Debug.Assert(token.SymbolId == Token.CELL_FUNCTION_LIST);
             var i = 0;
-            return ParseR1C1Reference(token, ref i);
+            return ParseR1C1Reference(Text(formula, token), ref i);
         }
     }
 }

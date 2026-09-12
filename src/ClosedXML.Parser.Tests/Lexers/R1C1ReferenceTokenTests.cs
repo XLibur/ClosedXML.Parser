@@ -10,7 +10,7 @@ public class R1C1ReferenceTokenTests
     public void Parse_extracts_information_from_token(string token, int[] expectedTokens, ReferenceArea expectedReference)
     {
         Assert.Equal(expectedTokens.Concat(new[] { Token.EofSymbolId }), RolexLexer.GetTokensR1C1(token).Select(x => x.SymbolId));
-        var reference = TokenParser.R1C1Style.ParseReference(token.AsSpan());
+        var reference = References.ReadCorners(TokenParser.R1C1Style, token);
         Assert.Equal(expectedReference, reference);
     }
 

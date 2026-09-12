@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ClosedXML.Parser.Rolex;
 
 namespace ClosedXML.Parser;
@@ -16,12 +16,12 @@ internal interface IReferenceStyle
     DfaEntry[] DfaTable { get; }
 
     /// <summary>
-    /// Extract the reference from a reference token.
+    /// Extract the reference from a <c>A1_CELL</c>, <c>A1_SPAN_REFERENCE</c> or <c>BANG_REFERENCE</c> token.
     /// </summary>
-    ReferenceArea ParseReference(ReadOnlySpan<char> token);
+    ReferenceArea ParseReference(ReadOnlySpan<char> formula, Token token);
 
     /// <summary>
     /// Extract the called cell from a <c>CELL_FUNCTION_LIST</c> token.
     /// </summary>
-    RowCol ParseCellFunction(ReadOnlySpan<char> token);
+    RowCol ParseCellFunction(ReadOnlySpan<char> formula, Token token);
 }

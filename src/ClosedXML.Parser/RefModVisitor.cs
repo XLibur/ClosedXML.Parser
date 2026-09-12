@@ -81,7 +81,8 @@ public class RefModVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
         // Sheet!#REF! is a valid formula per grammar and Excel, though it displeases me. The symbol
         // is a sheet prefix token followed by the error token, so read the sheet the way the parser does.
         var errorText = symbol.Slice(symbol.Length - error.Length);
-        TokenParser.ParseSingleSheetPrefix(symbol.Slice(0, symbol.Length - error.Length), out var workbookIndex, out var sheet);
+        var sheetPrefix = new Token(Token.SINGLE_SHEET_PREFIX, range.Start, range.Length - error.Length);
+        TokenParser.ParseSingleSheetPrefix(ctx.Formula.AsSpan(), sheetPrefix, out var workbookIndex, out var sheet);
         var nodeText = new StringBuilder();
         if (workbookIndex is null)
             nodeText.AppendSheetReference(ModifySheet(ctx, sheet));

@@ -33,8 +33,9 @@ public class RowColTests
     public void ToA1_loops_for_out_of_bounds_reference(string r1c1, int row, int col, string a1)
     {
         // In GUI, Excel loops over, if user enters out-of-bounds reference to a formula.
-        var refR1C1 = TokenParser.R1C1Style.ParseReference(r1c1).First;
-        var refA1 = TokenParser.A1Style.ParseReference(a1).First;
+        Assert.True(ReferenceParser.TryParseR1C1(r1c1, out var areaR1C1));
+        var refR1C1 = areaR1C1.First;
+        var refA1 = ReferenceParser.ParseA1(a1).First;
         Assert.Equal(refA1, refR1C1.ToA1(row, col));
     }
 }

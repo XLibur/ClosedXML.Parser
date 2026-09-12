@@ -12,7 +12,7 @@ public class DdeItemTokenTests
     public void Token_is_recognized_and_unescaped(string tokenText, string expectedItem)
     {
         AssertFormula.AssertTokenType(tokenText, FormulaLexer.DDE_ITEM);
-        Assert.Equal(expectedItem, TokenParser.ParseDdeItem(tokenText));
+        Assert.Equal(expectedItem, TokenParser.ParseDdeItem(tokenText, new Token(Token.DDE_ITEM, 0, tokenText.Length)));
     }
 
     [Theory]

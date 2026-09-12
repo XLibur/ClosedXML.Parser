@@ -25,7 +25,7 @@ public class ReferenceStyleTests
     [InlineData("$C$7(", Absolute, 7, Absolute, 3)]
     public void A1_reads_the_called_cell_of_a_cell_function(string token, ReferenceAxisType rowType, int row, ReferenceAxisType colType, int col)
     {
-        var cell = TokenParser.A1Style.ParseCellFunction(token.AsSpan());
+        var cell = TokenParser.A1Style.ParseCellFunction(token, new Token(Token.CELL_FUNCTION_LIST, 0, token.Length));
 
         Assert.Equal(A1, cell.Style);
         Assert.Equal(rowType, cell.RowType);
@@ -44,7 +44,7 @@ public class ReferenceStyleTests
     [InlineData("RC(", Relative, 0, Relative, 0)]
     public void R1C1_reads_the_called_cell_of_a_cell_function(string token, ReferenceAxisType rowType, int row, ReferenceAxisType colType, int col)
     {
-        var cell = TokenParser.R1C1Style.ParseCellFunction(token.AsSpan());
+        var cell = TokenParser.R1C1Style.ParseCellFunction(token, new Token(Token.CELL_FUNCTION_LIST, 0, token.Length));
 
         Assert.Equal(R1C1, cell.Style);
         Assert.Equal(rowType, cell.RowType);
