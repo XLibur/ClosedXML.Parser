@@ -116,9 +116,23 @@ internal static class TokenParser
     /// </summary>
     internal static ReadOnlySpan<char> ParseFunctionName(ReadOnlySpan<char> formula, Token token)
     {
-        Debug.Assert(token.SymbolId is Token.USER_DEFINED_FUNCTION_NAME or Token.REF_FUNCTION_LIST);
-        var functionNameWithBrace = Text(formula, token);
+        Debug.Assert(token.SymbolId is Token.USER_DEFINED_FUNCTION_NAME or Token.REF_FUNCTION_LIST or Token.CELL_FUNCTION_LIST);
+        return FunctionName(Text(formula, token));
+    }
 
+    /// <summary>
+    /// Does a <see cref="Token.CELL_FUNCTION_LIST"/> token name a function rather than a cell? <c>LOG10</c> is a
+    /// cell in A1 too, but a cell function is a construct of a macro sheet, and Excel reads <c>LOG10(</c> as the
+    /// function. No other function has a name that is also a cell.
+    /// </summary>
+    internal static bool IsFunctionNamedLikeCell(ReadOnlySpan<char> formula, Token token)
+    {
+        Debug.Assert(token.SymbolId == Token.CELL_FUNCTION_LIST);
+        return FunctionName(Text(formula, token)).Equals("LOG10".AsSpan(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static ReadOnlySpan<char> FunctionName(ReadOnlySpan<char> functionNameWithBrace)
+    {
         // In most cases, there won't be any whitespace
         var endPosition = functionNameWithBrace[functionNameWithBrace.Length - 1] == '('
             ? functionNameWithBrace.Length - 1

@@ -325,6 +325,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.CELL_FUNCTION_LIST:
                 {
                     isPureRef = false;
+                    if (TokenParser.IsFunctionNamedLikeCell(_input.AsSpan(), _tokenSource))
+                        return LocalFunctionCall();
+
                     var start = _tokenSource.StartIndex;
                     var cellReference = _style.ParseCellFunction(_input.AsSpan(), _tokenSource);
                     Consume();

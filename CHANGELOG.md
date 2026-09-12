@@ -63,6 +63,13 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse `LOG10(` in an A1 formula as the function `LOG10`. `LOG10` is also a cell, column `LOG`
+  row 10, so the lexer reads `LOG10(` as a cell function, and `IAstFactory.CellFunction`
+  received it. `RefModVisitor` special-cased the name by scanning the formula text, but every
+  other factory, e.g. an evaluator, had to know it too. A cell function is a construct of a
+  macro sheet and no other function has a name that is also a cell, so the parser now calls
+  `IAstFactory.Function` for it. A cell function on any other cell, e.g. `B$3(5)`, is
+  unchanged, and so is R1C1, where `LOG10` isn't a cell.
 - Keep the sheet of a sheet-qualified `#REF!` when a formula is converted or modified.
   `RefModVisitor.ErrorNode` cut the sheet out of the formula text instead of reading the
   sheet prefix, so a quoted sheet was quoted again: `FormulaConverter.ToR1C1("'Old sheet'!#REF!", 1, 1)`

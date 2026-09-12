@@ -30,6 +30,19 @@ public class FunctionCallRuleTests
         AssertFormula.SingleNodeParsed("[2]!Func(5)", expectedNode);
     }
 
+    /// <summary>
+    /// <c>LOG10</c> is a cell in A1 too, so <c>LOG10(</c> is lexed as a cell function. A cell function is a
+    /// construct of a macro sheet, and Excel reads it as the function.
+    /// </summary>
+    [Theory]
+    [InlineData("LOG10(5)", "LOG10")]
+    [InlineData("log10( 5 )", "log10")]
+    public void Log10_is_a_function_although_it_is_a_cell_too(string formula, string functionName)
+    {
+        var expectedNode = new FunctionNode(functionName) { Children = new AstNode[] { new ValueNode("Number", 5.0) } };
+        AssertFormula.SingleNodeParsed(formula, expectedNode);
+    }
+
     [Fact]
     public void Function_can_be_cell_function()
     {
