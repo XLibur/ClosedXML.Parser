@@ -63,10 +63,10 @@
     so the two cannot drift apart unnoticed.
   -->
   <ItemGroup>
-    <None Include="..\..\ident-sheet-first.txt" Link="ident-sheet-first.txt">
+    <None Include="..\..\tools\sheet-quotation\ident-sheet-first.txt" Link="ident-sheet-first.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\ident-sheet-next.txt" Link="ident-sheet-next.txt">
+    <None Include="..\..\tools\sheet-quotation\ident-sheet-next.txt" Link="ident-sheet-next.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

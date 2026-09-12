@@ -1,6 +1,6 @@
 # Sheet quotation data
 
-`ident-sheet-first.txt` and `ident-sheet-next.txt` in the repository root record, for
+`ident-sheet-first.txt` and `ident-sheet-next.txt` in this folder record, for
 every BMP codepoint, whether a sheet name containing that codepoint has to be quoted in
 a formula. `NameUtils.QuoteFirst` and `NameUtils.QuoteNext` are compiled copies of those
 two files. These scripts are how the data is collected.
