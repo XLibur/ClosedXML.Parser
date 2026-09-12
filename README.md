@@ -72,7 +72,6 @@ ClosedXML used [XLParser](https://github.com/spreadsheetlab/XLParser) and transf
   * Grammar extensively uses regexps extensively. Regexs are slow, especially for NET4x target, allocates extra memory. XLParser takes up _47_ seconds for Enron dataset on .NET Framework. .NET teams had made massive improvements on regexs, so it takes only _16_ seconds on NET7.
   * IronParser needs to determine all possible tokens after every token, that is problematic, even with the help of `prefix` hints.
 * AST: XLParser creates concentrates on creation of concrete syntax tree, but for ClosedXML, we need abstract syntax tree for evaluation. IronParser is not very friendly in that regard
-* ~~XLParser uses `IronParser`, an unmaintained project~~ (IronParser recently released version 1.2).
 * Doesn't have support for lambdas and R1C1 style.
 
 ANTLR lexer takes up about 3.2 seconds for Enron dataset. With ANTLR parsing, it takes up 11 seconds. I want that 7+ seconds in performance and no allocation, so RDS that takes up 700 ms.
