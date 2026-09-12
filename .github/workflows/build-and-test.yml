@@ -27,17 +27,17 @@ jobs:
             10.0.x
 
       - name: Restore dependencies
-        run: dotnet restore src/ClosedXML.Parser.sln
+        run: dotnet restore src/ClosedXML.Parser.slnx
 
       - name: Check formatting
         run: |
-          if ! dotnet format src/ClosedXML.Parser.sln --verify-no-changes --verbosity diagnostic; then
-            echo "::warning::Code formatting issues detected. Run 'dotnet format src/ClosedXML.Parser.sln' locally to fix."
+          if ! dotnet format src/ClosedXML.Parser.slnx --verify-no-changes --verbosity diagnostic; then
+            echo "::warning::Code formatting issues detected. Run 'dotnet format src/ClosedXML.Parser.slnx' locally to fix."
           fi
 
       - name: Check vulnerable packages
         run: |
-          OUTPUT=$(dotnet list src/ClosedXML.Parser.sln package --vulnerable --include-transitive --format json)
+          OUTPUT=$(dotnet list src/ClosedXML.Parser.slnx package --vulnerable --include-transitive --format json)
           echo "$OUTPUT"
           # A project is only vulnerable if some package carries a non-empty
           # vulnerabilities array. Testing for .frameworks alone matches clean
@@ -56,7 +56,7 @@ jobs:
           fi
 
       - name: Build
-        run: dotnet build src/ClosedXML.Parser.sln --configuration Release --no-restore
+        run: dotnet build src/ClosedXML.Parser.slnx --configuration Release --no-restore
 
       # The test project multi-targets net8.0 and net10.0; without --framework, both run.
       - name: Test

@@ -53,10 +53,10 @@ jobs:
           echo "Pre-release label: ${{ inputs.prerelease-label }}"
 
       - name: Restore dependencies
-        run: dotnet restore src/ClosedXML.Parser.sln
+        run: dotnet restore src/ClosedXML.Parser.slnx
 
       - name: Build
-        run: dotnet build src/ClosedXML.Parser.sln --configuration Release --no-restore
+        run: dotnet build src/ClosedXML.Parser.slnx --configuration Release --no-restore
 
       - name: Test
         run: >
