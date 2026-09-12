@@ -9,6 +9,9 @@ public class FormulaModifierTests
     [Theory]
     [InlineData("SUM(Sheet!A1:B2, 'Jane''s'!C3) + [1]Other!Name")]
     [InlineData("IF( A1 > 5 , \"Yes\" ,  {1,2;3,4} )  ")]
+    [InlineData("(A1),B2")]
+    [InlineData("SUM((A1):B2)")]
+    [InlineData("SUM((Total_Cost Jan):(Total_Cost Apr.))")]
     public void Modifier_that_changes_nothing_writes_the_formula_as_it_was(string formula)
     {
         Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
