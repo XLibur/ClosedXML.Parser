@@ -9,7 +9,7 @@ public record BinaryNode(BinaryOperation Operation) : AstNode
         { BinaryOperation.LessOrEqualThan, "<=" },
         { BinaryOperation.LessThan, "<" },
         { BinaryOperation.GreaterThan, ">" },
-        { BinaryOperation.NotEqual, "!=" },
+        { BinaryOperation.NotEqual, "<>" },
         { BinaryOperation.Equal, "=" },
         { BinaryOperation.Addition, "+" },
         { BinaryOperation.Subtraction, "-" },
