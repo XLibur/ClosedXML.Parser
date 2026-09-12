@@ -1,10 +1,12 @@
 # Visualizer design
 
 The visualizer is a web page that parses an Excel formula and draws its abstract syntax tree.
-It replaces `src/ClosedXML.Parser.Web` (a static page) and `src/ClosedXML.Parser.Function` (an
-Azure Function that did the parsing). The new visualizer runs the parser in the browser with
-Blazor WebAssembly, so it needs no server. GitHub Pages hosts it at
-<https://xlibur.github.io/ClosedXML.Parser/>.
+It runs the parser in the browser with Blazor WebAssembly, so it needs no server. GitHub Pages
+hosts it at <https://xlibur.github.io/ClosedXML.Parser/>.
+
+It replaced the old visualizer: a static page, `src/ClosedXML.Parser.Web`, that sent each
+formula to an Azure Function, `src/ClosedXML.Parser.Function`, for the parse. Both were removed
+after the Pages site worked.
 
 ## Goals
 
@@ -188,8 +190,6 @@ clean checkout, so it is not affected.
 
 ## Out of scope
 
-- Removing `ClosedXML.Parser.Web` and `ClosedXML.Parser.Function`. A later pull request removes
-  them, after the Pages site works.
 - Mermaid 12, which changes the default layout and look.
 - Hover highlighting, SVG download and a custom domain.
 - A self-hosted copy of Mermaid.
