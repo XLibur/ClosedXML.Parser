@@ -1,0 +1,50 @@
+@* A monospace copy of the formula. It highlights the text of the selected node or marks the position of a parse error. *@
+@* The segments stay on one line: the element keeps white space, so a line break in the markup would show. *@
+<div data-testid="formula-echo" class="overflow-x-auto rounded-md bg-slate-100 px-3 py-1.5 font-mono text-sm whitespace-pre dark:bg-slate-800/60">@if (Formula.Length == 0 && ErrorPosition is null){<span class="text-slate-400">(empty formula)</span>}else{@foreach (var segment in Segments()){<span class="@segment.Class" data-segment="@segment.Kind">@segment.Text</span>}}</div>
+
+@code {
+    private const string HighlightClass = "rounded-sm bg-yellow-200 text-slate-900 dark:bg-yellow-400/40 dark:text-yellow-50";
+    private const string ErrorClass = "rounded-sm bg-red-200 text-red-900 underline decoration-red-600 decoration-wavy dark:bg-red-500/40 dark:text-red-50";
+
+    [Parameter, EditorRequired]
+    public string Formula { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The range of the selected node.
+    /// </summary>
+    [Parameter]
+    public SymbolRange? Highlight { get; set; }
+
+    /// <summary>
+    /// The position of a parse error. It can be the formula length, when the formula ended too soon.
+    /// </summary>
+    [Parameter]
+    public int? ErrorPosition { get; set; }
+
+    private IEnumerable<Segment> Segments()
+    {
+        var length = Formula.Length;
+        if (ErrorPosition is { } position)
+        {
+            var at = Math.Clamp(position, 0, length);
+            yield return new Segment(Formula[..at], "text", null);
+            // A space marks the end of the formula, so the error is visible after the last character.
+            yield return new Segment(at < length ? Formula[at].ToString() : " ", "error", ErrorClass);
+            yield return new Segment(at < length ? Formula[(at + 1)..] : string.Empty, "text", null);
+        }
+        else if (Highlight is { } range)
+        {
+            var start = Math.Clamp(range.Start, 0, length);
+            var end = Math.Clamp(range.End, start, length);
+            yield return new Segment(Formula[..start], "text", null);
+            yield return new Segment(Formula[start..end], "highlight", HighlightClass);
+            yield return new Segment(Formula[end..], "text", null);
+        }
+        else
+        {
+            yield return new Segment(Formula, "text", null);
+        }
+    }
+
+    private sealed record Segment(string Text, string Kind, string? Class);
+}

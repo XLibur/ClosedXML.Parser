@@ -1,0 +1,6 @@
+<ul class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400" aria-label="Node families">
+    @foreach (var family in NodeFamilies.All)
+    {
+        <li class="flex items-center gap-1.5"><span class="fam-swatch @NodeFamilies.CssClass(family)" aria-hidden="true"></span>@NodeFamilies.DisplayName(family)</li>
+    }
+</ul>

@@ -1,0 +1,86 @@
+name: Pages
+
+# Publishes the visualizer (src/ClosedXML.Parser.Visualizer) to GitHub Pages. A pull request
+# only builds it: trimming runs at publish, so this is where a trim warning fails.
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'src/ClosedXML.Parser/**'
+      - 'src/ClosedXML.Parser.Ast/**'
+      - 'src/ClosedXML.Parser.Visualizer/**'
+      - 'global.json'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'src/ClosedXML.Parser/**'
+      - 'src/ClosedXML.Parser.Ast/**'
+      - 'src/ClosedXML.Parser.Visualizer/**'
+      - 'global.json'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time. A newer pull request run cancels an older one.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pages-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # MinVer reads the version of the parser from the tags, and the footer shows it.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Pages compresses the files itself, so the .br and .gz copies are not needed.
+      - name: Publish
+        run: >
+          dotnet publish src/ClosedXML.Parser.Visualizer/ClosedXML.Parser.Visualizer.csproj
+          --configuration Release
+          --output publish
+          -p:CompressionEnabled=false
+
+      # The site is at https://<owner>.github.io/<repository>/, so the base is the repository path.
+      # Pages runs Jekyll unless .nojekyll exists, and Jekyll skips the _framework folder.
+      - name: Set the base path
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+        run: |
+          sed -i "s|<base href=\"/\" />|<base href=\"$BASE_PATH\" />|" publish/wwwroot/index.html
+          grep -F "<base href=\"$BASE_PATH\" />" publish/wwwroot/index.html
+          touch publish/wwwroot/.nojekyll
+
+      - name: Upload the site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: publish/wwwroot
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,185 @@
+/*
+  The Tailwind input of the visualizer. tools/tailwind/generate-css.sh compiles it into
+  wwwroot/css/app.css, which is committed. Run the script after a change to this file or to the
+  Tailwind classes of a .razor file.
+
+  Only the files below are scanned, so the output is the same on each machine. Do not put
+  Tailwind classes in .cs files.
+*/
+@import "tailwindcss" source(none);
+@source "../**/*.razor";
+@source "../wwwroot/index.html";
+
+/*
+  The colours of the node families. The diagram and the legend use them. The classDef colours of
+  a copied diagram (NodeFamilies.LightColours) are the light values. Keep the two the same.
+*/
+:root {
+    --famFunction-fill: #dbeafe;
+    --famFunction-stroke: #2563eb;
+    --famFunction-text: #1e3a8a;
+    --famReference-fill: #dcfce7;
+    --famReference-stroke: #16a34a;
+    --famReference-text: #14532d;
+    --famStructuredReference-fill: #ccfbf1;
+    --famStructuredReference-stroke: #0d9488;
+    --famStructuredReference-text: #134e4a;
+    --famName-fill: #ede9fe;
+    --famName-stroke: #7c3aed;
+    --famName-text: #4c1d95;
+    --famValue-fill: #fef3c7;
+    --famValue-stroke: #d97706;
+    --famValue-text: #78350f;
+    --famError-fill: #fee2e2;
+    --famError-stroke: #dc2626;
+    --famError-text: #7f1d1d;
+    --famOperator-fill: #f1f5f9;
+    --famOperator-stroke: #475569;
+    --famOperator-text: #0f172a;
+    --diagram-edge: #64748b;
+    --diagram-selected: #f59e0b;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --famFunction-fill: #172554;
+        --famFunction-stroke: #60a5fa;
+        --famFunction-text: #dbeafe;
+        --famReference-fill: #052e16;
+        --famReference-stroke: #4ade80;
+        --famReference-text: #dcfce7;
+        --famStructuredReference-fill: #042f2e;
+        --famStructuredReference-stroke: #2dd4bf;
+        --famStructuredReference-text: #ccfbf1;
+        --famName-fill: #2e1065;
+        --famName-stroke: #a78bfa;
+        --famName-text: #ede9fe;
+        --famValue-fill: #451a03;
+        --famValue-stroke: #fbbf24;
+        --famValue-text: #fef3c7;
+        --famError-fill: #450a0a;
+        --famError-stroke: #f87171;
+        --famError-text: #fee2e2;
+        --famOperator-fill: #1e293b;
+        --famOperator-stroke: #94a3b8;
+        --famOperator-text: #f1f5f9;
+        --diagram-edge: #94a3b8;
+        --diagram-selected: #fbbf24;
+    }
+}
+
+.famFunction { --fam-fill: var(--famFunction-fill); --fam-stroke: var(--famFunction-stroke); --fam-text: var(--famFunction-text); }
+.famReference { --fam-fill: var(--famReference-fill); --fam-stroke: var(--famReference-stroke); --fam-text: var(--famReference-text); }
+.famStructuredReference { --fam-fill: var(--famStructuredReference-fill); --fam-stroke: var(--famStructuredReference-stroke); --fam-text: var(--famStructuredReference-text); }
+.famName { --fam-fill: var(--famName-fill); --fam-stroke: var(--famName-stroke); --fam-text: var(--famName-text); }
+.famValue { --fam-fill: var(--famValue-fill); --fam-stroke: var(--famValue-stroke); --fam-text: var(--famValue-text); }
+.famError { --fam-fill: var(--famError-fill); --fam-stroke: var(--famError-stroke); --fam-text: var(--famError-text); }
+.famOperator { --fam-fill: var(--famOperator-fill); --fam-stroke: var(--famOperator-stroke); --fam-text: var(--famOperator-text); }
+
+.fam-swatch {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+    border: 1px solid var(--fam-stroke);
+    background: var(--fam-fill);
+}
+
+/*
+  Mermaid puts a style element with "#mermaid-N ..." rules into each SVG. The rules below start
+  with "#diagram svg", which is more specific, so they win over the Mermaid theme.
+*/
+#diagram svg {
+    display: block;
+    margin-inline: auto;
+    max-width: none;
+}
+
+#diagram svg g.node {
+    cursor: pointer;
+}
+
+#diagram svg g.node :is(rect, polygon, circle, ellipse, path) {
+    fill: var(--fam-fill);
+    stroke: var(--fam-stroke);
+    stroke-width: 1.5px;
+}
+
+#diagram svg g.node :is(.nodeLabel, .nodeLabel *, p) {
+    color: var(--fam-text);
+}
+
+#diagram svg g.node text {
+    fill: var(--fam-text);
+}
+
+#diagram svg g.node.selected :is(rect, polygon, circle, ellipse, path) {
+    stroke: var(--diagram-selected);
+    stroke-width: 3px;
+}
+
+#diagram svg :is(.flowchart-link, .edgePath path) {
+    stroke: var(--diagram-edge);
+}
+
+#diagram svg :is(.marker, marker path, .arrowheadPath) {
+    fill: var(--diagram-edge);
+    stroke: var(--diagram-edge);
+}
+
+/* The loading indicator and the error bar, from the Blazor template. */
+.loading-progress {
+    position: absolute;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    inset: 20vh 0 auto 0;
+    margin: 0 auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: #2563eb;
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Loading");
+}
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    color: #0f172a;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
