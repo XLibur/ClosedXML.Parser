@@ -4,7 +4,7 @@
 >
 > This repository is a fork of [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser), Copyright (c) 2023, Jan Havlíček.
 >
-> The sole purpose of this fork is to bundle some fixes needed by the XLibur library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push pull requests with these fixes back to upstream ClosedXML.Parser.
+> The sole purpose of this fork is to bundle some fixes needed by the [XLibur](https://github.com/XLibur/XLibur) library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push pull requests with these fixes back to upstream [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser).
 
 ClosedParser parses Excel formulas, in the form that OOXML files store them, into an abstract syntax tree that can be evaluated.
 
@@ -27,7 +27,7 @@ There is a visualizer to display AST in a browser at **[https://xlibur.github.io
 
 # Goals
 
-* __Performance__ - ClosedXML needs to parse formula really fast. Limit allocation and so on.
+* __Performance__ - [ClosedXML](https://github.com/ClosedXML/ClosedXML) needs to parse formula really fast. Limit allocation and so on.
 * __Evaluation oriented__ - Parser should concentrates on creation of abstract syntax trees, not concrete syntax tree. Goal is evaluation of formulas, not transformation.
 * __Multi-use__ - Formulas are mostly used in cells, but there are other places with different grammar rules (e.g. sparklines, data validation)
 * __Multi notation (A1 or R1C1)__ - Parser should be able to parse both A1 and R1C1 formulas. I.e. `SUM(R5)` can mean return sum of cell `R5` in _A1_ notation, but return sum of all cells on row 5 in _R1C1_ notation.
@@ -36,7 +36,7 @@ The ANTLR4 grammars in *src/ClosedXML.ANTLR* are the source of truth. The lexer 
 
 ANTLR4 one of few maintained parser generators with C# target.
 
-Upstream ClosedXML has replaced XLParser with ClosedXML.Parser, and the XLibur library uses the `XLibur.ClosedXML.Parser` package of this fork.
+Upstream [ClosedXML](https://github.com/ClosedXML/ClosedXML) has replaced XLParser with [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser), and the [XLibur](https://github.com/XLibur/XLibur) library uses the `XLibur.ClosedXML.Parser` package of this fork.
 
 ## Current performance
 
@@ -66,12 +66,12 @@ The parser also does not parse a call of a function result, such as `LAMBDA(x,x+
 
 # Why not use XLParser
 
-ClosedXML used [XLParser](https://github.com/spreadsheetlab/XLParser) and transformed its concrete syntax tree to an abstract syntax tree, until it replaced XLParser with ClosedXML.Parser. The reasons, as upstream measured them:
+[ClosedXML](https://github.com/ClosedXML/ClosedXML) used [XLParser](https://github.com/spreadsheetlab/XLParser) and transformed its concrete syntax tree to an abstract syntax tree, until it replaced XLParser with [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser). The reasons, as upstream measured them:
 
 * Speed:
   * Grammar extensively uses regexps extensively. Regexs are slow, especially for NET4x target, allocates extra memory. XLParser takes up _47_ seconds for Enron dataset on .NET Framework. .NET teams had made massive improvements on regexs, so it takes only _16_ seconds on NET7.
   * IronParser needs to determine all possible tokens after every token, that is problematic, even with the help of `prefix` hints.
-* AST: XLParser creates concentrates on creation of concrete syntax tree, but for ClosedXML, we need abstract syntax tree for evaluation. IronParser is not very friendly in that regard
+* AST: XLParser creates concentrates on creation of concrete syntax tree, but for [ClosedXML](https://github.com/ClosedXML/ClosedXML), we need abstract syntax tree for evaluation. IronParser is not very friendly in that regard
 * Doesn't have support for lambdas and R1C1 style.
 
 ANTLR lexer takes up about 3.2 seconds for Enron dataset. With ANTLR parsing, it takes up 11 seconds. I want that 7+ seconds in performance and no allocation, so RDS that takes up 700 ms.
