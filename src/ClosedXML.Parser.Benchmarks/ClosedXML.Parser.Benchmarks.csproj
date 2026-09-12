@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Signed with the key of the parser, so the InternalsVisibleTo of the parser lets the
+    benchmarks call the internal Rolex lexer and measure the lexer apart from the parser.
+  -->
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../ClosedXML.Parser.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClosedXML.Parser\ClosedXML.Parser.csproj" />
+    <ProjectReference Include="..\ClosedXML.Parser.Ast\ClosedXML.Parser.Ast.csproj" />
+  </ItemGroup>
+
+  <!--
+    The data sets stay in the test project. BenchmarkDotNet runs each benchmark from a project
+    it generates in a directory of its own, so a path relative to the output directory does not
+    find them. The build stores their absolute path instead, and FormulaSample reads it back.
+  -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DataDirectory</_Parameter1>
+      <_Parameter2>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../ClosedXML.Parser.Tests/data'))</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

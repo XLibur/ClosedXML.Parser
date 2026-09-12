@@ -9,3 +9,4 @@ packages
 TestResults
 artifacts
 .tools
+BenchmarkDotNet.Artifacts
