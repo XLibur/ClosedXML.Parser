@@ -37,7 +37,7 @@ public class A1SpanReferenceTokenTests
     private static void AssertAreaReferenceToken(string token, ReferenceArea expectedReference)
     {
         AssertFormula.AssertTokenType(token, FormulaLexer.A1_SPAN_REFERENCE);
-        var reference = TokenParser.A1Style.ParseReference(token);
+        var reference = TokenParser.A1Style.ParseReference(token, new Token(Token.A1_SPAN_REFERENCE, 0, token.Length));
         Assert.Equal(expectedReference, reference);
     }
 }

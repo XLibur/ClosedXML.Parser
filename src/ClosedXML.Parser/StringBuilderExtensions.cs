@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using ClosedXML.Parser.Rolex;
 
 namespace ClosedXML.Parser;
 
@@ -78,13 +77,8 @@ internal static class StringBuilderExtensions
     {
         var link = application + '|' + topic;
         var prefix = link + '!';
-        var tokens = RolexLexer.GetTokensA1(prefix.AsSpan());
-        if (tokens.Count == 2 && tokens[0].SymbolId == Token.SINGLE_SHEET_PREFIX && tokens[0].Length == prefix.Length)
-        {
-            TokenParser.ParseSingleSheetPrefix(prefix.AsSpan(), out var workbookIndex, out var name);
-            if (workbookIndex is null && name == link)
-                return sb.Append(prefix);
-        }
+        if (TokenParser.ReadsBackAsSheetPrefix(prefix, link))
+            return sb.Append(prefix);
 
         return sb.Append('\'').AppendEscapedSheetName(link).Append('\'').AppendReferenceSeparator();
     }

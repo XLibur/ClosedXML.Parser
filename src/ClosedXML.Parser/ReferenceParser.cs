@@ -186,70 +186,41 @@ public static class ReferenceParser
 
     private static bool TryParse(List<Token> tokens, string text, IReferenceStyle style, out ReferenceArea area)
     {
-        var isValid = IsReference(tokens);
-        if (!isValid)
-        {
-            area = default;
-            return false;
-        }
-
-        area = style.ParseReference(text.AsSpan());
-        return true;
+        return IsWholeReference(tokens, 0, text, style, out area);
     }
 
     private static bool TryParseSheetA1(List<Token> tokens, string text, out string sheetName, out ReferenceArea area)
     {
-        if (tokens.Count == 0 ||
-            tokens[0].SymbolId != Token.SINGLE_SHEET_PREFIX)
+        if (tokens[0].SymbolId != Token.SINGLE_SHEET_PREFIX)
         {
             sheetName = string.Empty;
             area = default;
             return false;
         }
 
-        var sheetPrefixToken = tokens[0];
-        var sheetPrefix = text.AsSpan(sheetPrefixToken.StartIndex, sheetPrefixToken.Length);
-        TokenParser.ParseSingleSheetPrefix(sheetPrefix, out int? workbookIndex, out sheetName);
-        if (workbookIndex is not null)
+        TokenParser.ParseSingleSheetPrefix(text.AsSpan(), tokens[0], out var workbookIndex, out sheetName);
+        if (workbookIndex is not null || !IsWholeReference(tokens, 1, text, TokenParser.A1Style, out area))
         {
             sheetName = string.Empty;
             area = default;
             return false;
         }
 
-        tokens.RemoveAt(0);
-        if (!IsReference(tokens))
-        {
-            sheetName = string.Empty;
-            area = default;
-            return false;
-        }
-
-        var referenceArea = text.AsSpan().Slice(sheetPrefixToken.Length);
-        area = TokenParser.A1Style.ParseReference(referenceArea);
         return true;
     }
 
     /// <summary>
-    /// Both DFA tables emit these token ids for a reference, so the shape of the token list
-    /// is the same in either reference style.
+    /// Are the tokens from <paramref name="index"/> a reference and nothing else?
     /// </summary>
-    private static bool IsReference(IReadOnlyList<Token> tokens)
+    private static bool IsWholeReference(List<Token> tokens, int index, string text, IReferenceStyle style, out ReferenceArea area)
     {
-        // a1_reference : A1_CELL
-        //              | A1_CELL COLON A1_CELL
-        //              | A1_SPAN_REFERENCE
-        var isValid = tokens.Count switch
-        {
-            2 => tokens[0].SymbolId is Token.A1_CELL or Token.A1_SPAN_REFERENCE &&
-                 tokens[1].SymbolId == Token.EofSymbolId,
-            4 => tokens[0].SymbolId == Token.A1_CELL &&
-                 tokens[1].SymbolId == Token.COLON &&
-                 tokens[2].SymbolId == Token.A1_CELL &&
-                 tokens[3].SymbolId == Token.EofSymbolId,
-            _ => false,
-        };
-        return isValid;
+        if (TokenParser.TryReadReference(style, text.AsSpan(), tokens, ref index, out area) &&
+            tokens[index].SymbolId == Token.EofSymbolId)
+            return true;
+
+        // A reference followed by more text isn't a reference, so don't give out the reference at its start.
+        area = default;
+        return false;
     }
 
     private static bool TryParseSheetName(List<Token> tokens, string text, out string sheetName, out string name)
@@ -268,9 +239,7 @@ public static class ReferenceParser
             return false;
         }
 
-        var sheetPrefixToken = tokens[0];
-        var sheetPrefix = text.AsSpan(sheetPrefixToken.StartIndex, sheetPrefixToken.Length);
-        TokenParser.ParseSingleSheetPrefix(sheetPrefix, out int? workbookIndex, out sheetName);
+        TokenParser.ParseSingleSheetPrefix(text.AsSpan(), tokens[0], out var workbookIndex, out sheetName);
         if (workbookIndex is not null)
         {
             sheetName = string.Empty;
@@ -278,8 +247,7 @@ public static class ReferenceParser
             return false;
         }
 
-        var nameToken = tokens[1];
-        name = text.AsSpan().Slice(nameToken.StartIndex, nameToken.Length).ToString();
+        name = TokenParser.ParseName(text.AsSpan(), tokens[1]);
         return true;
     }
 }

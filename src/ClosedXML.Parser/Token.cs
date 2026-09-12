@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ClosedXML.Parser.Rolex;
 
 // ReSharper disable InconsistentNaming
 namespace ClosedXML.Parser;
@@ -26,47 +27,51 @@ internal readonly struct Token
     /// </summary>
     public const int EofSymbolId = -1;
 
-    public const int REF_CONSTANT = 1;
-    public const int NONREF_ERRORS = 2;
-    public const int LOGICAL_CONSTANT = 3;
-    public const int NUMERICAL_CONSTANT = 4;
-    public const int STRING_CONSTANT = 5;
-    public const int POW = 6;
-    public const int MULT = 7;
-    public const int DIV = 8;
-    public const int PLUS = 9;
-    public const int MINUS = 10;
-    public const int CONCAT = 11;
-    public const int EQUAL = 12;
-    public const int NOT_EQUAL = 13;
-    public const int LESS_OR_EQUAL_THAN = 14;
-    public const int LESS_THAN = 15;
-    public const int GREATER_OR_EQUAL_THAN = 16;
-    public const int GREATER_THAN = 17;
-    public const int PERCENT = 18;
-    public const int SEMICOLON = 19;
-    public const int COLON = 20;
-    public const int OPEN_BRACE = 21;
-    public const int CLOSE_BRACE = 22;
-    public const int OPEN_CURLY = 23;
-    public const int CLOSE_CURLY = 24;
-    public const int COMMA = 25;
-    public const int SPACE = 26;
-    public const int INTERSECT = 27;
-    public const int SPILL = 28;
-    public const int BOOK_PREFIX = 29;
-    public const int BANG_REFERENCE = 30;
-    public const int SHEET_RANGE_PREFIX = 31;
-    public const int SINGLE_SHEET_PREFIX = 32;
-    public const int A1_CELL = 33;
-    public const int A1_SPAN_REFERENCE = 34;
-    public const int REF_FUNCTION_LIST = 35;
-    public const int CELL_FUNCTION_LIST = 36;
-    public const int USER_DEFINED_FUNCTION_NAME = 37;
-    public const int NAME = 38;
-    public const int INTRA_TABLE_REFERENCE = 39;
-    public const int DDE_ITEM = 40;
-    public const int BANG_NAME = 41;
+    // The IDs are the ones of the ANTLR lexer, which numbers the tokens from 1 (see FormulaLexer.tokens).
+    // The Rolex tables are generated from the same grammar, but number the tokens from 0, and the lexer
+    // adds one to what a table accepts. Deriving each ID from the generated constant keeps this list in
+    // step with the grammar. Both tables number the tokens alike, so the A1 one stands for both.
+    public const int REF_CONSTANT = RolexA1Dfa.REF_CONSTANT + 1;
+    public const int NONREF_ERRORS = RolexA1Dfa.NONREF_ERRORS + 1;
+    public const int LOGICAL_CONSTANT = RolexA1Dfa.LOGICAL_CONSTANT + 1;
+    public const int NUMERICAL_CONSTANT = RolexA1Dfa.NUMERICAL_CONSTANT + 1;
+    public const int STRING_CONSTANT = RolexA1Dfa.STRING_CONSTANT + 1;
+    public const int POW = RolexA1Dfa.POW + 1;
+    public const int MULT = RolexA1Dfa.MULT + 1;
+    public const int DIV = RolexA1Dfa.DIV + 1;
+    public const int PLUS = RolexA1Dfa.PLUS + 1;
+    public const int MINUS = RolexA1Dfa.MINUS + 1;
+    public const int CONCAT = RolexA1Dfa.CONCAT + 1;
+    public const int EQUAL = RolexA1Dfa.EQUAL + 1;
+    public const int NOT_EQUAL = RolexA1Dfa.NOT_EQUAL + 1;
+    public const int LESS_OR_EQUAL_THAN = RolexA1Dfa.LESS_OR_EQUAL_THAN + 1;
+    public const int LESS_THAN = RolexA1Dfa.LESS_THAN + 1;
+    public const int GREATER_OR_EQUAL_THAN = RolexA1Dfa.GREATER_OR_EQUAL_THAN + 1;
+    public const int GREATER_THAN = RolexA1Dfa.GREATER_THAN + 1;
+    public const int PERCENT = RolexA1Dfa.PERCENT + 1;
+    public const int SEMICOLON = RolexA1Dfa.SEMICOLON + 1;
+    public const int COLON = RolexA1Dfa.COLON + 1;
+    public const int OPEN_BRACE = RolexA1Dfa.OPEN_BRACE + 1;
+    public const int CLOSE_BRACE = RolexA1Dfa.CLOSE_BRACE + 1;
+    public const int OPEN_CURLY = RolexA1Dfa.OPEN_CURLY + 1;
+    public const int CLOSE_CURLY = RolexA1Dfa.CLOSE_CURLY + 1;
+    public const int COMMA = RolexA1Dfa.COMMA + 1;
+    public const int SPACE = RolexA1Dfa.SPACE + 1;
+    public const int INTERSECT = RolexA1Dfa.INTERSECT + 1;
+    public const int SPILL = RolexA1Dfa.SPILL + 1;
+    public const int BOOK_PREFIX = RolexA1Dfa.BOOK_PREFIX + 1;
+    public const int BANG_REFERENCE = RolexA1Dfa.BANG_REFERENCE + 1;
+    public const int SHEET_RANGE_PREFIX = RolexA1Dfa.SHEET_RANGE_PREFIX + 1;
+    public const int SINGLE_SHEET_PREFIX = RolexA1Dfa.SINGLE_SHEET_PREFIX + 1;
+    public const int A1_CELL = RolexA1Dfa.A1_CELL + 1;
+    public const int A1_SPAN_REFERENCE = RolexA1Dfa.A1_SPAN_REFERENCE + 1;
+    public const int REF_FUNCTION_LIST = RolexA1Dfa.REF_FUNCTION_LIST + 1;
+    public const int CELL_FUNCTION_LIST = RolexA1Dfa.CELL_FUNCTION_LIST + 1;
+    public const int USER_DEFINED_FUNCTION_NAME = RolexA1Dfa.USER_DEFINED_FUNCTION_NAME + 1;
+    public const int NAME = RolexA1Dfa.NAME + 1;
+    public const int INTRA_TABLE_REFERENCE = RolexA1Dfa.INTRA_TABLE_REFERENCE + 1;
+    public const int DDE_ITEM = RolexA1Dfa.DDE_ITEM + 1;
+    public const int BANG_NAME = RolexA1Dfa.BANG_NAME + 1;
 
     /// <summary>
     /// A token ID or TokenType. Non-negative integer. The values are from Antlr grammar, starting with 1.

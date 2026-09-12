@@ -9,7 +9,7 @@ public class IntraTableReferenceTokenTests
     public void Token_data_are_extracted_and_unescaped(string tokenText, StructuredReferenceArea expectedArea, string expectedFirstColumn, string expectedLastColumn)
     {
         AssertFormula.AssertTokenType(tokenText, FormulaLexer.INTRA_TABLE_REFERENCE);
-        TokenParser.ParseIntraTableReference(tokenText, out var area, out var firstColumn, out var lastColumn);
+        TokenParser.ParseIntraTableReference(tokenText, new Token(Token.INTRA_TABLE_REFERENCE, 0, tokenText.Length), out var area, out var firstColumn, out var lastColumn);
 
         Assert.Equal(expectedArea, area);
         Assert.Equal(expectedFirstColumn, firstColumn);

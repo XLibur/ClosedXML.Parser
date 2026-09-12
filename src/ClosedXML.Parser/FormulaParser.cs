@@ -325,8 +325,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.CELL_FUNCTION_LIST:
                 {
                     isPureRef = false;
+                    if (TokenParser.IsFunctionNamedLikeCell(_input.AsSpan(), _tokenSource))
+                        return LocalFunctionCall();
+
                     var start = _tokenSource.StartIndex;
-                    var cellReference = _style.ParseCellFunction(GetCurrentToken());
+                    var cellReference = _style.ParseCellFunction(_input.AsSpan(), _tokenSource);
                     Consume();
                     var args = ArgumentList();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -343,9 +346,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     isPureRef = false;
                     var start = _tokenSource.StartIndex;
-                    TokenParser.ParseSingleSheetPrefix(GetCurrentToken(), out var wbIndex, out var sheetName);
+                    TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), _tokenSource, out var wbIndex, out var sheetName);
                     Consume();
-                    var functionName = TokenParser.ExtractLocalFunctionName(GetCurrentToken());
+                    var functionName = TokenParser.ParseFunctionName(_input.AsSpan(), _tokenSource);
                     Consume();
                     var args = ArgumentList();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -359,9 +362,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     isPureRef = false;
                     var start = _tokenSource.StartIndex;
-                    var wbIndex = TokenParser.ParseBookPrefix(GetCurrentToken());
+                    var wbIndex = TokenParser.ParseBookPrefix(_input.AsSpan(), _tokenSource);
                     Consume();
-                    var functionName = TokenParser.ExtractLocalFunctionName(GetCurrentToken());
+                    var functionName = TokenParser.ParseFunctionName(_input.AsSpan(), _tokenSource);
                     Consume();
                     var args = ArgumentList();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -439,23 +442,13 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
         // The lexer puts the space before '@' into the INTERSECT token, so the token is the intersection operator
         // too. The implicit intersection takes the rest of the intersection, so nothing follows it here.
-        if (_la == Token.INTERSECT && IsSpaceBeforeAt())
+        if (_la == Token.INTERSECT && TokenParser.IsSpaceBeforeAt(_input.AsSpan(), _tokenSource))
         {
             var rightNode = RefImplicitExpression();
             leftNode = _factory.BinaryNode(_context, new SymbolRange(start, _tokenSource.StartIndex), BinaryOperation.Intersection, leftNode, rightNode);
         }
 
         return leftNode;
-    }
-
-    /// <summary>
-    /// Is there a space before the <c>@</c> of the current <c>INTERSECT</c> token? A line break alone is not the
-    /// intersection operator, the same as for a <c>SPACE</c> token.
-    /// </summary>
-    private bool IsSpaceBeforeAt()
-    {
-        var token = GetCurrentToken();
-        return token.Slice(0, token.IndexOf('@')).IndexOf(' ') >= 0;
     }
 
     /// <summary>
@@ -563,75 +556,44 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             // cell_reference has been inlined into this switch
 
             // cell_reference:
-            //     (A1_CELL | A1_CELL COLON A1_CELL) -- inlined a1_reference
+            //     (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE) -- inlined a1_reference
             case Token.A1_CELL:
-                {
-                    var startIdx = _tokenSource.StartIndex;
-                    var area = _style.ParseReference(GetCurrentToken());
-                    Consume();
-                    if (_la == Token.COLON && LL(1) == Token.A1_CELL)
-                    {
-                        Consume();
-                        var secondCell = _style.ParseReference(GetCurrentToken());
-                        Consume();
-                        area = new ReferenceArea(area.First, secondCell.First);
-                    }
-
-                    var endIdx = _tokenSource.StartIndex;
-                    var reference = _factory.Reference(_context, new SymbolRange(startIdx, endIdx), area);
-                    return reference;
-                }
-
-            // cell_reference:
-            //     (A1_SPAN_REFERENCE)  -- inlined a1_reference
             case Token.A1_SPAN_REFERENCE:
                 {
                     var start = _tokenSource.StartIndex;
-                    var area = _style.ParseReference(GetCurrentToken());
-                    Consume();
-                    var end = _tokenSource.StartIndex;
-                    var reference = _factory.Reference(_context, new SymbolRange(start, end), area);
-                    return reference;
+                    var area = A1Reference()!.Value;
+                    return _factory.Reference(_context, new SymbolRange(start, _tokenSource.StartIndex), area);
                 }
 
             // cell_reference:
             //     BANG_REFERENCE
             case Token.BANG_REFERENCE:
                 {
-                    // Slice away '!' from the bang reference so it can be parsed.
-                    var referenceToken = GetCurrentToken().Slice(1);
                     var start = _tokenSource.StartIndex;
-                    if (referenceToken.Equals(REF_ERROR.AsSpan(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        Consume();
-                        return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), REF_ERROR.AsSpan());
-                    }
-
-                    var reference = _style.ParseReference(referenceToken);
+                    var isReference = TokenParser.TryParseBangReference(_style, _input.AsSpan(), _tokenSource, out var reference);
                     Consume();
-                    return _factory.BangReference(_context, new SymbolRange(start, _tokenSource.StartIndex), reference);
+                    var range = new SymbolRange(start, _tokenSource.StartIndex);
+                    return isReference
+                        ? _factory.BangReference(_context, range, reference)
+                        : _factory.ErrorNode(_context, range, REF_ERROR.AsSpan());
                 }
 
             // name_reference: BANG_NAME
             case Token.BANG_NAME:
                 {
-                    // Slice away '!' from the bang name. The lexer can't exclude a logical constant from the name.
-                    var name = GetCurrentToken().Slice(1);
-                    if (name.Equals("TRUE".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("FALSE".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                        throw Error($"A name can't be TRUE or FALSE, so '!{name.ToString()}' is not a bang name.");
+                    if (!TokenParser.TryParseBangName(_input.AsSpan(), _tokenSource, out var name))
+                        throw Error($"A name can't be TRUE or FALSE, so '!{name}' is not a bang name.");
 
                     var start = _tokenSource.StartIndex;
                     Consume();
-                    return _factory.BangName(_context, new SymbolRange(start, _tokenSource.StartIndex), name.ToString());
+                    return _factory.BangName(_context, new SymbolRange(start, _tokenSource.StartIndex), name);
                 }
 
             // external_cell_reference: SHEET_RANGE_PREFIX (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE)
             case Token.SHEET_RANGE_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
-                    var sheetRangePrefixToken = GetCurrentToken();
-                    TokenParser.ParseSheetRangePrefix(sheetRangePrefixToken, out var wbIdx, out var firstName,
+                    TokenParser.ParseSheetRangePrefix(_input.AsSpan(), _tokenSource, out var wbIdx, out var firstName,
                         out var secondName);
                     Consume();
 
@@ -655,24 +617,24 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.NAME:
                 {
                     var start = _tokenSource.StartIndex;
-                    var localName = GetCurrentToken();
+                    var localName = TokenParser.ParseName(_input.AsSpan(), _tokenSource);
                     Consume();
                     if (_la == Token.INTRA_TABLE_REFERENCE)
                     {
-                        TokenParser.ParseIntraTableReference(GetCurrentToken(), out var specifics, out var firstColumn, out var lastColumn);
+                        TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
                         Consume();
                         var range = new SymbolRange(start, _tokenSource.StartIndex);
-                        return _factory.StructureReference(_context, range, localName.ToString(), specifics, firstColumn, lastColumn ?? firstColumn);
+                        return _factory.StructureReference(_context, range, localName, specifics, firstColumn, lastColumn ?? firstColumn);
                     }
 
                     // 3D reference
                     if (_la == Token.COLON && LL(1) == Token.SINGLE_SHEET_PREFIX)
                     {
-                        var firstSheetName = localName.ToString();
+                        var firstSheetName = localName;
                         Consume(); // COLON
 
                         // TODO: Decouple book prefix from single sheet prefix
-                        TokenParser.ParseSingleSheetPrefix(GetCurrentToken(), out var wbIdx, out string lastSheetName);
+                        TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), _tokenSource, out var wbIdx, out string lastSheetName);
                         if (wbIdx is not null)
                             throw Error("External workbook not expected.");
 
@@ -687,35 +649,36 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                         return _factory.Reference3D(_context, new SymbolRange(start, end), firstSheetName, lastSheetName, area.Value);
                     }
 
-                    return _factory.Name(_context, new SymbolRange(start, _tokenSource.StartIndex), localName.ToString());
+                    return _factory.Name(_context, new SymbolRange(start, _tokenSource.StartIndex), localName);
                 }
 
             // reference to another workbook or to an item of a DDE link
             case Token.BOOK_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
-                    var bookPrefix = TokenParser.ParseBookPrefix(GetCurrentToken());
+                    var bookPrefix = TokenParser.ParseBookPrefix(_input.AsSpan(), _tokenSource);
                     Consume();
 
                     // dde_reference: BOOK_PREFIX DDE_ITEM
                     if (_la == Token.DDE_ITEM)
                     {
-                        var item = TokenParser.ParseDdeItem(GetCurrentToken());
+                        var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
                         Consume();
                         return _factory.ExternalDynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, item);
                     }
 
-                    var externalName = GetCurrentToken();
+                    var externalNameToken = _tokenSource;
                     Match(Token.NAME);
+                    var externalName = TokenParser.ParseName(_input.AsSpan(), externalNameToken);
                     if (_la == Token.INTRA_TABLE_REFERENCE)
                     {
-                        TokenParser.ParseIntraTableReference(GetCurrentToken(), out var specifics, out var firstColumn, out var lastColumn);
+                        TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
                         Consume();
                         var range = new SymbolRange(start, _tokenSource.StartIndex);
-                        return _factory.ExternalStructureReference(_context, range, bookPrefix, externalName.ToString(), specifics, firstColumn, lastColumn ?? firstColumn);
+                        return _factory.ExternalStructureReference(_context, range, bookPrefix, externalName, specifics, firstColumn, lastColumn ?? firstColumn);
                     }
 
-                    return _factory.ExternalName(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, externalName.ToString());
+                    return _factory.ExternalName(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, externalName);
                 }
             // name_reference: SINGLE_SHEET_PREFIX NAME
             // external_cell_reference: SINGLE_SHEET_PREFIX (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE | REF_CONSTANT)
@@ -723,8 +686,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.SINGLE_SHEET_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
-                    var sheetPrefix = GetCurrentToken();
-                    TokenParser.ParseSingleSheetPrefix(sheetPrefix, out var wbIdx, out string sheetName);
+                    var sheetPrefix = _tokenSource;
+                    TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), sheetPrefix, out var wbIdx, out string sheetName);
                     Consume();
 
                     var area = A1Reference();
@@ -747,29 +710,29 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     // A sheet name can contain `|` too, but only a DDE link is followed by a quoted item.
                     if (_la == Token.DDE_ITEM)
                     {
-                        if (wbIdx is not null || !TokenParser.TrySplitDdeLink(sheetName, out var application, out var topic))
-                            throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{sheetPrefix.ToString()}'.");
+                        if (!TokenParser.TryParseDdeLinkPrefix(_input.AsSpan(), sheetPrefix, out var application, out var topic))
+                            throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{_input.Substring(sheetPrefix.StartIndex, sheetPrefix.Length)}'.");
 
-                        var item = TokenParser.ParseDdeItem(GetCurrentToken());
+                        var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
                         Consume();
                         return _factory.DynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), application, topic, item);
                     }
 
                     // name_reference
-                    var name = GetCurrentToken();
+                    var nameToken = _tokenSource;
                     Match(Token.NAME);
+                    var name = TokenParser.ParseName(_input.AsSpan(), nameToken);
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
                     return wbIdx is null
-                        ? _factory.SheetName(_context, range, sheetName, name.ToString())
-                        : _factory.ExternalSheetName(_context, range, wbIdx.Value, sheetName, name.ToString());
+                        ? _factory.SheetName(_context, range, sheetName, name)
+                        : _factory.ExternalSheetName(_context, range, wbIdx.Value, sheetName, name);
                 }
 
             // structure_reference - only for formulas directly in the table, e.g. totals row.
             case Token.INTRA_TABLE_REFERENCE:
                 {
                     var start = _tokenSource.StartIndex;
-                    var localTableReference = GetCurrentToken();
-                    TokenParser.ParseIntraTableReference(localTableReference, out var specifics, out var firstColumn, out var lastColumn);
+                    TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
                     Consume();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
                     return _factory.StructureReference(_context, range, specifics, firstColumn, lastColumn ?? firstColumn);
@@ -790,31 +753,14 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// </summary>
     private ReferenceArea? A1Reference()
     {
-        if (_la == Token.A1_CELL)
-        {
-            var cellToken = GetCurrentToken();
-            var cell = _style.ParseReference(cellToken);
-            Consume();
-            var area = cell;
-            if (_la == Token.COLON && LL(1) == Token.A1_CELL)
-            {
-                Consume();
-                var secondCell = _style.ParseReference(GetCurrentToken());
-                area = new ReferenceArea(cell.First, secondCell.First);
-                Consume();
-            }
+        var index = _tokenIndex;
+        if (!TokenParser.TryReadReference(_style, _input.AsSpan(), _tokens, ref index, out var area))
+            return null;
 
-            return area;
-        }
-
-        if (_la == Token.A1_SPAN_REFERENCE)
-        {
-            var area = _style.ParseReference(GetCurrentToken());
-            Consume();
-            return area;
-        }
-
-        return null;
+        // Continue at the token after the reference.
+        _tokenIndex = index - 1;
+        Consume();
+        return area;
     }
 
     private TNode ErrorNode()
@@ -1105,7 +1051,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private TNode LocalFunctionCall()
     {
         var start = _tokenSource.StartIndex;
-        var functionName = TokenParser.ExtractLocalFunctionName(GetCurrentToken());
+        var functionName = TokenParser.ParseFunctionName(_input.AsSpan(), _tokenSource);
         Consume();
         var args = ArgumentList();
         var range = new SymbolRange(start, _tokenSource.StartIndex);

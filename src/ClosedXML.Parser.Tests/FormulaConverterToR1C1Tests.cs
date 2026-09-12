@@ -15,6 +15,19 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
+    [InlineData("'Old sheet'!#REF!", "'Old sheet'!#REF!")]
+    [InlineData("SUM('Jane''s'!#REF!)", "SUM('Jane''s'!#REF!)")]
+    [InlineData("Sheet! #REF!", "Sheet!#REF!")]
+    [InlineData("[1]Sheet!#REF!", "[1]Sheet!#REF!")]
+    [InlineData("'[1]Old sheet'!#REF!", "'[1]Old sheet'!#REF!")]
+    [InlineData("!#REF!", "!#REF!")]
+    [InlineData("SUM(!#ref!)", "SUM(!#ref!)")]
+    public void Sheet_error_keeps_its_sheet(string a1, string r1c1)
+    {
+        Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, 1, 1));
+    }
+
+    [Theory]
     [MemberData(nameof(ErrorValues.AddedAfterMsXlsx), MemberType = typeof(ErrorValues))]
     public void Error_added_after_MS_XLSX(string error)
     {

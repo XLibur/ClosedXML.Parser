@@ -12,6 +12,8 @@ under Unreleased with each change.
 
 ### Added
 
+- `FormulaConverter.ModifyR1C1`, the R1C1 counterpart of `ModifyA1`. `ModContext.IsA1` tells a
+  modifier the reference style of the formula, and a reference it gets is in that style.
 - `ReferenceParser.TryParseR1C1`. Every public method of `ReferenceParser` lexed with the
   A1 table, so a caller holding an R1C1 reference had no entry point at all, and the
   library's own tests had to reach through `InternalsVisibleTo` to parse one. The
@@ -37,6 +39,26 @@ under Unreleased with each change.
 
 ### Changed
 
+- Replace `RefModVisitor` with `FormulaModifier`, which has only the methods a modification
+  overrides: `ModifySheet`, `ModifyTable`, `ModifyFunction`, `ModifyRef` and
+  `ModifyCellFunction`. A method that returns `null` still replaces the part with `#REF!`.
+  `RefModVisitor` implemented the 34 methods of `IAstFactory`, 22 of them only to pass the
+  call on, and the formula text was rebuilt from offsets by it, by `CopyVisitor` and by
+  `ModContext`, all of them public. Now that is inside the library. The breaking changes:
+  - `RefModVisitor` is renamed `FormulaModifier` and doesn't implement `IAstFactory`.
+    `FormulaConverter.ModifyA1` takes a `FormulaModifier`. To migrate, derive from
+    `FormulaModifier`; an override of `ModifySheet`, `ModifyTable` or `ModifyFunction`
+    doesn't change.
+  - `ModifyRef` and `ModifyCellFunction` are protected, so they can be overridden outside the
+    library, e.g. to shift references when rows are inserted. They were internal, although
+    the class invited overriding them.
+  - `CopyVisitor` and `TransformedSymbol` are internal. `RefModVisitor` used a `CopyVisitor` of
+    its own, so an override of `CopyVisitor` never changed a modification.
+  - A `ModContext` can't be created outside the library, and it doesn't expose the text of the
+    formula any more, so a modifier can't cut the formula by offsets. `Sheet`, `Row`, `Col`
+    and `IsA1` stay.
+  - The obsolete `FormulaConverter.ModifyA1` overload without a sheet and the obsolete
+    `ModContext` constructor are removed.
 - Forked from ClosedXML.Parser 2.0.0 and published as `XLibur.ClosedXML.Parser`. The
   `ClosedXML.Parser` namespace is unchanged.
 - The Rolex grammars `LexerA1.rl` and `LexerR1C1.rl` are generated from `FormulaLexer.g4`
@@ -63,6 +85,35 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Leave the sheets of a 3D reference into another workbook alone when a sheet is renamed or
+  deleted. `RefModVisitor.ExternalReference3D` passed both sheets of `[1]First:Last!A1` to
+  `ModifySheet`, so renaming a sheet of this workbook renamed the sheet of the same name in
+  the other workbook, and deleting it turned the reference into `#REF!`. Every other reference
+  behind a book prefix, e.g. `[1]Sheet!A1`, `[1]Sheet!Name` or `[1]Sheet!F(1)`, already left
+  its sheet alone, and now the 3D reference does too.
+- Parse `LOG10(` in an A1 formula as the function `LOG10`. `LOG10` is also a cell, column `LOG`
+  row 10, so the lexer reads `LOG10(` as a cell function, and `IAstFactory.CellFunction`
+  received it. `RefModVisitor` special-cased the name by scanning the formula text, but every
+  other factory, e.g. an evaluator, had to know it too. A cell function is a construct of a
+  macro sheet and no other function has a name that is also a cell, so the parser now calls
+  `IAstFactory.Function` for it. A cell function on any other cell, e.g. `B$3(5)`, is
+  unchanged, and so is R1C1, where `LOG10` isn't a cell.
+- Read an area whose colon has spaces around it, e.g. `A1 : B2`, in `ReferenceParser`. The
+  lexer puts the whitespace around `:` into the colon token, but `ReferenceParser` read the
+  whole text as if the colon were bare, so `TryParseA1("A1 : B2")` returned `true` with the
+  area `A1::-16`, and `TryParseR1C1("R1C1 : R2C2")` threw `InvalidOperationException`. It now
+  reads each cell of such an area, as the formula parser already did.
+- Keep the sheet of a sheet-qualified `#REF!` when a formula is converted or modified.
+  `RefModVisitor.ErrorNode` cut the sheet out of the formula text instead of reading the
+  sheet prefix, so a quoted sheet was quoted again: `FormulaConverter.ToR1C1("'Old sheet'!#REF!", 1, 1)`
+  gave `'''Old sheet'''!#REF!`, which doesn't parse back, and a rename of `Old sheet` missed
+  it. A space after the `!` became part of the name (`Old! #REF!` gave `'Old!'!#REF!`), a
+  bang reference `!#REF!` threw `ArgumentException`, and the book index of
+  `'[1]Old sheet'!#REF!` reached `ModifySheet` as part of the sheet name. The sheet is now
+  read the way the parser reads it, and a space after the `!` is dropped as it is for a
+  sheet reference. A sheet behind a book prefix belongs to another workbook and is left as
+  it is. 116 formulas of the Enron and EUSES data sets that didn't survive a conversion to
+  R1C1 and back now do.
 - Parse the implicit intersection operator `@` wherever a reference operand can start.
   It parsed only at the head of a whole reference expression. `SUM(@A1:A4)`,
   `IF(@A1,1,2)` and `D3:@A1:C2` failed with `Unexpected token INTERSECT`, and

@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Tests.Lexers;
+namespace ClosedXML.Parser.Tests.Lexers;
 
 public class CellFunctionListTokenTests
 {
@@ -6,14 +6,14 @@ public class CellFunctionListTokenTests
     public void Ignores_trailing_whitespaces()
     {
         var expected = new RowCol(1, 1, A1);
-        Assert.Equal(expected, TokenParser.A1Style.ParseCellFunction("A1(  "));
+        Assert.Equal(expected, ParseCellFunction("A1(  "));
     }
 
     [Theory]
     [MemberData(nameof(TestData))]
     public void Accepts_absolute_and_relative_cell_addresses(string token, RowCol expectedCell)
     {
-        Assert.Equal(expectedCell, TokenParser.A1Style.ParseCellFunction(token));
+        Assert.Equal(expectedCell, ParseCellFunction(token));
     }
 
     public static IEnumerable<object[]> TestData
@@ -25,5 +25,10 @@ public class CellFunctionListTokenTests
             yield return new object[] { "$B3(", new RowCol(false, 3, true, 2, A1) };
             yield return new object[] { "B$3(", new RowCol(true, 3, false, 2, A1) };
         }
+    }
+
+    private static RowCol ParseCellFunction(string tokenText)
+    {
+        return TokenParser.A1Style.ParseCellFunction(tokenText, new Token(Token.CELL_FUNCTION_LIST, 0, tokenText.Length));
     }
 }

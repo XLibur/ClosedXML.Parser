@@ -1,25 +1,14 @@
-﻿using System;
+using System;
 
 namespace ClosedXML.Parser;
 
 /// <summary>
-/// A context for modifications of a formula through <see cref="CopyVisitor"/>.
+/// Where a modified formula is. <see cref="FormulaConverter"/> passes it to every method of a
+/// <see cref="FormulaModifier"/>.
 /// </summary>
 public class ModContext
 {
-    /// <summary>
-    /// Create a context for modifying formulas. 
-    /// </summary>
-    [Obsolete("Use overload with sheet parameter.")]
-    public ModContext(string formula, int row, int col, bool isA1)
-        : this(formula, string.Empty, row, col, isA1)
-    {
-    }
-
-    /// <summary>
-    /// Create a context for modifying formulas. 
-    /// </summary>
-    public ModContext(string formula, string sheet, int row, int col, bool isA1)
+    internal ModContext(string formula, string sheet, int row, int col, bool isA1, FormulaModifier modifier)
     {
         if (string.IsNullOrWhiteSpace(formula))
             throw new ArgumentException(nameof(formula));
@@ -35,15 +24,17 @@ public class ModContext
         Row = row;
         Col = col;
         IsA1 = isA1;
+        Modifier = modifier;
     }
 
     /// <summary>
-    /// The original formula without any modifications.
+    /// The original formula without any modifications. The modification writes the formula again from it, so a
+    /// modifier gets the parts of the formula, not the text.
     /// </summary>
-    public string Formula { get; }
+    internal string Formula { get; }
 
     /// <summary>
-    /// Name of the current sheet.
+    /// Name of the sheet the formula is on.
     /// </summary>
     public string Sheet { get; }
 
@@ -58,7 +49,13 @@ public class ModContext
     public int Col { get; }
 
     /// <summary>
-    /// Should references in formula be A1?
+    /// Is the formula written in the A1 reference style? If not, it is written in R1C1, and so are the references
+    /// passed to the modifier.
     /// </summary>
     public bool IsA1 { get; }
+
+    /// <summary>
+    /// The modifier of the formula.
+    /// </summary>
+    internal FormulaModifier Modifier { get; }
 }

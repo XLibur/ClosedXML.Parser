@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="**/*.csv">
+    <None Update="**/*.csv;**/*.sha256">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

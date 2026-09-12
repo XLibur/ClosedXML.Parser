@@ -3,13 +3,13 @@ using BenchmarkDotNet.Attributes;
 namespace ClosedXML.Parser.Benchmarks;
 
 /// <summary>
-/// Convert and modify the formulas of a data set sample. Each of these parses the formula with
-/// <see cref="RefModVisitor"/> and writes the formula text again.
+/// Convert and modify the formulas of a data set sample. Each of these parses the formula with a
+/// <see cref="FormulaModifier"/> and writes the formula text again.
 /// </summary>
 [MemoryDiagnoser]
 public class FormulaConverterBenchmarks
 {
-    private static readonly RenameSheetVisitor s_renameSheet = new("Sheet1", "Renamed sheet");
+    private static readonly RenameSheetModifier s_renameSheet = new("Sheet1", "Renamed sheet");
 
     private string[] _formulasA1 = null!;
     private string[] _formulasR1C1 = null!;
@@ -55,12 +55,12 @@ public class FormulaConverterBenchmarks
         return modified;
     }
 
-    private sealed class RenameSheetVisitor : RefModVisitor
+    private sealed class RenameSheetModifier : FormulaModifier
     {
         private readonly string _oldName;
         private readonly string _newName;
 
-        public RenameSheetVisitor(string oldName, string newName)
+        public RenameSheetModifier(string oldName, string newName)
         {
             _oldName = oldName;
             _newName = newName;
