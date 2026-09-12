@@ -100,15 +100,6 @@ Generate the DFA tables
 
 `tools/rolex/generate-dfa-tables.sh` regenerates *RolexA1Dfa.cs* and *RolexR1C1Dfa.cs* from the Rolex grammars with the vendored Rolex build in *tools/rolex/91a2d6d*, the only build whose output matches the tables. It is a .NET Framework executable, so run the script from Git Bash on Windows. With `--check` it changes nothing and fails when a committed table differs. The `rolex-tables` CI job runs it that way, so a Rolex grammar committed without its regenerated table fails the build. *tools/rolex/README.md* records how that build was made.
 
-# TODO
-
-* Lexer generation during build
-* Proper CI pipeline.
-  * Azure Function
-  * Web 
-* Fuzzer
-* PR to Rolex to fix unicode bug.
-
 # Resources
 
 * [MS-XML](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e)
