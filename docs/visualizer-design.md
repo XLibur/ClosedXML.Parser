@@ -25,7 +25,7 @@ after the Pages site worked.
 | `tools/tailwind/generate-css.sh` | Regenerates or checks the committed Tailwind CSS. |
 | `.github/workflows/pages.yml` | Publishes the app to GitHub Pages. |
 
-Both projects are in `src/ClosedXML.Parser.sln`, so every workflow that builds the solution also
+Both projects are in `src/ClosedXML.Parser.slnx`, so every workflow that builds the solution also
 builds the app. The app sets `IsPackable=false`. The release workflows pack only
 `ClosedXML.Parser.csproj`, so the app never goes to NuGet.
 
