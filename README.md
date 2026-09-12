@@ -4,18 +4,21 @@
 >
 > This repository is a fork of [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser), Copyright (c) 2023, Jan Havlíček.
 >
-> The sole purpose of this fork is to bundle some fixes needed by the upstream XLibur library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push pull requests with these fixes back to upstream ClosedXML.Parser.
+> The sole purpose of this fork is to bundle some fixes needed by the XLibur library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push pull requests with these fixes back to upstream ClosedXML.Parser.
 
-ClosedParser is a project to parse OOXML grammar to create an abstract syntax tree that can be later evaluated.
+ClosedParser parses Excel formulas, in the form that OOXML files store them, into an abstract syntax tree that can be evaluated.
 
-Official source for the grammar is [MS-XML](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e), chapter 2.2.2 Formulas. The provided grammar is not usable for parser generators, it's full of ambiguities and the rules don't take into account operator precedence.
+Official source for the grammar is [MS-XLSX](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e), chapter 2.2.2 Formulas. The provided grammar is not usable for parser generators, it's full of ambiguities and the rules don't take into account operator precedence.
 
 # How to use
 
-* Implement `IAstFactory` interface.
-* Call parsing methods
-  * `FormulaParser<TScalarValue, TNode>.CellFormulaA1("Sum(A1, 2)", astFactory)`
-  * `FormulaParser<TScalarValue, TNode>.CellFormulaR1C1("Sum(R1C1, 2)", astFactory)`
+Install the `XLibur.ClosedXML.Parser` NuGet package.
+
+* Implement the `IAstFactory<TScalarValue, TNode, TContext>` interface. The parser calls it for each node, with the range of the formula text that the node was parsed from. *src/ClosedXML.Parser.Ast/AstFactory.cs* is an example; the tests and the visualizer use it.
+* Call a parsing method. The parser passes the context to each method of the factory.
+  * `FormulaParser<TScalarValue, TNode, TContext>.CellFormulaA1("SUM(A1, 2)", context, factory)`
+  * `FormulaParser<TScalarValue, TNode, TContext>.CellFormulaR1C1("SUM(R1C1, 2)", context, factory)`
+* A formula that does not satisfy the grammar throws a `ParsingException`.
 
 ## Visualizer
 There is a visualizer to display AST in a browser at **[https://xlibur.github.io/ClosedXML.Parser/](https://xlibur.github.io/ClosedXML.Parser/)**. It runs the parser from the `develop` branch in the browser with Blazor WebAssembly. See [docs/visualizer-design.md](docs/visualizer-design.md).
@@ -29,19 +32,22 @@ There is a visualizer to display AST in a browser at **[https://xlibur.github.io
 * __Multi-use__ - Formulas are mostly used in cells, but there are other places with different grammar rules (e.g. sparklines, data validation)
 * __Multi notation (A1 or R1C1)__ - Parser should be able to parse both A1 and R1C1 formulas. I.e. `SUM(R5)` can mean return sum of cell `R5` in _A1_ notation, but return sum of all cells on row 5 in _R1C1_ notation.
 
-Project uses ANTLR4 grammar file as the source of truth and a lexer. There is also ANTLR parser is not used, but is used as a basis of recursive descent parser (ANTLR takes up 8 seconds vs RDS 700ms for parsing of enron dataset).
+The ANTLR4 grammars in *src/ClosedXML.ANTLR* are the source of truth. The lexer grammar, *FormulaLexer.g4*, is converted to the grammars of the Rolex DFA lexer that the parser uses (see [Rolex](#rolex)). The parser grammar, *FormulaParser.g4*, is the basis of the recursive descent parser. The package does not use the ANTLR runtime: only the tests use the ANTLR lexer and parser, to check that the parser agrees with the grammar. Upstream measured the ANTLR parser at 8 seconds for the Enron data set, and the recursive descent parser at 700 ms.
 
 ANTLR4 one of few maintained parser generators with C# target.
 
-The project has a low priority, XLParser mostly works, but in the long term, replacement is likely.
+Upstream ClosedXML has replaced XLParser with ClosedXML.Parser, and the XLibur library uses the `XLibur.ClosedXML.Parser` package of this fork.
 
 ## Current performance
 
-ENRON dataset parsed using recursive descent parser and DFA lexer in Release mode:
+The data set tests print how long the parse took. In Release mode, on .NET 10 and an AMD Ryzen 9 5950X (measured 2026-09-12), with the AST factory of the tests:
 
-* Total: *946320*
-* Elapsed: *1838 ms*
-* Per formula: *1.942 μs*
+* Enron: *946320* formulas in 1.6 to 1.8 s, *1.7 to 1.9 μs* per formula
+* EUSES: *89295* formulas in 0.12 to 0.15 s, *1.4 to 1.7 μs* per formula
+
+Upstream measured 1.942 μs per formula for Enron. To measure again:
+
+`dotnet test src/ClosedXML.Parser.Tests -c Release -f net10.0 --filter "FullyQualifiedName~DataSetTests" --logger "console;verbosity=detailed"`
 
 2μs per formula should be something like 6000 instructions (under unrealistic assumption 1 instruction per 1 Hz), so basically fast enough.
 
@@ -52,12 +58,15 @@ The primary goal is to parse formulas stored in file, not user supplied formulas
 * In the structured references, user sees @ as an indication that structured references this row, but in reality it is a specifier `[#This Row]`
 
 Therefore:
-* External references are accepted only in form of an index to an external file (e.g. `[5]`)
-* There are several formula implementations out there with slighly different grammar incompatible with OOXML formulas (`[1]!'Some name in external wb'`). They are out of scope of the project.
+* External references are accepted only in form of an index to an external file (e.g. `[5]Sheet1!A1`). `[Book1.xlsx]Sheet1!A1` does not parse.
+* A quoted item after an external file index, such as `[1]!'Some name in external wb'`, is read as a dynamic data exchange (DDE) item, because that is how a file stores a DDE link. A name in an external file parses only without quotes, e.g. `[1]!SomeName`.
+* Other formula implementations have a slightly different grammar, incompatible with OOXML formulas. They are out of scope of the project.
+
+The parser also does not parse a call of a function result, such as `LAMBDA(x,x+1)(2)`.
 
 # Why not use XLParser
 
-ClosedXML is currently using [XLParser](https://github.com/spreadsheetlab/XLParser) and transforming the concrete syntax tree to abstract syntax tree.
+ClosedXML used [XLParser](https://github.com/spreadsheetlab/XLParser) and transformed its concrete syntax tree to an abstract syntax tree, until it replaced XLParser with ClosedXML.Parser. The reasons, as upstream measured them:
 
 * Speed:
   * Grammar extensively uses regexps extensively. Regexs are slow, especially for NET4x target, allocates extra memory. XLParser takes up _47_ seconds for Enron dataset on .NET Framework. .NET teams had made massive improvements on regexs, so it takes only _16_ seconds on NET7.
@@ -75,15 +84,17 @@ Use [vscode-antlr4](https://github.com/mike-lischke/vscode-antlr4/blob/master/do
 ## Testing strategy
 
 * Each token that contains some data that are extracted for a node (e.g. `A1_REFERENCE` `C5` to `row 5`, `column 3`) has a separate test class in `Lexers` directory with a `{TokenPascalName}TokenTests.cs`
-* Each parser rule has a test class in `Rules` directory. It should contain all possible combinatins of a rule and comparing it with the AST nodes.
-* Data set tests are in `DataSetTests.cs`. Each test tries to parse formula and ensures that **ANTLR** can parse it RDS can and can't parse a formula when **ANTLR** can't. There is no check of the output, just that formulas can be parsed. Data are contained in a `data` directory in CSV format with a one column.
+* Each parser rule has a test class in `Rules` directory. It should contain all possible combinations of a rule and comparing it with the AST nodes.
+* Data set tests are in `DataSetTests.cs`. They parse each formula of the Enron, EUSES and contributions data sets. A formula listed in the `known-fails.csv` of its data set must fail, and every other formula must parse. There is no check of the output. Each data set is a directory in `data`, with its formulas in a one column CSV file, `formulas.csv`.
+* `AntlrCompatibilityTests.cs` checks that the Rolex lexer and the ANTLR lexer produce the same tokens for the data sets.
+* `ClosedXML.Parser.Visualizer.Tests` tests the visualizer.
 
 ## Rolex
 
 Rolex is a DFA based lexer released under MIT license (see [Rolex: Unicode Enabled Lexer Generator in C#
 ](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp)). ANTLR is still the source of truth, but it is used to generate Rolex grammar and then DFA for a lexer.
 
-It is rather complicated, but two times faster than ANTLR lexer (1.9 us vs 3.676 us per formula).
+It is rather complicated, but upstream measured it as two times faster than the ANTLR lexer (1.9 us vs 3.676 us per formula).
 
 ## Generate lexer
 
@@ -102,6 +113,6 @@ Generate the DFA tables
 
 # Resources
 
-* [MS-XML](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e)
+* [MS-XLSX](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e)
 * [Simplified XLParser grammar](https://github.com/spreadsheetlab/XLParser/blob/master/doc/ebnf.pdf) and [tokens](https://github.com/spreadsheetlab/XLParser/blob/master/doc/tokens.pdf).
 * [Getting Started With ANTLR in C#](https://tomassetti.me/getting-started-with-antlr-in-csharp/)
