@@ -214,8 +214,13 @@ public static class ReferenceParser
     /// </summary>
     private static bool IsWholeReference(List<Token> tokens, int index, string text, IReferenceStyle style, out ReferenceArea area)
     {
-        return TokenParser.TryReadReference(style, text.AsSpan(), tokens, ref index, out area) &&
-               tokens[index].SymbolId == Token.EofSymbolId;
+        if (TokenParser.TryReadReference(style, text.AsSpan(), tokens, ref index, out area) &&
+            tokens[index].SymbolId == Token.EofSymbolId)
+            return true;
+
+        // A reference followed by more text isn't a reference, so don't give out the reference at its start.
+        area = default;
+        return false;
     }
 
     private static bool TryParseSheetName(List<Token> tokens, string text, out string sheetName, out string name)

@@ -59,6 +59,34 @@ public class ReferenceParserTests
         Assert.Equal(ReferenceParser.ParseA1(expectedArea), area);
     }
 
+    /// <summary>
+    /// A reference followed by more text isn't a reference, and the area of a parse that fails is the default,
+    /// not the reference at the start of the text. A default area is <c>A1</c>, so none of the texts starts with it.
+    /// </summary>
+    [Theory]
+    [InlineData("B2+")]
+    [InlineData("B2:")]
+    [InlineData("B2:C3+")]
+    [InlineData("$D:$G+")]
+    public void TryParseA1_gives_default_area_when_reference_is_followed_by_more(string text)
+    {
+        Assert.False(ReferenceParser.TryParseA1(text, out var area));
+        Assert.Equal(default, area);
+
+        Assert.False(ReferenceParser.TryParseA1(text, out _, out var sheetArea));
+        Assert.Equal(default, sheetArea);
+    }
+
+    [Theory]
+    [InlineData("RC+")]
+    [InlineData("R1C1:")]
+    [InlineData("R1C1:R[2]C[3]+")]
+    public void TryParseR1C1_gives_default_area_when_reference_is_followed_by_more(string text)
+    {
+        Assert.False(ReferenceParser.TryParseR1C1(text, out var area));
+        Assert.Equal(default, area);
+    }
+
     [Fact]
     public void TryParseR1C1_reads_area_with_spaces_around_colon()
     {
