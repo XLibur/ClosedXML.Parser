@@ -18,7 +18,7 @@ Official source for the grammar is [MS-XML](https://learn.microsoft.com/en-us/op
   * `FormulaParser<TScalarValue, TNode>.CellFormulaR1C1("Sum(R1C1, 2)", astFactory)`
 
 ## Visualizer
-There is a visualizer to display AST in a browser at **[https://parser.closedxml.io](https://parser.closedxml.io)**
+There is a visualizer to display AST in a browser at **[https://xlibur.github.io/ClosedXML.Parser/](https://xlibur.github.io/ClosedXML.Parser/)**. It runs the parser from the `develop` branch in the browser with Blazor WebAssembly. See [docs/visualizer-design.md](docs/visualizer-design.md).
 
 ![image](assets/visualizer.png)
 

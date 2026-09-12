@@ -1,0 +1,235 @@
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>ClosedXML.Parser visualizer</PageTitle>
+
+<main class="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6">
+    <header class="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">ClosedXML.Parser visualizer</h1>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Type an Excel formula to see the syntax tree that the parser builds. The parser runs in your browser.</p>
+        </div>
+        <a class="text-sm text-blue-700 hover:underline dark:text-blue-400" href="https://github.com/XLibur/ClosedXML.Parser">GitHub</a>
+    </header>
+
+    <section class="flex flex-col gap-2" aria-label="Formula">
+        <div class="flex flex-wrap items-center gap-2">
+            <label for="formula" class="sr-only">Formula</label>
+            <input id="formula" type="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+                   class="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 font-mono text-base shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                   value="@_formula" @oninput="OnFormulaInput" />
+            <div role="group" aria-label="Reference style" class="inline-flex overflow-hidden rounded-md border border-slate-300 shadow-sm dark:border-slate-700">
+                @foreach (var style in Styles)
+                {
+                    <button type="button" aria-pressed="@(style == _style ? "true" : "false")"
+                            class="bg-white px-3 py-2 text-sm font-medium hover:bg-slate-100 aria-pressed:bg-blue-600 aria-pressed:text-white dark:bg-slate-900 dark:hover:bg-slate-800 dark:aria-pressed:bg-blue-500"
+                            @onclick="() => SetStyle(style)">@style</button>
+                }
+            </div>
+        </div>
+
+        <FormulaEcho Formula="@_formula" Highlight="@SelectedNode?.Range" ErrorPosition="@Failure?.Position" />
+
+        @if (Failure is { } failure)
+        {
+            <p role="alert" class="text-sm text-red-700 dark:text-red-400">@failure.Message</p>
+        }
+        else if (SelectedNode is { } node)
+        {
+            <p class="text-sm" data-testid="node-details">
+                <span class="font-medium">@node.Type</span>
+                <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">@node.Label</code>
+                covers <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">@CoveredText(node)</code>,
+                range @node.Range
+            </p>
+        }
+        else
+        {
+            <p class="text-sm text-slate-500 dark:text-slate-400">Click a node to see the part of the formula it covers.</p>
+        }
+
+        <div class="flex flex-wrap items-center gap-2" aria-label="Examples">
+            <span class="text-xs text-slate-500 dark:text-slate-400">Examples:</span>
+            @foreach (var example in ExampleFormulas.All)
+            {
+                <button type="button" title="@example.Formula"
+                        class="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs hover:border-blue-500 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-blue-400"
+                        @onclick="() => ShowExample(example)">@example.Label</button>
+            }
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-label="Syntax tree">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2 dark:border-slate-800">
+            <h2 class="text-sm font-medium">Syntax tree</h2>
+            <div class="flex items-center gap-2">
+                @if (_copyStatus is not null)
+                {
+                    <span role="status" class="text-xs text-slate-500 dark:text-slate-400">@_copyStatus</span>
+                }
+                <button type="button" disabled="@(_diagram is null || Failure is not null)"
+                        title="Copy the tree as Mermaid text. GitHub draws it in an issue or a comment."
+                        class="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                        @onclick="CopyMermaid">Copy Mermaid</button>
+            </div>
+        </div>
+        <div class="p-4">
+            @if (_diagram is null)
+            {
+                <p class="text-sm text-slate-500 dark:text-slate-400">The tree shows when the formula parses.</p>
+            }
+            else
+            {
+                <MermaidDiagram Definition="@_diagram.Mermaid" SelectedNodeId="@SelectedNode?.Id" Dimmed="@(Failure is not null)" OnNodeClick="OnNodeClick" />
+            }
+        </div>
+        <div class="border-t border-slate-200 px-4 py-2 dark:border-slate-800">
+            <Legend />
+        </div>
+    </section>
+
+    <footer class="text-xs text-slate-500 dark:text-slate-400">
+        XLibur.ClosedXML.Parser @ParserVersion.Current.Version
+        @if (ParserVersion.Current.CommitUrl is { } commitUrl)
+        {
+            <text> · </text><a class="hover:underline" href="@commitUrl">@ParserVersion.Current.ShortCommit</a>
+        }
+    </footer>
+</main>
+
+@code {
+    public const string DefaultFormula = "SUM(B5,2)";
+
+    private static readonly TimeSpan DebounceDelay = TimeSpan.FromMilliseconds(150);
+    private static readonly ReferenceStyle[] Styles = [ReferenceStyle.A1, ReferenceStyle.R1C1];
+
+    private string _formula = DefaultFormula;
+    private ReferenceStyle _style = ReferenceStyle.A1;
+    private ParseResult _result = null!;
+
+    /// <summary>
+    /// The tree of the last formula that parsed. It stays on the page, dimmed, while the formula has an error.
+    /// </summary>
+    private DiagramModel? _diagram;
+
+    private string? _selectedNodeId;
+    private CancellationTokenSource? _pendingParse;
+    private string? _copyStatus;
+
+    private FailedParse? Failure => _result as FailedParse;
+
+    private DiagramNode? SelectedNode => Failure is null ? _diagram?.FindNode(_selectedNodeId) : null;
+
+    protected override void OnInitialized()
+    {
+        // Read the query once. Later changes to it come from this page, not from the user.
+        var query = System.Web.HttpUtility.ParseQueryString(new Uri(Navigation.Uri).Query);
+        _formula = query["f"] ?? DefaultFormula;
+        _style = string.Equals(query["style"], "R1C1", StringComparison.OrdinalIgnoreCase) ? ReferenceStyle.R1C1 : ReferenceStyle.A1;
+        Parse();
+    }
+
+    private async Task OnFormulaInput(ChangeEventArgs e)
+    {
+        _formula = e.Value?.ToString() ?? string.Empty;
+        CancelPendingParse();
+        var pending = _pendingParse = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(DebounceDelay, pending.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        ApplyFormula();
+    }
+
+    private void SetStyle(ReferenceStyle style)
+    {
+        if (style == _style)
+            return;
+
+        _style = style;
+        ApplyFormula();
+    }
+
+    private void ShowExample(ExampleFormula example)
+    {
+        _formula = example.Formula;
+        _style = example.Style;
+        ApplyFormula();
+    }
+
+    private void OnNodeClick(string? nodeId)
+    {
+        _selectedNodeId = nodeId == _selectedNodeId ? null : nodeId;
+    }
+
+    private async Task CopyMermaid()
+    {
+        if (_diagram is null)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", _diagram.MermaidWithClassDefs);
+            _copyStatus = "Copied";
+        }
+        catch (JSException)
+        {
+            _copyStatus = "The browser did not allow the copy";
+        }
+
+        StateHasChanged();
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        _copyStatus = null;
+    }
+
+    private void ApplyFormula()
+    {
+        CancelPendingParse();
+        Parse();
+        UpdateUrl();
+    }
+
+    private void Parse()
+    {
+        _result = FormulaAnalyzer.Parse(_formula, _style);
+        if (_result is ParsedFormula parsed)
+        {
+            _diagram = parsed.Diagram;
+            _selectedNodeId = null;
+        }
+    }
+
+    private void UpdateUrl()
+    {
+        var uri = Navigation.GetUriWithQueryParameters(new Dictionary<string, object?>
+        {
+            ["f"] = _formula == DefaultFormula ? null : _formula,
+            ["style"] = _style == ReferenceStyle.R1C1 ? "R1C1" : null,
+        });
+
+        // Replace, so typing does not add an entry to the history for each parse.
+        Navigation.NavigateTo(uri, replace: true);
+    }
+
+    private string CoveredText(DiagramNode node)
+    {
+        var start = Math.Clamp(node.Range.Start, 0, _formula.Length);
+        var end = Math.Clamp(node.Range.End, start, _formula.Length);
+        return _formula[start..end];
+    }
+
+    private void CancelPendingParse()
+    {
+        _pendingParse?.Cancel();
+        _pendingParse?.Dispose();
+        _pendingParse = null;
+    }
+
+    public void Dispose() => CancelPendingParse();
+}

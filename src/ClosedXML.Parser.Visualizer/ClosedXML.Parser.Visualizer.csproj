@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <IsPackable>false</IsPackable>
+    <!-- A number shows the same in every browser, and the ICU data is not downloaded. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    Blazor hides trim warnings by default. The parser reads the fields of Token by reflection,
+    so show the trim warnings and fail the publish on one, instead of shipping a broken page.
+
+    The trimmer reports each warning of this app and of its project references (the parser and
+    the Ast project). For any other assembly it reports one IL2104 warning. The Blazor framework
+    assemblies have such warnings, and Blazor expects them, so IL2104 is not an error.
+  -->
+  <PropertyGroup>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <ILLinkTreatWarningsAsErrors>true</ILLinkTreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);IL2104</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.12" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClosedXML.Parser.Ast\ClosedXML.Parser.Ast.csproj" />
+  </ItemGroup>
+
+</Project>
