@@ -63,6 +63,23 @@ public class RefModVisitorTests
         AssertChangesA1(formula, factory, modifiedFormula);
     }
 
+    /// <summary>
+    /// A sheet behind a book prefix is a sheet of another workbook, so a sheet of this workbook with the same
+    /// name being renamed or deleted doesn't change it.
+    /// </summary>
+    [Theory]
+    [InlineData("'[1]Old sheet:Other'!A1", "Old sheet", "New", "'[1]Old sheet:Other'!A1")]
+    [InlineData("[1]Old:Other!A1", "Old", null, "[1]Old:Other!A1")]
+    [InlineData("[1]First:Old!A1", "Old", "New", "[1]First:Old!A1")]
+    [InlineData("'[1]Old sheet'!A1", "Old sheet", "New", "'[1]Old sheet'!A1")]
+    [InlineData("[1]Old!Name", "Old", null, "[1]Old!Name")]
+    [InlineData("[1]Old!F(1)", "Old", "New", "[1]Old!F(1)")]
+    public void Sheet_of_another_workbook_is_not_modified(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var factory = new FormulaVisitor { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertChangesA1(formula, factory, modifiedFormula);
+    }
+
     [Theory]
     [InlineData("Sheet!Name", "Sheet", null, "#REF!")]
     [InlineData("Sheet!Name", "Sheet", "New Sheet", "'New Sheet'!Name")]

@@ -160,13 +160,12 @@ public class RefModVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     /// <inheritdoc />
     public TransformedSymbol ExternalReference3D(ModContext ctx, SymbolRange range, int workbookIndex, string firstSheet, string lastSheet, ReferenceArea reference)
     {
-        var modifiedFirstSheet = ModifySheet(ctx, firstSheet);
-        var modifiedLastSheet = ModifySheet(ctx, lastSheet);
+        // The sheets are sheets of another workbook, so they aren't modified.
         var modifiedReference = ModifyRef(ctx, reference);
-        if (modifiedFirstSheet is null || modifiedLastSheet is null || modifiedReference is null)
+        if (modifiedReference is null)
             return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
 
-        return s_copyVisitor.ExternalReference3D(ctx, range, workbookIndex, modifiedFirstSheet, modifiedLastSheet, modifiedReference.Value);
+        return s_copyVisitor.ExternalReference3D(ctx, range, workbookIndex, firstSheet, lastSheet, modifiedReference.Value);
     }
 
     /// <inheritdoc />

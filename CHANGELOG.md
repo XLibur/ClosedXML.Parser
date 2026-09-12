@@ -63,6 +63,12 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Leave the sheets of a 3D reference into another workbook alone when a sheet is renamed or
+  deleted. `RefModVisitor.ExternalReference3D` passed both sheets of `[1]First:Last!A1` to
+  `ModifySheet`, so renaming a sheet of this workbook renamed the sheet of the same name in
+  the other workbook, and deleting it turned the reference into `#REF!`. Every other reference
+  behind a book prefix, e.g. `[1]Sheet!A1`, `[1]Sheet!Name` or `[1]Sheet!F(1)`, already left
+  its sheet alone, and now the 3D reference does too.
 - Parse `LOG10(` in an A1 formula as the function `LOG10`. `LOG10` is also a cell, column `LOG`
   row 10, so the lexer reads `LOG10(` as a cell function, and `IAstFactory.CellFunction`
   received it. `RefModVisitor` special-cased the name by scanning the formula text, but every
