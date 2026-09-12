@@ -63,6 +63,17 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Keep the sheet of a sheet-qualified `#REF!` when a formula is converted or modified.
+  `RefModVisitor.ErrorNode` cut the sheet out of the formula text instead of reading the
+  sheet prefix, so a quoted sheet was quoted again: `FormulaConverter.ToR1C1("'Old sheet'!#REF!", 1, 1)`
+  gave `'''Old sheet'''!#REF!`, which doesn't parse back, and a rename of `Old sheet` missed
+  it. A space after the `!` became part of the name (`Old! #REF!` gave `'Old!'!#REF!`), a
+  bang reference `!#REF!` threw `ArgumentException`, and the book index of
+  `'[1]Old sheet'!#REF!` reached `ModifySheet` as part of the sheet name. The sheet is now
+  read the way the parser reads it, and a space after the `!` is dropped as it is for a
+  sheet reference. A sheet behind a book prefix belongs to another workbook and is left as
+  it is. 116 formulas of the Enron and EUSES data sets that didn't survive a conversion to
+  R1C1 and back now do.
 - Parse the implicit intersection operator `@` wherever a reference operand can start.
   It parsed only at the head of a whole reference expression. `SUM(@A1:A4)`,
   `IF(@A1,1,2)` and `D3:@A1:C2` failed with `Unexpected token INTERSECT`, and

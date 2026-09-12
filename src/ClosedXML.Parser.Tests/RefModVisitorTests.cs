@@ -17,7 +17,19 @@ public class RefModVisitorTests
     [Theory]
     [InlineData("Old!#REF!", "Old", null, "#REF!#REF!")]
     [InlineData("Old!#REF!", "Old", "New", "New!#REF!")]
+    [InlineData("'Old sheet'!#REF!", "Old sheet", "New", "New!#REF!")]
+    [InlineData("'Old sheet'!#REF!", "Old sheet", "New sheet", "'New sheet'!#REF!")]
+    [InlineData("Old! #REF!", "Old", "New", "New!#REF!")]
     public void ErrorNode_can_modify_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var factory = new FormulaVisitor { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertChangesA1(formula, factory, modifiedFormula);
+    }
+
+    [Theory]
+    [InlineData("'[1]Old sheet'!#REF!", "Old sheet", "New", "'[1]Old sheet'!#REF!")]
+    [InlineData("[1]Old!#REF!", "Old", null, "[1]Old!#REF!")]
+    public void ErrorNode_leaves_sheet_of_another_workbook(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
     {
         var factory = new FormulaVisitor { SheetMap = { { oldSheetName, newSheetName } } };
         AssertChangesA1(formula, factory, modifiedFormula);

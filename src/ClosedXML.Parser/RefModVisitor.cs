@@ -62,7 +62,7 @@ public class RefModVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
         if (range.Length == error.Length)
             return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-        // Deal with `Sheet!REF!`, `#REF!A1` and `#REF!#REF!`
+        // Deal with `Sheet!#REF!`, `!#REF!`, `#REF!A1` and `#REF!#REF!`
         var symbol = ctx.Formula.AsSpan().Slice(range.Start, range.Length);
         var sheetIsRefError = symbol.StartsWith(REF_ERROR.AsSpan(), StringComparison.OrdinalIgnoreCase);
 
@@ -74,14 +74,21 @@ public class RefModVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
             return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
         }
 
-        // Sheet!#REF! is a valid formula per grammar and Excel, though it displeases me.
-        var sheet = symbol.Slice(0, symbol.Length - REF_ERROR.Length - 1);
-        var modifiedSheet = ModifySheet(ctx, sheet.ToString());
-        var nodeText = new StringBuilder()
-            .AppendSheetReference(modifiedSheet)
-            .Append(symbol.Slice(symbol.Length - REF_ERROR.Length))
-            .ToString();
-        return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
+        // A bang reference to a deleted cell has no sheet to modify.
+        if (symbol[0] == '!')
+            return TransformedSymbol.CopyOriginal(ctx.Formula, range);
+
+        // Sheet!#REF! is a valid formula per grammar and Excel, though it displeases me. The symbol
+        // is a sheet prefix token followed by the error token, so read the sheet the way the parser does.
+        var errorText = symbol.Slice(symbol.Length - error.Length);
+        TokenParser.ParseSingleSheetPrefix(symbol.Slice(0, symbol.Length - error.Length), out var workbookIndex, out var sheet);
+        var nodeText = new StringBuilder();
+        if (workbookIndex is null)
+            nodeText.AppendSheetReference(ModifySheet(ctx, sheet));
+        else
+            nodeText.AppendExternalSheetReference(workbookIndex.Value, sheet); // A sheet of another workbook isn't modified.
+
+        return TransformedSymbol.ToText(ctx.Formula, range, nodeText.Append(errorText).ToString());
     }
 
     /// <inheritdoc />
