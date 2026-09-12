@@ -8,7 +8,7 @@
 
 ClosedParser parses Excel formulas, in the form that OOXML files store them, into an abstract syntax tree that can be evaluated.
 
-Official source for the grammar is [MS-XLSX](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e), chapter 2.2.2 Formulas. The provided grammar is not usable for parser generators, it's full of ambiguities and the rules don't take into account operator precedence.
+Official source for the grammar is [MS-XLSX](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/2c5dee00-eff2-4b22-92b6-0738acd4475e), chapter 2.2.2 Formulas. The provided grammar is not usable for parser generators, it's full of ambiguities and the rules don't take into account operator precedence. A copy of the v20221115 grammar is in *docs/grammar*, together with a copy annotated with notes from the start of the project.
 
 # How to use
 
