@@ -46,6 +46,27 @@ public class ReferenceParserTests
         Assert.Equal(default, area);
     }
 
+    /// <summary>
+    /// The lexer puts the whitespace around a <c>:</c> into the colon token, so the cells of an area can have
+    /// spaces between them.
+    /// </summary>
+    [Theory]
+    [InlineData("A1 : B2", "A1:B2")]
+    [InlineData("$B$2 :$D$10", "$B$2:$D$10")]
+    public void TryParseA1_reads_area_with_spaces_around_colon(string text, string expectedArea)
+    {
+        Assert.True(ReferenceParser.TryParseA1(text, out var area));
+        Assert.Equal(ReferenceParser.ParseA1(expectedArea), area);
+    }
+
+    [Fact]
+    public void TryParseR1C1_reads_area_with_spaces_around_colon()
+    {
+        Assert.True(ReferenceParser.TryParseR1C1("R1C1 : R[2]C[3]", out var area));
+        Assert.True(ReferenceParser.TryParseR1C1("R1C1:R[2]C[3]", out var expectedArea));
+        Assert.Equal(expectedArea, area);
+    }
+
     [Theory]
     [MemberData(nameof(ParseR1C1TestCases))]
     public void TryParseR1C1_parses_cell_area_or_rowspan_or_colspan(string text, ReferenceArea expectedReference)

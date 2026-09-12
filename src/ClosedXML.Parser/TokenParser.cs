@@ -202,14 +202,29 @@ internal static class TokenParser
             return false;
         }
 
+        // A1_CELL COLON A1_CELL
+        if (index + 2 < tokens.Count && tokens[index + 1].SymbolId == Token.COLON && tokens[index + 2].SymbolId == Token.A1_CELL)
+        {
+            var colon = tokens[index + 1];
+            var secondCell = tokens[index + 2];
+            if (colon.Length == 1)
+            {
+                // A bare ':' between the cells, so the reader reads the area in one pass, the same as the
+                // reference of a bang reference (e.g. `!A1:B2`).
+                area = style.ParseReference(formula, new Token(Token.A1_CELL, first.StartIndex, secondCell.StartIndex + secondCell.Length - first.StartIndex));
+            }
+            else
+            {
+                // The lexer puts the whitespace around ':' into the colon token (e.g. `A1 : B2`), so read each cell.
+                area = new ReferenceArea(style.ParseReference(formula, first).First, style.ParseReference(formula, secondCell).First);
+            }
+
+            index += 3;
+            return true;
+        }
+
         area = style.ParseReference(formula, first);
         index++;
-        if (index + 1 < tokens.Count && tokens[index].SymbolId == Token.COLON && tokens[index + 1].SymbolId == Token.A1_CELL)
-        {
-            var secondCell = style.ParseReference(formula, tokens[index + 1]);
-            area = new ReferenceArea(area.First, secondCell.First);
-            index += 2;
-        }
 
         return true;
     }
