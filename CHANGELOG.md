@@ -63,6 +63,11 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Read an area whose colon has spaces around it, e.g. `A1 : B2`, in `ReferenceParser`. The
+  lexer puts the whitespace around `:` into the colon token, but `ReferenceParser` read the
+  whole text as if the colon were bare, so `TryParseA1("A1 : B2")` returned `true` with the
+  area `A1::-16`, and `TryParseR1C1("R1C1 : R2C2")` threw `InvalidOperationException`. It now
+  reads each cell of such an area, as the formula parser already did.
 - Keep the sheet of a sheet-qualified `#REF!` when a formula is converted or modified.
   `RefModVisitor.ErrorNode` cut the sheet out of the formula text instead of reading the
   sheet prefix, so a quoted sheet was quoted again: `FormulaConverter.ToR1C1("'Old sheet'!#REF!", 1, 1)`
