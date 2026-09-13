@@ -216,6 +216,36 @@ public class FormulaModifierTests
     }
 
     /// <summary>
+    /// A 3D reference with no sheets left is answered with <c>null</c>, so a range that names no
+    /// sheets - a <c>default</c> one - is a fault in the call rather than a null reference from
+    /// inside the writer.
+    /// </summary>
+    [Fact]
+    public void ModifySheetRange_cant_answer_with_a_range_that_names_no_sheets()
+    {
+        var modifier = new SheetRangeModifier { Sheets = default(SheetRange) };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1("Sheet1:Sheet5!A1", "Sheet", 1, 1, modifier));
+        Assert.Contains("names no sheets", ex.Message);
+    }
+
+    /// <summary>
+    /// The name rule holds at both ends even when the sheet at the other end is deleted. The part
+    /// comes out as <c>#REF!</c> either way, but a rename to a name no workbook could hold is a
+    /// fault in the call, and it is caught wherever it is answered.
+    /// </summary>
+    [Theory]
+    [InlineData("Old:Last!A1", "Old", "Last")]
+    [InlineData("First:Old!A1", "Old", "First")]
+    public void A_rename_in_a_3D_reference_is_checked_when_the_other_sheet_is_deleted(string formula, string renamedSheet, string deletedSheet)
+    {
+        var modifier = new SheetModifier { SheetMap = { { renamedSheet, "a?" }, { deletedSheet, null } } };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, modifier));
+        Assert.Contains("a?", ex.Message);
+    }
+
+    /// <summary>
     /// Only a 3D reference of this workbook spans sheets a modification may change, so nothing else
     /// asks the hook.
     /// </summary>

@@ -58,7 +58,13 @@ public partial class FormulaModifier
         var modifiedFirstSheet = ModifySheet(ctx, firstSheet);
         var modifiedLastSheet = ModifySheet(ctx, lastSheet);
         if (modifiedFirstSheet is null || modifiedLastSheet is null)
+        {
+            // The reference is gone, so there is no pair left for the rewriter to hold to the name
+            // rule. A rename the caller got wrong is a fault either way, so it is caught here.
+            CheckRename(firstSheet, modifiedFirstSheet);
+            CheckRename(lastSheet, modifiedLastSheet);
             return null;
+        }
 
         return new SheetRange(modifiedFirstSheet, modifiedLastSheet);
     }
@@ -106,5 +112,23 @@ public partial class FormulaModifier
     protected virtual RowCol? ModifyCellFunction(ModContext ctx, RowCol cell)
     {
         return cell;
+    }
+
+    /// <summary>
+    /// Hold a rename to what a sheet may be called. A renamed sheet is written back into the
+    /// formula, and a name no workbook could hold has no spelling to write: it needs quotes, and a
+    /// quoted name holding a <c>?</c> reads back as a DDE item rather than a sheet prefix. Only a
+    /// rename is checked, so a formula the modification left alone is never refused, and
+    /// <c>null</c> keeps its meaning - the sheet is gone.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The modification renamed the sheet to a name
+    /// <see cref="NameUtils.IsSheetNameValid"/> rejects.</exception>
+    private static void CheckRename(string sheet, string? modifiedSheet)
+    {
+        if (modifiedSheet is not null && modifiedSheet != sheet && !NameUtils.IsSheetNameValid(modifiedSheet.AsSpan()))
+        {
+            throw new InvalidOperationException(
+                $"The modifier renamed the sheet '{sheet}' to '{modifiedSheet}', which can't name a sheet: a sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ].");
+        }
     }
 }

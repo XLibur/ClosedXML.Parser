@@ -25,7 +25,9 @@ or Fixed.
   `null` for a `#REF!`. Its default asks `ModifySheet` about each end on its own and gives up the
   whole reference when either sheet is gone, which is what every modification did before, so an
   existing one answers as it always did. Both names it answers with are held to the same rule a
-  rename is: a sheet name no workbook could hold raises an `InvalidOperationException`.
+  rename is, wherever in the pair they are answered: a sheet name no workbook could hold raises an
+  `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
+  one reads.
 
 #### Changed
 

@@ -51,31 +51,28 @@ public partial class FormulaModifier
         /// becomes <c>#REF!</c>.
         /// </summary>
         /// <exception cref="InvalidOperationException">The modifier renamed a sheet to a name
-        /// <see cref="NameUtils.IsSheetNameValid"/> rejects.</exception>
+        /// <see cref="NameUtils.IsSheetNameValid"/> rejects, or answered with a sheet range that
+        /// names no sheets.</exception>
         private static SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
         {
             var modifiedSheets = ctx.Modifier.ModifySheetRange(ctx, firstSheet, lastSheet);
             if (modifiedSheets is null)
                 return null;
 
-            CheckRename(firstSheet, modifiedSheets.Value.FirstSheet);
-            CheckRename(lastSheet, modifiedSheets.Value.LastSheet);
-            return modifiedSheets;
-        }
-
-        /// <summary>
-        /// Hold a rename to what a sheet may be called. A renamed sheet is written back into the
-        /// formula, and a name no workbook could hold has no spelling to write: it needs quotes,
-        /// and a quoted name holding a <c>?</c> reads back as a DDE item rather than a sheet
-        /// prefix. Only a rename is checked, so a formula the modifier left alone is never refused.
-        /// </summary>
-        private static void CheckRename(string sheet, string? modifiedSheet)
-        {
-            if (modifiedSheet is not null && modifiedSheet != sheet && !NameUtils.IsSheetNameValid(modifiedSheet.AsSpan()))
+            // A `default` SheetRange names no sheet at either end, and a reference with no sheets
+            // left is answered with `null`. Caught here, the answer is a fault in the call rather
+            // than a null reference from inside the writer.
+            var modifiedFirstSheet = modifiedSheets.Value.FirstSheet;
+            var modifiedLastSheet = modifiedSheets.Value.LastSheet;
+            if (modifiedFirstSheet is null || modifiedLastSheet is null)
             {
                 throw new InvalidOperationException(
-                    $"The modifier renamed the sheet '{sheet}' to '{modifiedSheet}', which can't name a sheet: a sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ].");
+                    $"The modifier answered about the sheets '{firstSheet}' and '{lastSheet}' with a sheet range that names no sheets. A 3D reference that has no sheets left is answered with null.");
             }
+
+            CheckRename(firstSheet, modifiedFirstSheet);
+            CheckRename(lastSheet, modifiedLastSheet);
+            return modifiedSheets;
         }
 
         public TransformedSymbol LogicalValue(ModContext ctx, SymbolRange range, bool value)
