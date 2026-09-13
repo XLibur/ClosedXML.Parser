@@ -49,6 +49,9 @@ public static class FormulaConverter
     /// <param name="modifier">Says what changes in the formula.</param>
     /// <returns>The modified formula, in A1 style.</returns>
     /// <exception cref="ParsingException">The formula is not parseable.</exception>
+    /// <exception cref="InvalidOperationException">The modifier renamed a sheet to a name
+    /// <see cref="NameUtils.IsSheetNameValid"/> rejects, which has no spelling the modified formula
+    /// could be written in.</exception>
     public static string ModifyA1(string formulaA1, string sheet, int row, int col, FormulaModifier modifier)
     {
         return Modify(formulaA1, sheet, row, col, isA1: true, modifier ?? throw new ArgumentNullException(nameof(modifier)));
@@ -64,6 +67,9 @@ public static class FormulaConverter
     /// <param name="modifier">Says what changes in the formula.</param>
     /// <returns>The modified formula, in R1C1 style.</returns>
     /// <exception cref="ParsingException">The formula is not parseable.</exception>
+    /// <exception cref="InvalidOperationException">The modifier renamed a sheet to a name
+    /// <see cref="NameUtils.IsSheetNameValid"/> rejects, which has no spelling the modified formula
+    /// could be written in.</exception>
     public static string ModifyR1C1(string formulaR1C1, string sheet, int row, int col, FormulaModifier modifier)
     {
         return Modify(formulaR1C1, sheet, row, col, isA1: false, modifier ?? throw new ArgumentNullException(nameof(modifier)));

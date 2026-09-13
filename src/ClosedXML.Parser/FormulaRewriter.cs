@@ -32,6 +32,28 @@ public partial class FormulaModifier
         private const string REF_ERROR = "#REF!";
         private const string BANG_REF_ERROR = "!#REF!";
 
+        /// <summary>
+        /// Ask the modifier what a sheet is called now, and hold a rename to what a sheet may be
+        /// called. A renamed sheet is written back into the formula, and a name no workbook could
+        /// hold has no spelling to write: it needs quotes, and a quoted name holding a <c>?</c>
+        /// reads back as a DDE item rather than a sheet prefix. Only a rename is checked, so a
+        /// formula the modifier left alone is never refused, and <c>null</c> keeps its meaning -
+        /// the sheet is gone and the part becomes <c>#REF!</c>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The modifier renamed the sheet to a name
+        /// <see cref="NameUtils.IsSheetNameValid"/> rejects.</exception>
+        private static string? ModifySheet(ModContext ctx, string sheet)
+        {
+            var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheet);
+            if (modifiedSheet is not null && modifiedSheet != sheet && !NameUtils.IsSheetNameValid(modifiedSheet.AsSpan()))
+            {
+                throw new InvalidOperationException(
+                    $"The modifier renamed the sheet '{sheet}' to '{modifiedSheet}', which can't name a sheet: a sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ].");
+            }
+
+            return modifiedSheet;
+        }
+
         public TransformedSymbol LogicalValue(ModContext ctx, SymbolRange range, bool value)
         {
             return TransformedSymbol.CopyOriginal(ctx.Formula, range);
@@ -115,7 +137,7 @@ public partial class FormulaModifier
             if (workbookIndex is not null)
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheet);
+            var modifiedSheet = ModifySheet(ctx, sheet);
             if (modifiedSheet == sheet)
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
@@ -152,7 +174,7 @@ public partial class FormulaModifier
 
         public TransformedSymbol SheetReference(ModContext ctx, SymbolRange range, string sheet, ReferenceArea reference)
         {
-            var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheet);
+            var modifiedSheet = ModifySheet(ctx, sheet);
             var modifiedReference = ctx.Modifier.ModifyRef(ctx, reference);
             if (modifiedSheet is null || modifiedReference is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
@@ -185,8 +207,8 @@ public partial class FormulaModifier
 
         public TransformedSymbol Reference3D(ModContext ctx, SymbolRange range, string firstSheet, string lastSheet, ReferenceArea reference)
         {
-            var modifiedFirstSheet = ctx.Modifier.ModifySheet(ctx, firstSheet);
-            var modifiedLastSheet = ctx.Modifier.ModifySheet(ctx, lastSheet);
+            var modifiedFirstSheet = ModifySheet(ctx, firstSheet);
+            var modifiedLastSheet = ModifySheet(ctx, lastSheet);
             var modifiedReference = ctx.Modifier.ModifyRef(ctx, reference);
             if (modifiedFirstSheet is null || modifiedLastSheet is null || modifiedReference is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
@@ -254,7 +276,7 @@ public partial class FormulaModifier
 
         public TransformedSymbol Function(ModContext ctx, SymbolRange range, string sheetName, ReadOnlySpan<char> functionName, IReadOnlyList<TransformedSymbol> arguments)
         {
-            var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheetName);
+            var modifiedSheet = ModifySheet(ctx, sheetName);
             if (modifiedSheet is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
 
@@ -350,7 +372,7 @@ public partial class FormulaModifier
 
         public TransformedSymbol SheetName(ModContext ctx, SymbolRange range, string sheet, string name)
         {
-            var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheet);
+            var modifiedSheet = ModifySheet(ctx, sheet);
             if (modifiedSheet is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
 
