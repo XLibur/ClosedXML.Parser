@@ -66,15 +66,31 @@ The parser also does not parse a call of a function result, such as `LAMBDA(x,x+
 
 # Why not use XLParser
 
-[ClosedXML](https://github.com/ClosedXML/ClosedXML) used [XLParser](https://github.com/spreadsheetlab/XLParser) and transformed its concrete syntax tree to an abstract syntax tree, until it replaced XLParser with [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser). The reasons, as upstream measured them:
+[ClosedXML](https://github.com/ClosedXML/ClosedXML) previously used [XLParser](https://github.com/spreadsheetlab/XLParser), converting its concrete syntax tree (CST) into an abstract syntax tree (AST). It was later replaced by [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser).
 
-* Speed:
-  * Grammar extensively uses regexps extensively. Regexs are slow, especially for NET4x target, allocates extra memory. XLParser takes up _47_ seconds for Enron dataset on .NET Framework. .NET teams had made massive improvements on regexs, so it takes only _16_ seconds on NET7.
-  * IronParser needs to determine all possible tokens after every token, that is problematic, even with the help of `prefix` hints.
-* AST: XLParser creates concentrates on creation of concrete syntax tree, but for [ClosedXML](https://github.com/ClosedXML/ClosedXML), we need abstract syntax tree for evaluation. IronParser is not very friendly in that regard
-* Doesn't have support for lambdas and R1C1 style.
+The main reasons for replacing XLParser, based on measurements made by the ClosedXML project, were:
 
-ANTLR lexer takes up about 3.2 seconds for Enron dataset. With ANTLR parsing, it takes up 11 seconds. I want that 7+ seconds in performance and no allocation, so RDS that takes up 700 ms.
+* **Performance**
+
+  * XLParser's grammar makes extensive use of regular expressions. These can be relatively slow and allocate additional memory, particularly on .NET Framework.
+  * Parsing the Enron dataset with XLParser took approximately **47 seconds on .NET Framework**. Improvements to the .NET regular expression engine reduced this to around **16 seconds on .NET 7**.
+  * Irony, which XLParser is built on, also needs to determine the set of possible tokens after each parsed token. This adds additional overhead, even when `prefix` hints are used.
+
+* **Abstract syntax tree support**
+
+  * XLParser is primarily designed to produce a concrete syntax tree.
+  * ClosedXML requires an abstract syntax tree for tasks such as formula evaluation, which means the CST produced by XLParser must be transformed into another representation.
+  * Irony does not make this particularly convenient.
+
+* **Missing Excel syntax support**
+
+  * XLParser does not support newer Excel features such as lambda expressions.
+  * It also does not support R1C1-style references.
+
+For comparison, lexing the Enron dataset with ANTLR takes approximately **3.2 seconds**, while lexing and parsing takes around **11 seconds**.
+
+ClosedXML.Parser instead uses a recursive-descent parser (RDP), which completes the same workload in approximately **700 ms** while also avoiding much of the allocation overhead.
+
 
 ## Debugging
 
@@ -90,10 +106,12 @@ Use [vscode-antlr4](https://github.com/mike-lischke/vscode-antlr4/blob/master/do
 
 ## Rolex
 
-Rolex is a DFA based lexer released under MIT license (see [Rolex: Unicode Enabled Lexer Generator in C#
-](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp)). ANTLR is still the source of truth, but it is used to generate Rolex grammar and then DFA for a lexer.
+[Rolex](https://github.com/codewitch-honey-crisis/Rolex) is a DFA-based lexer generator released under the MIT license. See [Rolex: Unicode Enabled Lexer Generator in C#](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp).
 
-It is rather complicated, but upstream measured it as two times faster than the ANTLR lexer (1.9 us vs 3.676 us per formula).
+ANTLR remains the source of truth for the lexer grammar. That grammar is used to generate a Rolex-compatible grammar, which Rolex then compiles into a DFA-based lexer.
+
+This approach adds some complexity to the build and generation process, but upstream benchmarks found the resulting lexer to be approximately twice as fast as the ANTLR lexer: around **1.9 μs per formula**, compared with **3.676 μs per formula** for ANTLR.
+
 
 ## Generate lexer
 
