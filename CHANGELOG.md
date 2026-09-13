@@ -88,9 +88,11 @@ or Fixed.
 - A differential sweep of the two lexers, `AntlrCompatibilityTests.Produce_same_tokens_for_every_short_input`,
   over every string of up to four characters from a bracket-and-punctuation alphabet. The data set
   comparison only says the two agree on text somebody wrote, and text nobody wrote is where they
-  drift apart: no formula in enron or euses holds `[ ]`. The sweep finds that one divergence and
-  nothing else, so it is asserted in a test of its own rather than left unsaid, and the sweep skips
-  it. It is a defect in Rolex's DFA construction, not a stale table: the regular expression in
+  drift apart: no formula in enron or euses holds `[ ]`. Nothing is skipped: the sweep holds the
+  whole run to a recorded list of the 20 inputs the two lexers read differently, each with the token
+  stream both of them produce, so a new divergence and a change to a known one both fail. All 20 are
+  the same defect, a bracket holding nothing but spaces, read alone and after and before other
+  tokens. It is a defect in Rolex's DFA construction, not a stale table: the regular expression in
   `LexerA1.rl` refuses `[ ]`, the committed table is what the vendored build produces from it, and
   rewriting the column name as `X (Y* X)?` rather than `(X Y*)? X` changes the table without
   changing this.
