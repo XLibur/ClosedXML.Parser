@@ -83,6 +83,18 @@ or Fixed.
   generated one in `Rolex`, whose `NAME` rule always accepted every codepoint from `U+0080`
   up; the tests added alongside pin that live behaviour so the two lexers agree about it.
 
+### Sheet names and quoting
+
+#### Changed
+
+- `IsSheetNameValid` scans for the seven characters a sheet name may never hold through a
+  `SearchValues<char>` rather than a `char[]`, which is a vectorised lookup instead of a scan per
+  candidate character. It costs about a quarter of what it did — 16.2 ns to 4.2 ns for
+  `Jane's sheet`, 14.6 to 4.2 for a 25-character name, 17.4 to 5.4 for `Sheet1` — and allocates
+  nothing either way. The char-by-char loop in `IsNameValid` was looked at for the same treatment
+  and left alone: it asks `char.IsLetter`, a category test over the whole of Unicode rather than a
+  fixed set of characters, and `SearchValues` has nothing to offer it.
+
 ### Packaging and tooling
 
 #### Changed
