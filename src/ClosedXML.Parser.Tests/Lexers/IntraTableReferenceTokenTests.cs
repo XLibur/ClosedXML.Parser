@@ -59,8 +59,14 @@ public class IntraTableReferenceTokenTests
             yield return new object?[] { "[:b]", StructuredReferenceArea.None, ":b", null };
             yield return new object?[] { "[a:]", StructuredReferenceArea.None, "a:", null };
             yield return new object?[] { "[:]", StructuredReferenceArea.None, ":", null };
-            // One separator, two columns: the second name runs to the bracket, colons and all.
+            // One separator, two columns: the second name runs to the bracket, colons and all. A
+            // bracketed name runs to its own closing bracket for the same reason, either side of
+            // the separator.
             yield return new object?[] { "[a:b:c]", StructuredReferenceArea.None, "a", "b:c" };
+            yield return new object?[] { "[[a]:[b:c]]", StructuredReferenceArea.None, "a", "b:c" };
+            yield return new object?[] { "[[a:b]:[c]]", StructuredReferenceArea.None, "a:b", "c" };
+            yield return new object?[] { "[[a]:b:c]", StructuredReferenceArea.None, "a", "b:c" };
+            yield return new object?[] { "[[#Data],[a]:[b:c]]", StructuredReferenceArea.Data, "a", "b:c" };
             yield return new object?[] { "[[#Headers],[#Data], '#]", StructuredReferenceArea.Headers | StructuredReferenceArea.Data, "#", null };
 
             // INTRA_TABLE_REFERENCE : SPACED_LBRACKET INNER_REFERENCE SPACED_RBRACKET

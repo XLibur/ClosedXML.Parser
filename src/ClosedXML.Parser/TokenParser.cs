@@ -293,7 +293,7 @@ internal static class TokenParser
         // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
         i = GetStructuredName(input, i, out firstColumn);
         if (i < input.Length && input[i] == ':')
-            GetStructuredName(input, i + 1, out lastColumn);
+            GetStructuredName(input, i + 1, out lastColumn, stopAtRange: false); // One separator, so the rest is the name.
         else
             lastColumn = null;
     }
@@ -626,16 +626,25 @@ internal static class TokenParser
     /// <param name="startIdx">First index of expected name. It will either contain a bracket or first letter of column name.</param>
     /// <param name="columnName">Parsed name.</param>
     /// <param name="stopAtRange">
-    /// Whether a colon ends the name. It does wherever a range can follow, which is everywhere but
-    /// the re-read of a simple column whose colon turned out to belong to the name itself.
+    /// Whether a colon ends a name written without brackets. It does where a range can still follow
+    /// — the first column of a simple range — and not where one cannot, because a range has one
+    /// separator and the name after it runs to the end.
     /// </param>
+    /// <remarks>
+    /// A bracketed name always runs to its closing bracket, colons and all: the brackets are what
+    /// say where it ends, so <c>[[a]:[b:c]]</c> is the columns <c>a</c> to <c>b:c</c>. Stopping a
+    /// bracketed name at a colon cut that one down to <c>b</c> and lost the rest, and the loss only
+    /// showed up as a display string that no longer read back as the node it came from.
+    /// </remarks>
     private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName, bool stopAtRange = true)
     {
         Span<char> buffer = stackalloc char[input.Length];
         var bufferIdx = 0;
-        var i = startIdx + (input[startIdx] == '[' ? 1 : 0);
+        var bracketed = input[startIdx] == '[';
+        var i = startIdx + (bracketed ? 1 : 0);
+        var endsAtColon = stopAtRange && !bracketed;
         var c = input[i];
-        for (; c is not ']' && (!stopAtRange || c is not ':'); c = input[++i])
+        for (; c is not ']' && (!endsAtColon || c is not ':'); c = input[++i])
         {
             if (c == '\'')
                 c = input[++i];
