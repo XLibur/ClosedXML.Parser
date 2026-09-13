@@ -31,10 +31,25 @@ namespace ClosedXML.Parser;
 /// </summary>
 public readonly struct RowCol : IEquatable<RowCol>
 {
-    internal const int MinRow = 1;
-    internal const int MaxRow = 1048576;
-    internal const int MinCol = 1;
-    internal const int MaxCol = 16384;
+    /// <summary>
+    /// The first row of a sheet.
+    /// </summary>
+    public const int MinRow = 1;
+
+    /// <summary>
+    /// The last row of a sheet.
+    /// </summary>
+    public const int MaxRow = 1048576;
+
+    /// <summary>
+    /// The first column of a sheet.
+    /// </summary>
+    public const int MinCol = 1;
+
+    /// <summary>
+    /// The last column of a sheet, the <c>XFD</c> of <em>A1</em> notation.
+    /// </summary>
+    public const int MaxCol = 16384;
 
     // keep at 0, so default ctor creates is A1
     private readonly int _rowIndex;
@@ -93,22 +108,136 @@ public readonly struct RowCol : IEquatable<RowCol>
     /// <param name="columnType">The type used to interpret the column position.</param>
     /// <param name="columnValue">The value for the column position.</param>
     /// <param name="style">Semantic of the reference.</param>
+    /// <exception cref="ArgumentException">Both axes are <see cref="None"/>, or a
+    /// <see cref="None"/> axis carries a value other than zero.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">An axis is outside a sheet. See the remarks.</exception>
+    /// <remarks>
+    /// An axis holds what a sheet has and nothing else, so a <c>RowCol</c> can't name a cell no
+    /// sheet holds. A position — an <em>A1</em> axis of either type, or an <see cref="Absolute"/>
+    /// <em>R1C1</em> one — is a row of 1 to 1048576 or a column of 1 to 16384. A
+    /// <see cref="Relative"/> <em>R1C1</em> axis is an offset from the formula's own cell instead,
+    /// and the furthest one cell of a sheet can be from another is one short of the sheet, so an
+    /// offset reaches 1048575 rows or 16383 columns either way. Those are the same bounds the
+    /// grammar admits, so every reference a formula can be parsed into is held.
+    /// </remarks>
     public RowCol(ReferenceAxisType rowType, int rowValue, ReferenceAxisType columnType, int columnValue, ReferenceStyle style)
     {
         if (columnType == None && rowType == None)
             throw new ArgumentException("At least one of axis must be non-none.");
 
-        if (columnType == None && columnValue != 0)
-            throw new ArgumentException("Value for `None` type must be zero.", nameof(columnValue));
+        var rowFault = CheckAxis(rowType, rowValue, style, MinRow, MaxRow);
+        if (rowFault != AxisFault.Ok)
+            throw AxisError(rowFault, rowValue, MinRow, MaxRow, "row", nameof(rowValue));
 
-        if (rowType == None && rowValue != 0)
-            throw new ArgumentException("Value for `None` type must be zero.", nameof(rowValue));
+        var columnFault = CheckAxis(columnType, columnValue, style, MinCol, MaxCol);
+        if (columnFault != AxisFault.Ok)
+            throw AxisError(columnFault, columnValue, MinCol, MaxCol, "column", nameof(columnValue));
 
         ColumnType = columnType;
         _columnIndex = columnValue - 1;
         RowType = rowType;
         _rowIndex = rowValue - 1;
         Style = style;
+    }
+
+    /// <summary>
+    /// Create a new <see cref="RowCol"/>, or answer that the arguments don't describe one, rather
+    /// than raising the exception the constructor does.
+    /// </summary>
+    /// <remarks>
+    /// A caller that builds a <c>RowCol</c> from a position it worked out itself — a
+    /// <see cref="FormulaModifier"/> shifting a reference is the one that does — can land outside
+    /// the sheet as an ordinary outcome, because a reference shifted off a sheet is a
+    /// <c>#REF!</c> rather than a mistake. This answers that question without an exception, and
+    /// reads the same rule the constructor does, so the two can't disagree.
+    /// </remarks>
+    /// <param name="rowType">The type used to interpret the row position.</param>
+    /// <param name="rowValue">The value for the row position.</param>
+    /// <param name="columnType">The type used to interpret the column position.</param>
+    /// <param name="columnValue">The value for the column position.</param>
+    /// <param name="style">Semantic of the reference.</param>
+    /// <param name="rowCol">The created <c>RowCol</c>, or <c>default</c> when there isn't one.</param>
+    /// <returns><c>true</c> when the arguments describe a <c>RowCol</c>, <c>false</c> otherwise.</returns>
+    public static bool TryCreate(ReferenceAxisType rowType, int rowValue, ReferenceAxisType columnType,
+        int columnValue, ReferenceStyle style, out RowCol rowCol)
+    {
+        if ((rowType == None && columnType == None) ||
+            CheckAxis(rowType, rowValue, style, MinRow, MaxRow) != AxisFault.Ok ||
+            CheckAxis(columnType, columnValue, style, MinCol, MaxCol) != AxisFault.Ok)
+        {
+            rowCol = default;
+            return false;
+        }
+
+        rowCol = new RowCol(rowType, rowValue, columnType, columnValue, style);
+        return true;
+    }
+
+    /// <summary>
+    /// Why one axis can't be part of a <see cref="RowCol"/>.
+    /// </summary>
+    private enum AxisFault
+    {
+        /// <summary>The axis is one a sheet has.</summary>
+        Ok,
+
+        /// <summary>The axis is <see cref="None"/> and carries a value anyway.</summary>
+        ValueOnNoneAxis,
+
+        /// <summary>The axis names a row or a column that no sheet has.</summary>
+        PositionOutsideSheet,
+
+        /// <summary>The axis is an offset that reaches further than a sheet.</summary>
+        OffsetWiderThanSheet,
+    }
+
+    /// <summary>
+    /// Hold one axis to a sheet, so that no <c>RowCol</c> carries a row or a column a sheet
+    /// doesn't have. See the remarks of the constructor for the bounds and why they are those.
+    /// </summary>
+    /// <param name="type">How the value of the axis is to be read.</param>
+    /// <param name="value">The value of the axis.</param>
+    /// <param name="style">Semantic of the reference the axis belongs to.</param>
+    /// <param name="min">The first row or column of a sheet.</param>
+    /// <param name="max">The last row or column of a sheet.</param>
+    private static AxisFault CheckAxis(ReferenceAxisType type, int value, ReferenceStyle style, int min, int max)
+    {
+        if (type == None)
+            return value == 0 ? AxisFault.Ok : AxisFault.ValueOnNoneAxis;
+
+        // An R1C1 offset is counted from the formula's own cell, which is itself in the sheet, so
+        // it stops one short of the sheet on each side. Everything else is a position in a sheet.
+        if (type == Relative && style == R1C1)
+            return value > -max && value < max ? AxisFault.Ok : AxisFault.OffsetWiderThanSheet;
+
+        return value >= min && value <= max ? AxisFault.Ok : AxisFault.PositionOutsideSheet;
+    }
+
+    /// <summary>
+    /// The exception the constructor raises for an axis <see cref="CheckAxis"/> refused.
+    /// </summary>
+    /// <param name="fault">Why the axis was refused.</param>
+    /// <param name="value">The value of the axis.</param>
+    /// <param name="min">The first row or column of a sheet.</param>
+    /// <param name="max">The last row or column of a sheet.</param>
+    /// <param name="axis">The name of the axis, for the message.</param>
+    /// <param name="paramName">The name of the constructor parameter the value came from.</param>
+    private static Exception AxisError(AxisFault fault, int value, int min, int max, string axis, string paramName)
+    {
+        switch (fault)
+        {
+            case AxisFault.ValueOnNoneAxis:
+                return new ArgumentException("Value for `None` type must be zero.", paramName);
+
+            case AxisFault.OffsetWiderThanSheet:
+                return new ArgumentOutOfRangeException(paramName, value,
+                    $"A relative R1C1 {axis} is an offset from the formula's own cell and can't " +
+                    $"reach outside the sheet, so it is {1 - max} to {max - 1}.");
+
+            default:
+                return new ArgumentOutOfRangeException(paramName, value,
+                    $"A {axis} of a sheet is {min} to {max}.");
+        }
     }
 
     /// <summary>
@@ -217,7 +346,8 @@ public readonly struct RowCol : IEquatable<RowCol>
     /// </summary>
     /// <remarks>
     /// If <c>RowCol</c> already is in <em>A1</em>, return it directly. If converted <c>RowCol</c>
-    /// is out of sheet bounds, loop it.
+    /// is out of sheet bounds, loop it. An offset spans at most one sheet, which the constructor
+    /// holds it to, so the loop always lands in the sheet.
     /// </remarks>
     /// <param name="anchorRow">A row coordinate that should be used as an anchor for relative <em>R1C1</em> reference.</param>
     /// <param name="anchorCol">A column coordinate that should be used as an anchor for relative <em>R1C1</em> reference.</param>
@@ -227,7 +357,8 @@ public readonly struct RowCol : IEquatable<RowCol>
     {
         var (newRowPosition, newColPosition) = ToA1Positions(anchorRow, anchorCol);
 
-        // Modulo is expensive and because of grammar and row/col constraints, we can't go out of 1 range on each side.
+        // Modulo is expensive and because of the constructor's bounds, we can't go out of 1 range
+        // on each side: an offset is at most one short of the sheet and an anchor is in it.
         if (RowType == Relative)
         {
             if (newRowPosition < 1)
@@ -384,20 +515,12 @@ public readonly struct RowCol : IEquatable<RowCol>
     /// <remarks>
     /// The letters are found from the last one back, so they are collected in a buffer and written
     /// in the order they are read.
-    /// <para>
-    /// The buffer holds seven letters rather than the three a column of a sheet needs. The
-    /// constructor takes any <see cref="int"/> as a column and only <see cref="ToA1OrError"/>
-    /// holds a converted one to the sheet, so a column above <c>ZZZ</c> reaches here from the
-    /// public constructor and from <see cref="ToA1"/>, whose single wrap only brings an offset
-    /// within one sheet width back into range. Seven letters is what the largest <see cref="int"/>
-    /// spells, so every column the type can hold is written rather than refused.
-    /// </para>
     /// </remarks>
     private void AppendA1Column(StringBuilder sb)
     {
-        // A1 column letters are bijective base 26, so int.MaxValue (2147483647) is the seven
-        // letters FXSHRXW. Anything shorter turns a column this type accepts into an index error.
-        const int maxColumnLetters = 7;
+        // The constructor holds a column to the 16384 of a sheet, which is the three letters XFD,
+        // and every other way here converts a column into that range, so three is the whole buffer.
+        const int maxColumnLetters = 3;
         Span<char> letters = stackalloc char[maxColumnLetters];
         var columnIndex = ColumnValue;
         var i = maxColumnLetters;

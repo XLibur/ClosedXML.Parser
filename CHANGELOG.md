@@ -30,6 +30,31 @@ or Fixed.
   `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
   one reads.
 
+- `RowCol.TryCreate`, which builds a `RowCol` or answers that the arguments don't describe one,
+  instead of raising the exception the constructor does. A `FormulaModifier` shifting references is
+  the one caller that builds a `RowCol` from a position it worked out itself — `ModifyRef` and
+  `ModifyCellFunction` hand one over and take one back — and a reference shifted off a sheet is a
+  `#REF!` rather than a mistake, so it needs a way to ask rather than a reason to catch. It reads
+  the same rule the constructor does, so the two can't disagree about what a sheet holds. The four
+  bounds it is read against, `RowCol.MinRow`, `MaxRow`, `MinCol` and `MaxCol`, are public for the
+  same reason, so a caller clamping a shift need not write the numbers out itself.
+
+#### Changed
+
+- **Breaking:** `RowCol` holds a row and a column that a sheet has, and its constructor refuses one
+  it doesn't with an `ArgumentOutOfRangeException`. A position — an A1 axis of either type, or an
+  absolute R1C1 one — is a row of 1 to 1048576 or a column of 1 to 16384. A relative R1C1 axis is an
+  offset from the formula's own cell instead, and the furthest one cell of a sheet can be from
+  another is one short of the sheet, so an offset reaches 1048575 rows or 16383 columns either way.
+  Those are the bounds the grammar admits, so every reference a formula can be parsed into is still
+  held and only a `RowCol` built by hand is refused, which is the breaking part.
+  It is also what makes `ToA1` keep the promise of its remarks, that a converted reference out of
+  the sheet is looped back into it. The loop adds or subtracts one sheet width once, which is
+  enough for every offset the parser produces but not for a wider one built by hand: a column offset
+  of 1000000 converted to column 983617, and `int.MaxValue` overflowed to a negative column. Because
+  a column above the `XFD` of a sheet can no longer be reached, the letters of one are again written
+  through the three a sheet needs rather than the seven the largest `int` spells.
+
 #### Fixed
 
 - Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of

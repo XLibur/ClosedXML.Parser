@@ -68,6 +68,11 @@ public readonly record struct ReferenceArea
     /// <param name="columnType">Column axis type of a reference.</param>
     /// <param name="columnPosition">Column position.</param>
     /// <param name="style">Semantic of the reference.</param>
+    /// <exception cref="ArgumentException">Both axes are <see cref="ReferenceAxisType.None"/>, or a
+    /// <see cref="ReferenceAxisType.None"/> axis carries a value other than zero.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">An axis is outside a sheet. See the remarks of
+    /// the <see cref="RowCol(ReferenceAxisType,int,ReferenceAxisType,int,ReferenceStyle)"/>
+    /// constructor this one builds on for the bounds.</exception>
     public ReferenceArea(ReferenceAxisType rowType, int rowPosition, ReferenceAxisType columnType,
         int columnPosition, ReferenceStyle style)
         : this(new RowCol(rowType, rowPosition, columnType, columnPosition, style))
