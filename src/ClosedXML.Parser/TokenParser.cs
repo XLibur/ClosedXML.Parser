@@ -22,6 +22,18 @@ internal static class TokenParser
     private const string REF_ERROR = "#REF!";
 
     /// <summary>
+    /// The most characters to take from the stack for a scratch buffer.
+    /// </summary>
+    /// <remarks>
+    /// A name, a text or a column name is as long as the formula holding it: the grammar puts no
+    /// limit on any of them. A buffer sized from the input would therefore run the stack out on a
+    /// long one, and a <c>StackOverflowException</c> can't be caught — it takes down the whole
+    /// process. Past this many characters the scratch space comes from the heap instead. Nothing
+    /// a workbook holds gets that far, and the string built from the buffer allocates regardless.
+    /// </remarks>
+    internal const int MaxStackAllocChars = 256;
+
+    /// <summary>
     /// Reads formulas written in the <see cref="ReferenceStyle.A1"/> reference style.
     /// </summary>
     internal static readonly IReferenceStyle A1Style = new A1ReferenceStyle();
@@ -638,7 +650,9 @@ internal static class TokenParser
     /// </remarks>
     private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName, bool stopAtRange = true)
     {
-        Span<char> buffer = stackalloc char[input.Length];
+        Span<char> buffer = input.Length <= MaxStackAllocChars
+            ? stackalloc char[MaxStackAllocChars]
+            : new char[input.Length];
         var bufferIdx = 0;
         var bracketed = input[startIdx] == '[';
         var i = startIdx + (bracketed ? 1 : 0);

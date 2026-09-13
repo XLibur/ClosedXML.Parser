@@ -35,6 +35,21 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     // Current lookahead token index
     private int _la;
 
+    /// <summary>
+    /// The most levels of nesting a formula can have, e.g. braces within braces or an argument
+    /// of an argument. The parser descends by recursion, so a formula nesting deeper than this
+    /// runs out the stack, and a <c>StackOverflowException</c> can't be caught: it takes down
+    /// the whole process, not just the parse. Excel accepts at most 64 levels of nested
+    /// functions, so this leaves room to spare over any formula a workbook can hold.
+    /// </summary>
+    private const int MaxNestingDepth = 256;
+
+    /// <summary>
+    /// How many levels of nesting the parser is inside right now, e.g. braces within braces
+    /// or an argument of an argument.
+    /// </summary>
+    private int _nestingDepth;
+
     private FormulaParser(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory, bool a1Mode)
     {
         // Trim the end, so ref_intersection_expression that tried to parse SPACE as an operator
@@ -270,7 +285,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         }
 
         Consume();
+        EnterNesting();
         var neutralAtom = PrefixAtomExpression(skipRangeUnion, out _);
+        _nestingDepth--;
         isPureRef = false;
         return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), op, neutralAtom);
     }
@@ -294,7 +311,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     var start = _tokenSource.StartIndex;
                     Consume();
+                    EnterNesting();
                     var expression = Expression(false, out isPureRef);
+                    _nestingDepth--;
                     Match(Token.CLOSE_BRACE);
                     var nestedNode = _factory.Nested(_context, new SymbolRange(start, _tokenSource.StartIndex), expression);
 
@@ -416,7 +435,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         if (readAtom is null && _la == Token.INTERSECT)
         {
             Consume();
+            EnterNesting();
             var refNode = RefImplicitExpression();
+            _nestingDepth--;
             return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), UnaryOperation.ImplicitIntersection, refNode);
         }
 
@@ -556,7 +577,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     var start = _tokenSource.StartIndex;
                     Consume();
+                    EnterNesting();
                     var refExpression = RefExpression();
+                    _nestingDepth--;
                     Match(Token.CLOSE_BRACE);
                     return _factory.Nested(_context, new SymbolRange(start, _tokenSource.StartIndex), refExpression);
                 }
@@ -916,7 +939,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
             case Token.STRING_CONSTANT:
                 var token = GetCurrentToken();
-                Span<char> buffer = stackalloc char[token.Length];
+                Span<char> buffer = token.Length <= TokenParser.MaxStackAllocChars
+                    ? stackalloc char[TokenParser.MaxStackAllocChars]
+                    : new char[token.Length];
                 Consume();
                 symbolRange = new SymbolRange(start, _tokenSource.StartIndex);
                 value = ConvertTextValue(token, out var slice, ref buffer)
@@ -966,7 +991,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             else
             {
                 // Path for a non-blank argument.
+                EnterNesting();
                 var arg = Expression(true, out _);
+                _nestingDepth--;
                 args.Add(arg);
                 if (_la == Token.CLOSE_BRACE)
                 {
@@ -1065,7 +1092,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private string ConvertText()
     {
         var token = GetCurrentToken();
-        Span<char> buffer = stackalloc char[token.Length];
+        Span<char> buffer = token.Length <= TokenParser.MaxStackAllocChars
+            ? stackalloc char[TokenParser.MaxStackAllocChars]
+            : new char[token.Length];
         return ConvertTextValue(token, out var slice, ref buffer)
             ? slice.ToString()
             : buffer.ToString();
@@ -1133,6 +1162,22 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private Exception UnexpectedTokenError()
     {
         return Error($"Unexpected token {GetLaTokenName()}.");
+    }
+
+    /// <summary>
+    /// Descend one level of nesting, refusing a formula that nests deeper than
+    /// <see cref="MaxNestingDepth"/>.
+    /// </summary>
+    /// <remarks>
+    /// Every caller pairs this with a decrement once the nested part is parsed. A formula that
+    /// throws in between leaves the count standing, which costs nothing: a parser reads one
+    /// formula and is thrown away with it, so the count is never read again.
+    /// </remarks>
+    /// <exception cref="ParsingException">The formula nests too deep.</exception>
+    private void EnterNesting()
+    {
+        if (++_nestingDepth > MaxNestingDepth)
+            throw Error($"the formula nests deeper than the {MaxNestingDepth} levels a formula can have.");
     }
 
     private Exception Error(string message)
