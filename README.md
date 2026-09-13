@@ -12,7 +12,7 @@ Official source for the grammar is [MS-XLSX](https://learn.microsoft.com/en-us/o
 
 # How to use
 
-Install the `XLibur.ClosedXML.Parser` NuGet package.
+Install the `XLibur.ClosedXML.Parser` NuGet package. It targets .NET 8 and needs .NET 8 or later; the package has no dependencies.
 
 * Implement the `IAstFactory<TScalarValue, TNode, TContext>` interface. The parser calls it for each node, with the range of the formula text that the node was parsed from. *src/ClosedXML.Parser.Ast/AstFactory.cs* is an example; the tests and the visualizer use it.
 * Call a parsing method. The parser passes the context to each method of the factory.

@@ -1,4 +1,3 @@
-using System;
 using ClosedXML.Parser.Rolex;
 
 namespace ClosedXML.Parser;

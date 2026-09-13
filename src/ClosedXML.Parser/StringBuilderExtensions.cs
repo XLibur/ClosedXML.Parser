@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace ClosedXML.Parser;
@@ -25,14 +23,10 @@ internal static class StringBuilderExtensions
     /// </remarks>
     public static StringBuilder AppendInvariant(this StringBuilder sb, int value)
     {
-#if NETSTANDARD2_0
-        return sb.Append(value.ToString(CultureInfo.InvariantCulture));
-#else
         Span<char> buffer = stackalloc char[MaxInt32Length];
         return value.TryFormat(buffer, out var length, default, CultureInfo.InvariantCulture)
             ? sb.Append(buffer.Slice(0, length))
             : sb.Append(value.ToString(CultureInfo.InvariantCulture));
-#endif
     }
 
     /// <summary>
@@ -182,17 +176,4 @@ internal static class StringBuilderExtensions
 
         return sb;
     }
-
-#if NETSTANDARD2_0
-    /// <summary>
-    /// Compatibility method for NETStandard 2.0, which doesn't have methods with <c>Span</c> arguments.
-    /// </summary>
-    public static StringBuilder Append(this StringBuilder sb, ReadOnlySpan<char> span)
-    {
-        foreach (var c in span)
-            sb.Append(c);
-
-        return sb;
-    }
-#endif
 }

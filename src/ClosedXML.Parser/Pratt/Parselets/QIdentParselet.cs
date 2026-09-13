@@ -1,5 +1,3 @@
-using System;
-
 namespace ClosedXML.Parser.Pratt.Parselets;
 
 /// <summary>

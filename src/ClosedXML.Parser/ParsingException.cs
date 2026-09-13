@@ -1,5 +1,4 @@
-﻿using System;
-using ClosedXML.Parser.Pratt;
+﻿using ClosedXML.Parser.Pratt;
 
 namespace ClosedXML.Parser;
 

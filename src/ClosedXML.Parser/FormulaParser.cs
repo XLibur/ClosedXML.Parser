@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using ClosedXML.Parser.Rolex;
 using JetBrains.Annotations;
 
@@ -1077,11 +1074,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private static double ParseNumber(ReadOnlySpan<char> number)
     {
         return double.Parse(
-#if NETSTANDARD2_1
             number,
-#else
-            number.ToString(),
-#endif
             NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent,
             CultureInfo.InvariantCulture);
     }

@@ -64,6 +64,54 @@ or Fixed.
   `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
   Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
 
+### Lexer and grammars
+
+#### Fixed
+
+- The Pratt prototype's lexer reads a letter from an astral plane as the letter it is, rather than
+  refusing every codepoint above `0xFFFF`. The refusal was a netstandard2.0 workaround —
+  `CharUnicodeInfo.GetUnicodeCategory` had no overload taking a codepoint there — written into
+  shared source without a `#if`, so it applied on both targets. Reading one exposed a second fault
+  next to it: both ends of a token's range were taken from the index of the *last* code unit of a
+  codepoint, which is a code unit too far for a surrogate pair. An identifier that began with an
+  astral letter came back a unit short, and a token standing before one — the `(` of
+  `SUM(𐐀A)`, the `+` of `1+𐐀A` — ran a unit into the pair, so its text held a lone high surrogate
+  and its range overlapped the token after it. The lexer now records where the current codepoint
+  begins and reads both ends from that. Neither fault could be seen before, because nothing could
+  start a token with an astral letter and the lexer refused the input as soon as it met one.
+  Nothing a caller of this library parses changes, because the lexer that reads a formula is the
+  generated one in `Rolex`, whose `NAME` rule always accepted every codepoint from `U+0080`
+  up; the tests added alongside pin that live behaviour so the two lexers agree about it.
+
+### Sheet names and quoting
+
+#### Changed
+
+- `IsSheetNameValid` scans for the seven characters a sheet name may never hold through a
+  `SearchValues<char>` rather than a `char[]`, which is a vectorised lookup instead of a scan per
+  candidate character. It costs about a quarter of what it did — 16.2 ns to 4.2 ns for
+  `Jane's sheet`, 14.6 to 4.2 for a 25-character name, 17.4 to 5.4 for `Sheet1` — and allocates
+  nothing either way. The char-by-char loop in `IsNameValid` was looked at for the same treatment
+  and left alone: it asks `char.IsLetter`, a category test over the whole of Unicode rather than a
+  fixed set of characters, and `SearchValues` has nothing to offer it.
+
+### Packaging and tooling
+
+#### Changed
+
+- **Breaking:** the package targets `net8.0` alone, where it targeted `netstandard2.0` and
+  `netstandard2.1` before. The minimum framework a consumer needs is therefore .NET 8, and .NET
+  Framework, Unity and older Xamarin can no longer use it. Neither netstandard target served a
+  consumer this fork has — every project here is net8.0 or later — and the `netstandard2.0` asset
+  shipped untested, because a net8.0 reference resolved the `netstandard2.1` one and no test,
+  benchmark or fuzz iteration ever loaded the other. The lower target was also the ceiling on the
+  one everybody loaded, because the code it could not compile went into shared source without a
+  `#if` rather than behind one — see the astral-plane letter above. It cost an implementer twice as
+  well, because `netstandard2.0` has no default interface methods and
+  each new `IAstFactory` member had to go out as a breaking change. The package now carries one
+  `lib/net8.0` folder and no dependencies; the `System.Memory` reference that `netstandard2.0`
+  alone needed is gone.
+
 ## v3.1.0 - 2026-09-13
 
 ### Summary

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using static ClosedXML.Parser.ReferenceAxisType;
 
 namespace ClosedXML.Parser;
@@ -541,7 +540,7 @@ public readonly struct RowCol : IEquatable<RowCol>
     /// Check whether the <paramref name="obj"/> is of type <see cref="RowCol"/>
     /// and all values are same as this one.
     /// </summary>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is RowCol other && Equals(other);
     }

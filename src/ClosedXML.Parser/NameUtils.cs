@@ -1,7 +1,5 @@
-﻿using System;
+﻿using System.Buffers;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using ClosedXML.Parser.Rolex;
 
@@ -46,18 +44,11 @@ public static class NameUtils
     }.Select(mask => (int)mask).ToArray());
 
     /// <summary>
-    /// Character not allowed in a sheet name, even quoted one.
+    /// Characters not allowed in a sheet name, even a quoted one: <c>*</c> (0x002A), <c>/</c>
+    /// (0x002F), <c>:</c> (0x003A), <c>?</c> (0x003F), <c>[</c> (0x005B), <c>\</c> (0x005C) and
+    /// <c>]</c> (0x005D).
     /// </summary>
-    private static readonly char[] InvalidSheetChars =
-    {
-        '*', // 0x002A
-        '/', // 0x002F
-        ':', // 0x003A
-        '?', // 0x003F
-        '[', // 0x005B
-        '\\',// 0x005C
-        ']', // 0x005D
-    };
+    private static readonly SearchValues<char> InvalidSheetChars = SearchValues.Create("*/:?[\\]");
 
     /// <summary>
     /// Should the name be quoted?

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using ClosedXML.Parser.Rolex;
 
 // ReSharper disable InconsistentNaming
@@ -15,7 +12,8 @@ internal readonly struct Token
     private static readonly IReadOnlyDictionary<int, string> SymbolNames = typeof(Token)
         .GetFields(BindingFlags.Public | BindingFlags.Static)
         .Where(f => f.FieldType == typeof(int) && f.IsLiteral)
-        .ToDictionary(x => (int)x.GetValue(null), x => x.Name);
+        // A literal int field always has a value, so the unboxing cannot see a null.
+        .ToDictionary(x => (int)x.GetValue(null)!, x => x.Name);
 
     /// <summary>
     /// An error symbol id.

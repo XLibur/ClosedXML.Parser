@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Xml;
 
 namespace ClosedXML.Parser.Pratt;
@@ -18,7 +16,8 @@ internal class Lexer
     private readonly Queue<Token> _queue = new(4);
     private string _input = string.Empty; // Currently tokenized formula
     private int _start; // The start index of currently parsed token in Next()
-    private int _i; // Index of current code point _c in _input
+    private int _i; // Index of the last code unit of the current code point _c in _input
+    private int _cStart; // Index of the first code unit of _c, one below _i for a surrogate pair
     private int _c; // A current code point (including astral planes) or -1 if at the EOF
 
 
@@ -50,6 +49,7 @@ internal class Lexer
         _input = formula ?? throw new ArgumentNullException();
         _start = -1;
         _i = -1;
+        _cStart = -1;
         _c = 0;
     }
 
@@ -82,7 +82,7 @@ internal class Lexer
         if (IsEof)
             return new Token(TokenType.Eof, 0, 0);
 
-        _start = _i;
+        _start = _cStart;
 
         // Number
         if (IsDigit(_c))
@@ -441,12 +441,10 @@ internal class Lexer
 
         static bool IsLetterOrLetterMark(int codepoint)
         {
-            // TODO: Only netstandard 2.1 has a parameter of type int, 2.0 has only char.
-            if (codepoint > 0xFFFF)
-                return false; // No letters from astral planes for us :(
-
             // Letters are categories from 0 to OtherLetter category. Then there are NonSpacingMark (accents and such).
-            return CharUnicodeInfo.GetUnicodeCategory((char)codepoint) <= UnicodeCategory.NonSpacingMark;
+            // The overload takes a codepoint rather than a code unit, so a letter from an astral
+            // plane is classified like any other and no longer refused for being one.
+            return CharUnicodeInfo.GetUnicodeCategory(codepoint) <= UnicodeCategory.NonSpacingMark;
         }
 
         // Is codepoint a character per XML 1.0 spec (2.2)?
@@ -462,17 +460,21 @@ internal class Lexer
 
     private Token T(TokenType type)
     {
-        return new Token(type, _start, _i);
+        // _c is the first code point past the token, so the token ends where that one begins.
+        // Taking _i instead ends a token one code unit inside a following surrogate pair.
+        return new Token(type, _start, _cStart);
     }
 
     private int Advance()
     {
         if (++_i >= _input.Length)
         {
+            _cStart = _input.Length;
             _c = -1;
             return (char)_c;
         }
 
+        _cStart = _i;
         var c = _input[_i];
 
         if (char.IsLowSurrogate(c))
