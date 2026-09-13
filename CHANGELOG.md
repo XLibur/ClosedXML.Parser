@@ -9,10 +9,13 @@ or Fixed.
 ## Contents
 
 - [Unreleased](#unreleased)
+- [v4.0.0](#v400---2026-09-13)
 - [v3.1.0](#v310---2026-09-13)
 - [v3.0.0](#v300---2026-09-13)
 
 ## Unreleased
+
+## v4.0.0 - 2026-09-13
 
 ### Formula parsers
 
