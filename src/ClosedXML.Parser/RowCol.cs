@@ -306,11 +306,12 @@ public readonly struct RowCol : IEquatable<RowCol>
         switch (ColumnType)
         {
             case Absolute:
-                sb.Append('$').Append(GetA1Reference());
+                sb.Append('$');
+                AppendA1Column(sb);
                 break;
 
             case Relative:
-                sb.Append(GetA1Reference());
+                AppendA1Column(sb);
                 break;
 
             case None:
@@ -377,20 +378,40 @@ public readonly struct RowCol : IEquatable<RowCol>
         }
     }
 
-    private string GetA1Reference()
+    /// <summary>
+    /// Write the column letters of the column, e.g. <c>XFD</c> for column 16384.
+    /// </summary>
+    /// <remarks>
+    /// The letters are found from the last one back, so they are collected in a buffer and written
+    /// in the order they are read.
+    /// <para>
+    /// The buffer holds seven letters rather than the three a column of a sheet needs. The
+    /// constructor takes any <see cref="int"/> as a column and only <see cref="ToA1OrError"/>
+    /// holds a converted one to the sheet, so a column above <c>ZZZ</c> reaches here from the
+    /// public constructor and from <see cref="ToA1"/>, whose single wrap only brings an offset
+    /// within one sheet width back into range. Seven letters is what the largest <see cref="int"/>
+    /// spells, so every column the type can hold is written rather than refused.
+    /// </para>
+    /// </remarks>
+    private void AppendA1Column(StringBuilder sb)
     {
+        // A1 column letters are bijective base 26, so int.MaxValue (2147483647) is the seven
+        // letters FXSHRXW. Anything shorter turns a column this type accepts into an index error.
+        const int maxColumnLetters = 7;
+        Span<char> letters = stackalloc char[maxColumnLetters];
         var columnIndex = ColumnValue;
-        var column = string.Empty;
+        var i = maxColumnLetters;
         do
         {
             columnIndex -= 1;
             var index = columnIndex % 26;
             columnIndex -= index;
             columnIndex /= 26;
-            column = (char)('A' + index) + column;
+            letters[--i] = (char)('A' + index);
         } while (columnIndex > 0);
 
-        return column;
+        for (; i < maxColumnLetters; ++i)
+            sb.Append(letters[i]);
     }
 
     /// <summary>

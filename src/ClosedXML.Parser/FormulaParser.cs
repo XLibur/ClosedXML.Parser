@@ -35,6 +35,21 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     // Current lookahead token index
     private int _la;
 
+    /// <summary>
+    /// The most levels of nesting a formula can have, e.g. braces within braces or an argument
+    /// of an argument. The parser descends by recursion, so a formula nesting deeper than this
+    /// runs out the stack, and a <c>StackOverflowException</c> can't be caught: it takes down
+    /// the whole process, not just the parse. Excel accepts at most 64 levels of nested
+    /// functions, so this leaves room to spare over any formula a workbook can hold.
+    /// </summary>
+    private const int MaxNestingDepth = 256;
+
+    /// <summary>
+    /// How many levels of nesting the parser is inside right now, e.g. braces within braces
+    /// or an argument of an argument.
+    /// </summary>
+    private int _nestingDepth;
+
     private FormulaParser(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory, bool a1Mode)
     {
         // Trim the end, so ref_intersection_expression that tried to parse SPACE as an operator
@@ -270,7 +285,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         }
 
         Consume();
+        EnterNesting();
         var neutralAtom = PrefixAtomExpression(skipRangeUnion, out _);
+        _nestingDepth--;
         isPureRef = false;
         return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), op, neutralAtom);
     }
@@ -294,7 +311,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     var start = _tokenSource.StartIndex;
                     Consume();
+                    EnterNesting();
                     var expression = Expression(false, out isPureRef);
+                    _nestingDepth--;
                     Match(Token.CLOSE_BRACE);
                     var nestedNode = _factory.Nested(_context, new SymbolRange(start, _tokenSource.StartIndex), expression);
 
@@ -416,7 +435,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         if (readAtom is null && _la == Token.INTERSECT)
         {
             Consume();
+            EnterNesting();
             var refNode = RefImplicitExpression();
+            _nestingDepth--;
             return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), UnaryOperation.ImplicitIntersection, refNode);
         }
 
@@ -519,44 +540,15 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             // Happens when sheet is deleted, e.g. `#REF!A1`. Note that #REF is actually a valid
             // name of a sheet, but it must be escaped to be usable ('#REF'!B3) because of '#'.
             case Token.REF_CONSTANT:
-                {
-                    // In all cases, it is a #REF! error from AST PoV, just with weird tokens.
-                    var start = _tokenSource.StartIndex;
-                    var errorToken = GetCurrentToken();
-                    Span<char> normalizedError = stackalloc char[errorToken.Length];
-                    errorToken.ToUpperInvariant(normalizedError);
-                    Match(Token.REF_CONSTANT);
-
-                    if (_la == Token.REF_CONSTANT)
-                    {
-                        // -> REF_CONSTANT REF_CONSTANT
-                        Match(Token.REF_CONSTANT);
-                    }
-                    else if (_la == Token.A1_CELL)
-                    {
-                        // -> REF_CONSTANT A1_CELL
-                        Match(Token.A1_CELL);
-                        if (_la == Token.COLON && LL(1) == Token.A1_CELL)
-                        {
-                            // -> REF_CONSTANT A1_CELL COLON A1_CELL
-                            Match(Token.COLON);
-                            Match(Token.A1_CELL);
-                        }
-                    }
-                    else if (_la == Token.A1_SPAN_REFERENCE)
-                    {
-                        // -> REF_CONSTANT A1_SPAN_REFERENCE
-                        Match(Token.A1_SPAN_REFERENCE);
-                    }
-
-                    return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), normalizedError);
-                }
+                return RefConstantAtom();
 
             case Token.OPEN_BRACE:
                 {
                     var start = _tokenSource.StartIndex;
                     Consume();
+                    EnterNesting();
                     var refExpression = RefExpression();
+                    _nestingDepth--;
                     Match(Token.CLOSE_BRACE);
                     return _factory.Nested(_context, new SymbolRange(start, _tokenSource.StartIndex), refExpression);
                 }
@@ -623,128 +615,16 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
             // Either defined name or table name for a structure reference
             case Token.NAME:
-                {
-                    var start = _tokenSource.StartIndex;
-                    var localName = TokenParser.ParseName(_input.AsSpan(), _tokenSource);
-                    Consume();
-                    if (_la == Token.INTRA_TABLE_REFERENCE)
-                    {
-                        TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
-                        Consume();
-                        var range = new SymbolRange(start, _tokenSource.StartIndex);
-                        return _factory.StructureReference(_context, range, localName, specifics, firstColumn, lastColumn ?? firstColumn);
-                    }
-
-                    // 3D reference
-                    if (_la == Token.COLON && LL(1) == Token.SINGLE_SHEET_PREFIX)
-                    {
-                        var firstSheetName = localName;
-                        Consume(); // COLON
-
-                        // TODO: Decouple book prefix from single sheet prefix
-                        var lastPrefix = SheetPrefix.ReadSingle(_input.AsSpan(), _tokenSource);
-                        if (lastPrefix.BookIndex is not null)
-                            throw Error("External workbook not expected.");
-
-                        var lastSheetName = lastPrefix.FirstSheet!;
-                        RequireSheetName(firstSheetName, start);
-                        RequireSheetName(lastSheetName, _tokenSource.StartIndex);
-
-                        Consume(); // SINGLE_SHEET_PREFIX
-
-                        // After prefix, there must be A1Reference
-                        var area = A1Reference();
-                        if (area is null)
-                            throw UnexpectedTokenError(Token.A1_CELL, Token.A1_SPAN_REFERENCE);
-
-                        var end = _tokenSource.StartIndex;
-                        return _factory.Reference3D(_context, new SymbolRange(start, end), firstSheetName, lastSheetName, area.Value);
-                    }
-
-                    return _factory.Name(_context, new SymbolRange(start, _tokenSource.StartIndex), localName);
-                }
+                return NameAtom();
 
             // reference to another workbook or to an item of a DDE link
             case Token.BOOK_PREFIX:
-                {
-                    var start = _tokenSource.StartIndex;
-                    var bookPrefix = SheetPrefix.ReadBookPrefix(_input.AsSpan(), _tokenSource);
-                    Consume();
-
-                    // dde_reference: BOOK_PREFIX DDE_ITEM
-                    if (_la == Token.DDE_ITEM)
-                    {
-                        var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
-                        Consume();
-                        return _factory.ExternalDynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, item);
-                    }
-
-                    var externalNameToken = _tokenSource;
-                    Match(Token.NAME);
-                    var externalName = TokenParser.ParseName(_input.AsSpan(), externalNameToken);
-                    if (_la == Token.INTRA_TABLE_REFERENCE)
-                    {
-                        TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
-                        Consume();
-                        var range = new SymbolRange(start, _tokenSource.StartIndex);
-                        return _factory.ExternalStructureReference(_context, range, bookPrefix, externalName, specifics, firstColumn, lastColumn ?? firstColumn);
-                    }
-
-                    return _factory.ExternalName(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, externalName);
-                }
+                return BookPrefixAtom();
             // name_reference: SINGLE_SHEET_PREFIX NAME
             // external_cell_reference: SINGLE_SHEET_PREFIX (A1_CELL | A1_CELL COLON A1_CELL | A1_SPAN_REFERENCE | REF_CONSTANT)
             // dde_reference: SINGLE_SHEET_PREFIX DDE_ITEM
             case Token.SINGLE_SHEET_PREFIX:
-                {
-                    var start = _tokenSource.StartIndex;
-                    var sheetPrefix = _tokenSource;
-                    var prefix = SheetPrefix.ReadSingle(_input.AsSpan(), sheetPrefix);
-                    var sheetName = prefix.FirstSheet!;
-                    Consume();
-
-                    // The prefix of a DDE reference is an application and a topic rather than a
-                    // sheet, and only the token after it says which this is.
-                    if (_la != Token.DDE_ITEM)
-                        RequireSheetName(sheetName, start);
-
-                    var area = A1Reference();
-                    if (area is not null)
-                    {
-                        var end = _tokenSource.StartIndex;
-                        return prefix.BookIndex is null
-                            ? _factory.SheetReference(_context, new SymbolRange(start, end), sheetName, area.Value)
-                            : _factory.ExternalSheetReference(_context, new SymbolRange(start, end), prefix.BookIndex.Value, sheetName, area.Value);
-                    }
-
-                    if (_la == Token.REF_CONSTANT)
-                    {
-                        var error = GetCurrentToken(); // Sheet1!#REF! is a valid
-                        Consume();
-                        return _factory.SheetErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), prefix.BookIndex, sheetName, error);
-                    }
-
-                    // The prefix of a displayed DDE formula is the application and the topic of the link, e.g. `Sdemo123|tik!`.
-                    // A sheet name can contain `|` too, but only a DDE link is followed by a quoted item.
-                    if (_la == Token.DDE_ITEM)
-                    {
-                        if (!prefix.TryGetDdeLink(out var application, out var topic))
-                            throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{_input.Substring(sheetPrefix.StartIndex, sheetPrefix.Length)}'.");
-
-                        var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
-                        Consume();
-                        return _factory.DynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), application, topic, item);
-                    }
-
-                    // name_reference
-                    var nameToken = _tokenSource;
-                    Match(Token.NAME);
-                    var name = TokenParser.ParseName(_input.AsSpan(), nameToken);
-                    var range = new SymbolRange(start, _tokenSource.StartIndex);
-                    return prefix.BookIndex is null
-                        ? _factory.SheetName(_context, range, sheetName, name)
-                        : _factory.ExternalSheetName(_context, range, prefix.BookIndex.Value, sheetName, name);
-                }
+                return SheetPrefixAtom();
 
             // structure_reference - only for formulas directly in the table, e.g. totals row.
             case Token.INTRA_TABLE_REFERENCE:
@@ -758,6 +638,161 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         }
 
         throw UnexpectedTokenError();
+    }
+
+    private TNode RefConstantAtom()
+    {
+        // In all cases, it is a #REF! error from AST PoV, just with weird tokens.
+        var start = _tokenSource.StartIndex;
+        var errorToken = GetCurrentToken();
+        Span<char> normalizedError = stackalloc char[errorToken.Length];
+        errorToken.ToUpperInvariant(normalizedError);
+        Match(Token.REF_CONSTANT);
+
+        if (_la == Token.REF_CONSTANT)
+        {
+            // -> REF_CONSTANT REF_CONSTANT
+            Match(Token.REF_CONSTANT);
+        }
+        else if (_la == Token.A1_CELL)
+        {
+            // -> REF_CONSTANT A1_CELL
+            Match(Token.A1_CELL);
+            if (_la == Token.COLON && LL(1) == Token.A1_CELL)
+            {
+                // -> REF_CONSTANT A1_CELL COLON A1_CELL
+                Match(Token.COLON);
+                Match(Token.A1_CELL);
+            }
+        }
+        else if (_la == Token.A1_SPAN_REFERENCE)
+        {
+            // -> REF_CONSTANT A1_SPAN_REFERENCE
+            Match(Token.A1_SPAN_REFERENCE);
+        }
+
+        return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), normalizedError);
+    }
+
+    private TNode NameAtom()
+    {
+        var start = _tokenSource.StartIndex;
+        var localName = TokenParser.ParseName(_input.AsSpan(), _tokenSource);
+        Consume();
+        if (_la == Token.INTRA_TABLE_REFERENCE)
+        {
+            TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
+            Consume();
+            var range = new SymbolRange(start, _tokenSource.StartIndex);
+            return _factory.StructureReference(_context, range, localName, specifics, firstColumn, lastColumn ?? firstColumn);
+        }
+
+        // 3D reference
+        if (_la == Token.COLON && LL(1) == Token.SINGLE_SHEET_PREFIX)
+        {
+            var firstSheetName = localName;
+            Consume(); // COLON
+
+            // TODO: Decouple book prefix from single sheet prefix
+            var lastPrefix = SheetPrefix.ReadSingle(_input.AsSpan(), _tokenSource);
+            if (lastPrefix.BookIndex is not null)
+                throw Error("External workbook not expected.");
+
+            var lastSheetName = lastPrefix.FirstSheet!;
+            RequireSheetName(firstSheetName, start);
+            RequireSheetName(lastSheetName, _tokenSource.StartIndex);
+
+            Consume(); // SINGLE_SHEET_PREFIX
+
+            // After prefix, there must be A1Reference
+            var area = A1Reference();
+            if (area is null)
+                throw UnexpectedTokenError(Token.A1_CELL, Token.A1_SPAN_REFERENCE);
+
+            var end = _tokenSource.StartIndex;
+            return _factory.Reference3D(_context, new SymbolRange(start, end), firstSheetName, lastSheetName, area.Value);
+        }
+
+        return _factory.Name(_context, new SymbolRange(start, _tokenSource.StartIndex), localName);
+    }
+
+    private TNode BookPrefixAtom()
+    {
+        var start = _tokenSource.StartIndex;
+        var bookPrefix = SheetPrefix.ReadBookPrefix(_input.AsSpan(), _tokenSource);
+        Consume();
+
+        // dde_reference: BOOK_PREFIX DDE_ITEM
+        if (_la == Token.DDE_ITEM)
+        {
+            var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
+            Consume();
+            return _factory.ExternalDynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, item);
+        }
+
+        var externalNameToken = _tokenSource;
+        Match(Token.NAME);
+        var externalName = TokenParser.ParseName(_input.AsSpan(), externalNameToken);
+        if (_la == Token.INTRA_TABLE_REFERENCE)
+        {
+            TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
+            Consume();
+            var range = new SymbolRange(start, _tokenSource.StartIndex);
+            return _factory.ExternalStructureReference(_context, range, bookPrefix, externalName, specifics, firstColumn, lastColumn ?? firstColumn);
+        }
+
+        return _factory.ExternalName(_context, new SymbolRange(start, _tokenSource.StartIndex), bookPrefix, externalName);
+    }
+
+    private TNode SheetPrefixAtom()
+    {
+        var start = _tokenSource.StartIndex;
+        var sheetPrefix = _tokenSource;
+        var prefix = SheetPrefix.ReadSingle(_input.AsSpan(), sheetPrefix);
+        var sheetName = prefix.FirstSheet!;
+        Consume();
+
+        // The prefix of a DDE reference is an application and a topic rather than a
+        // sheet, and only the token after it says which this is.
+        if (_la != Token.DDE_ITEM)
+            RequireSheetName(sheetName, start);
+
+        var area = A1Reference();
+        if (area is not null)
+        {
+            var end = _tokenSource.StartIndex;
+            return prefix.BookIndex is null
+                ? _factory.SheetReference(_context, new SymbolRange(start, end), sheetName, area.Value)
+                : _factory.ExternalSheetReference(_context, new SymbolRange(start, end), prefix.BookIndex.Value, sheetName, area.Value);
+        }
+
+        if (_la == Token.REF_CONSTANT)
+        {
+            var error = GetCurrentToken(); // Sheet1!#REF! is a valid
+            Consume();
+            return _factory.SheetErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), prefix.BookIndex, sheetName, error);
+        }
+
+        // The prefix of a displayed DDE formula is the application and the topic of the link, e.g. `Sdemo123|tik!`.
+        // A sheet name can contain `|` too, but only a DDE link is followed by a quoted item.
+        if (_la == Token.DDE_ITEM)
+        {
+            if (!prefix.TryGetDdeLink(out var application, out var topic))
+                throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{_input.Substring(sheetPrefix.StartIndex, sheetPrefix.Length)}'.");
+
+            var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
+            Consume();
+            return _factory.DynamicDataExchange(_context, new SymbolRange(start, _tokenSource.StartIndex), application, topic, item);
+        }
+
+        // name_reference
+        var nameToken = _tokenSource;
+        Match(Token.NAME);
+        var name = TokenParser.ParseName(_input.AsSpan(), nameToken);
+        var range = new SymbolRange(start, _tokenSource.StartIndex);
+        return prefix.BookIndex is null
+            ? _factory.SheetName(_context, range, sheetName, name)
+            : _factory.ExternalSheetName(_context, range, prefix.BookIndex.Value, sheetName, name);
     }
 
     /// <summary>
@@ -916,7 +951,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
             case Token.STRING_CONSTANT:
                 var token = GetCurrentToken();
-                Span<char> buffer = stackalloc char[token.Length];
+                Span<char> buffer = token.Length <= TokenParser.MaxStackAllocChars
+                    ? stackalloc char[TokenParser.MaxStackAllocChars]
+                    : new char[token.Length];
                 Consume();
                 symbolRange = new SymbolRange(start, _tokenSource.StartIndex);
                 value = ConvertTextValue(token, out var slice, ref buffer)
@@ -966,7 +1003,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             else
             {
                 // Path for a non-blank argument.
+                EnterNesting();
                 var arg = Expression(true, out _);
+                _nestingDepth--;
                 args.Add(arg);
                 if (_la == Token.CLOSE_BRACE)
                 {
@@ -1065,7 +1104,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private string ConvertText()
     {
         var token = GetCurrentToken();
-        Span<char> buffer = stackalloc char[token.Length];
+        Span<char> buffer = token.Length <= TokenParser.MaxStackAllocChars
+            ? stackalloc char[TokenParser.MaxStackAllocChars]
+            : new char[token.Length];
         return ConvertTextValue(token, out var slice, ref buffer)
             ? slice.ToString()
             : buffer.ToString();
@@ -1133,6 +1174,22 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private Exception UnexpectedTokenError()
     {
         return Error($"Unexpected token {GetLaTokenName()}.");
+    }
+
+    /// <summary>
+    /// Descend one level of nesting, refusing a formula that nests deeper than
+    /// <see cref="MaxNestingDepth"/>.
+    /// </summary>
+    /// <remarks>
+    /// Every caller pairs this with a decrement once the nested part is parsed. A formula that
+    /// throws in between leaves the count standing, which costs nothing: a parser reads one
+    /// formula and is thrown away with it, so the count is never read again.
+    /// </remarks>
+    /// <exception cref="ParsingException">The formula nests too deep.</exception>
+    private void EnterNesting()
+    {
+        if (++_nestingDepth > MaxNestingDepth)
+            throw Error($"the formula nests deeper than the {MaxNestingDepth} levels a formula can have.");
     }
 
     private Exception Error(string message)

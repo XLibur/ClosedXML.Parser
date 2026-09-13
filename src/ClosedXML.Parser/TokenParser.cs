@@ -22,6 +22,18 @@ internal static class TokenParser
     private const string REF_ERROR = "#REF!";
 
     /// <summary>
+    /// The most characters to take from the stack for a scratch buffer.
+    /// </summary>
+    /// <remarks>
+    /// A name, a text or a column name is as long as the formula holding it: the grammar puts no
+    /// limit on any of them. A buffer sized from the input would therefore run the stack out on a
+    /// long one, and a <c>StackOverflowException</c> can't be caught — it takes down the whole
+    /// process. Past this many characters the scratch space comes from the heap instead. Nothing
+    /// a workbook holds gets that far, and the string built from the buffer allocates regardless.
+    /// </remarks>
+    internal const int MaxStackAllocChars = 256;
+
+    /// <summary>
     /// Reads formulas written in the <see cref="ReferenceStyle.A1"/> reference style.
     /// </summary>
     internal static readonly IReferenceStyle A1Style = new A1ReferenceStyle();
@@ -248,48 +260,18 @@ internal static class TokenParser
         area = StructuredReferenceArea.None;
 
         RequireItem(input, i, token);
-        if (IsKeywordStart(input, i))
-        {
-            // Inner reference contains a keyword.
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
 
-            // `INNER_REFERENCE : KEYWORD_LIST`, i.e. the keyword list is the whole inner
-            // reference and no column range follows it (e.g. '[[#All]]').
-            if (IsEndOfInnerReference(input, i))
+        // KEYWORD_LIST can contain at most two item specifiers, so the reader runs at most twice.
+        for (var keyword = 0; keyword < 2; keyword++)
+        {
+            if (ReadKeywordItem(input, token, ref i, ref area))
             {
                 firstColumn = null;
                 lastColumn = null;
                 return;
             }
-
-            i = SkipComma(input, i);
-            RequireItem(input, i, token);
         }
 
-        if (IsKeywordStart(input, i))
-        {
-            // Item is a keyword list, either
-            // * '[#Headers]' SPACED_COMMA '[#Data]'
-            // * '[#Data]' SPACED_COMMA '[#Totals]'
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
-
-            // As above, for a two keyword list (e.g. '[[#Headers],[#Data]]').
-            if (IsEndOfInnerReference(input, i))
-            {
-                firstColumn = null;
-                lastColumn = null;
-                return;
-            }
-
-            i = SkipComma(input, i);
-            RequireItem(input, i, token);
-        }
-
-        // KEYWORD_LIST can contain at most two item specifiers.
         // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
         i = GetStructuredName(input, i, out firstColumn);
         if (i < input.Length && input[i] == ':')
@@ -547,6 +529,35 @@ internal static class TokenParser
     }
 
     /// <summary>
+    /// Read one item of an inner reference, when the item at <paramref name="i"/> is a keyword
+    /// rather than a column name, and add it to <paramref name="area"/>. The first such item is
+    /// the keyword an inner reference contains; a second one makes a keyword list, either
+    /// <c>'[#Headers]' SPACED_COMMA '[#Data]'</c> or <c>'[#Data]' SPACED_COMMA '[#Totals]'</c>.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> when the keyword list is the whole inner reference and no column range follows
+    /// it, i.e. the `INNER_REFERENCE : KEYWORD_LIST` alternative — '[[#All]]' for one keyword and
+    /// '[[#Headers],[#Data]]' for two. <c>false</c> when the item is not a keyword at all, or when
+    /// a comma follows the keyword and another item starts after it.
+    /// </returns>
+    private static bool ReadKeywordItem(ReadOnlySpan<char> input, Token token, ref int i, ref StructuredReferenceArea area)
+    {
+        if (!IsKeywordStart(input, i))
+            return false;
+
+        var listItem = GetArea(input, ++i);
+        i += GetLength(listItem) + 1;
+        area |= listItem;
+
+        if (IsEndOfInnerReference(input, i))
+            return true;
+
+        i = SkipComma(input, i);
+        RequireItem(input, i, token);
+        return false;
+    }
+
+    /// <summary>
     /// Has the inner reference ended at <paramref name="i"/>, i.e. is only the SPACED_RBRACKET
     /// left? That is the `INNER_REFERENCE : KEYWORD_LIST` alternative, a keyword list with no
     /// column range after it.
@@ -557,22 +568,6 @@ internal static class TokenParser
         return i >= input.Length || input[i] == ']';
     }
 
-    /// <summary>
-    /// Demand that an item of an inner reference starts at <paramref name="i"/>, i.e. that the
-    /// bracket or the comma before it is followed by something other than the end of the token.
-    /// </summary>
-    /// <remarks>
-    /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
-    /// column range, a simple column name has to start and end with a non-space, and neither can be
-    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
-    /// accepts it as a whole token, so the refusal has to happen when the token is read.
-    /// <para>
-    /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
-    /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.
-    /// The check covers the character after <paramref name="i"/> as well, because every caller peeks
-    /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
-    /// </para>
-    /// </remarks>
     /// <summary>
     /// Does the item of an inner reference at <paramref name="i"/> start a keyword, i.e. is it
     /// <c>[#</c> rather than a column name?
@@ -591,6 +586,22 @@ internal static class TokenParser
         return input[i] == '[' && input[i + 1] == '#';
     }
 
+    /// <summary>
+    /// Demand that an item of an inner reference starts at <paramref name="i"/>, i.e. that the
+    /// bracket or the comma before it is followed by something other than the end of the token.
+    /// </summary>
+    /// <remarks>
+    /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
+    /// column range, a simple column name has to start and end with a non-space, and neither can be
+    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
+    /// accepts it as a whole token, so the refusal has to happen when the token is read.
+    /// <para>
+    /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
+    /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.
+    /// The check covers the character after <paramref name="i"/> as well, because every caller peeks
+    /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
+    /// </para>
+    /// </remarks>
     private static void RequireItem(ReadOnlySpan<char> input, int i, Token token)
     {
         if (i + 1 >= input.Length || input[i] == ']')
@@ -638,7 +649,9 @@ internal static class TokenParser
     /// </remarks>
     private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName, bool stopAtRange = true)
     {
-        Span<char> buffer = stackalloc char[input.Length];
+        Span<char> buffer = input.Length <= MaxStackAllocChars
+            ? stackalloc char[MaxStackAllocChars]
+            : new char[input.Length];
         var bufferIdx = 0;
         var bracketed = input[startIdx] == '[';
         var i = startIdx + (bracketed ? 1 : 0);
@@ -700,9 +713,13 @@ internal static class TokenParser
 
     private static bool IsLetter(char c) => (c is >= 'A' and <= 'Z') || (c is >= 'a' and <= 'z');
 
+    /// <summary>
+    /// The exception for a token the lexer should never have produced. Returned rather than
+    /// thrown, so the <c>throw</c> stands at the call site and the compiler can see the path ends.
+    /// </summary>
     private static Exception Bug()
     {
-        throw new InvalidOperationException("Bug in token parser. Token doesn't have expected format.");
+        return new InvalidOperationException("Bug in token parser. Token doesn't have expected format.");
     }
 
     private sealed class A1ReferenceStyle : IReferenceStyle

@@ -102,7 +102,7 @@ internal readonly struct Token
     public static string GetSymbolName(int symbolId)
     {
         if (!SymbolNames.TryGetValue(symbolId, out var name))
-            throw new ArgumentOutOfRangeException($"Invalid symbol {symbolId}.");
+            throw new ArgumentOutOfRangeException(nameof(symbolId), symbolId, "Invalid symbol.");
 
         return name;
     }
