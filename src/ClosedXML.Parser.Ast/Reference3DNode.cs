@@ -4,6 +4,6 @@ public record Reference3DNode(string FirstSheet, string LastSheet, ReferenceArea
 {
     public override string GetDisplayString(ReferenceStyle style)
     {
-        return $"{FirstSheet}:{LastSheet}!{Reference.GetDisplayString(style)}";
+        return $"{SheetPrefixWriter.Range(FirstSheet, LastSheet)}{Reference.GetDisplayString(style)}";
     }
 }

@@ -7,10 +7,6 @@ public record SheetErrorNode(int? WorkbookIndex, string Sheet, string Error) : A
 {
     public override string GetDisplayString(ReferenceStyle style)
     {
-        // A quote wraps the whole prefix, the book index included: '[2]Jane''s'!#REF!
-        var book = WorkbookIndex is null ? string.Empty : $"[{WorkbookIndex}]";
-        return NameUtils.ShouldQuote(Sheet)
-            ? $"'{book}{Sheet.Replace("'", "''")}'!{Error}"
-            : $"{book}{Sheet}!{Error}";
+        return $"{SheetPrefixWriter.Sheet(Sheet, WorkbookIndex)}{Error}";
     }
 }

@@ -8,6 +8,6 @@ public record FunctionNode(string? Sheet, string Name) : AstNode
 
     public override string GetDisplayString(ReferenceStyle style)
     {
-        return Sheet is not null ? $"{Sheet}!{Name}" : Name;
+        return Sheet is not null ? $"{SheetPrefixWriter.Sheet(Sheet)}{Name}" : Name;
     }
 }
