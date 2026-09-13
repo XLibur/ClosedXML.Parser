@@ -152,13 +152,6 @@ public class SheetPrefixTests
     }
 
     [Fact]
-    public void A_deleted_sheet_is_written_as_a_ref_error()
-    {
-        Assert.Equal("#REF!", Write(SheetPrefix.Deleted));
-        Assert.True(SheetPrefix.Deleted.IsDeleted);
-    }
-
-    [Fact]
     public void A_bang_prefix_is_written_as_the_separator_alone()
     {
         Assert.Equal("!", Write(SheetPrefix.Bang));

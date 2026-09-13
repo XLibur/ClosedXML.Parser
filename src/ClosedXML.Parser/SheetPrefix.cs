@@ -10,8 +10,8 @@ namespace ClosedXML.Parser;
 /// and including the <c>!</c>. It covers every shape the prefix is written in: a single sheet
 /// (<c>Sheet1!</c>, <c>'New York'!</c>), a 3D reference (<c>first:last!</c>), either of them behind
 /// a book prefix (<c>[1]Sheet1!</c>), the link of a dynamic data exchange reference
-/// (<c>Sdemo123|tik!</c>), the empty prefix of a bang reference (<c>!</c>) and the <c>#REF!</c> of a
-/// deleted sheet.
+/// (<c>Sdemo123|tik!</c>) and the empty prefix of a bang reference (<c>!</c>). A reference whose
+/// sheet was deleted has no prefix: the whole reference is a <c>#REF!</c>.
 /// <para>
 /// Reading and writing are both here, because they are one decision seen from two sides: whether a
 /// name needs quotes decides how it is written, and how it was written decides where the name ends.
@@ -20,14 +20,11 @@ namespace ClosedXML.Parser;
 /// </summary>
 internal readonly record struct SheetPrefix
 {
-    private const string REF_ERROR = "#REF!";
-
-    private SheetPrefix(int? bookIndex, string? firstSheet, string? lastSheet, bool isDeleted, bool isDdeLink)
+    private SheetPrefix(int? bookIndex, string? firstSheet, string? lastSheet, bool isDdeLink)
     {
         BookIndex = bookIndex;
         FirstSheet = firstSheet;
         LastSheet = lastSheet;
-        IsDeleted = isDeleted;
         IsDdeLink = isDdeLink;
     }
 
@@ -38,27 +35,22 @@ internal readonly record struct SheetPrefix
     internal static SheetPrefix Bang => default;
 
     /// <summary>
-    /// The prefix of a reference whose sheet has been deleted, written <c>#REF!</c>.
-    /// </summary>
-    internal static SheetPrefix Deleted => new(null, null, null, true, false);
-
-    /// <summary>
     /// The prefix of a reference into one sheet, of this workbook or of the workbook at
     /// <paramref name="bookIndex"/>.
     /// </summary>
-    internal static SheetPrefix Sheet(string sheet, int? bookIndex = null) => new(bookIndex, sheet, null, false, false);
+    internal static SheetPrefix Sheet(string sheet, int? bookIndex = null) => new(bookIndex, sheet, null, false);
 
     /// <summary>
     /// The prefix of a 3D reference, i.e. one spanning the sheets from <paramref name="firstSheet"/>
     /// to <paramref name="lastSheet"/>.
     /// </summary>
-    internal static SheetPrefix Range(string firstSheet, string lastSheet, int? bookIndex = null) => new(bookIndex, firstSheet, lastSheet, false, false);
+    internal static SheetPrefix Range(string firstSheet, string lastSheet, int? bookIndex = null) => new(bookIndex, firstSheet, lastSheet, false);
 
     /// <summary>
     /// The prefix of a dynamic data exchange reference, i.e. the application and the topic its link
     /// reads from, written <c>application|topic!</c>.
     /// </summary>
-    internal static SheetPrefix DdeLink(string application, string topic) => new(null, application + '|' + topic, null, false, true);
+    internal static SheetPrefix DdeLink(string application, string topic) => new(null, application + '|' + topic, null, true);
 
     /// <summary>
     /// Index of the workbook the sheet is in, or <c>null</c> when it is in this workbook. A sheet
@@ -67,8 +59,7 @@ internal readonly record struct SheetPrefix
     internal int? BookIndex { get; }
 
     /// <summary>
-    /// The sheet, or the first sheet of a 3D reference. <c>null</c> for <see cref="Bang"/> and
-    /// <see cref="Deleted"/>.
+    /// The sheet, or the first sheet of a 3D reference. <c>null</c> for <see cref="Bang"/>.
     /// </summary>
     internal string? FirstSheet { get; }
 
@@ -76,11 +67,6 @@ internal readonly record struct SheetPrefix
     /// The last sheet of a 3D reference, otherwise <c>null</c>.
     /// </summary>
     internal string? LastSheet { get; }
-
-    /// <summary>
-    /// Is this the prefix of a reference whose sheet has been deleted?
-    /// </summary>
-    internal bool IsDeleted { get; }
 
     /// <summary>
     /// Is this the link of a dynamic data exchange reference? It is written bare where a sheet name
@@ -91,7 +77,7 @@ internal readonly record struct SheetPrefix
     /// <summary>
     /// Is this the empty prefix of a bang reference?
     /// </summary>
-    internal bool IsBang => FirstSheet is null && !IsDeleted;
+    internal bool IsBang => FirstSheet is null;
 
     /// <summary>
     /// Is this the prefix of a 3D reference?
@@ -185,9 +171,6 @@ internal readonly record struct SheetPrefix
     /// </summary>
     internal StringBuilder Append(StringBuilder sb)
     {
-        if (IsDeleted)
-            return sb.Append(REF_ERROR);
-
         if (IsBang)
             return sb.AppendReferenceSeparator();
 
