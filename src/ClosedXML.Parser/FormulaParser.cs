@@ -310,12 +310,13 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     // no way to detect whether it is ref_expression or expression.
                     if (isPureRef)
                     {
-                        // Incorrect expectation, backtrack to the ref_expression
-                        // note the passed true argument for 'replaceFirstAtom'
+                        // Incorrect expectation, backtrack to the ref_expression. The node is passed
+                        // on with the index it starts at, because the parser has read past it.
+                        var readAtom = new ReadAtom(nestedNode, start);
                         if (skipRangeUnion)
-                            return RefImplicitExpression(true, nestedNode);
+                            return RefImplicitExpression(readAtom);
 
-                        return RefExpression(true, nestedNode);
+                        return RefExpression(readAtom);
                     }
 
                     return nestedNode;
@@ -383,10 +384,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         }
     }
 
-    private TNode RefExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefExpression(ReadAtom? readAtom = null)
     {
-        var start = _tokenSource.StartIndex;
-        var leftNode = RefImplicitExpression(replaceFirstAtom, refAtom);
+        var start = readAtom?.Start ?? _tokenSource.StartIndex;
+        var leftNode = RefImplicitExpression(readAtom);
         while (_la == Token.COMMA)
         {
             Consume();
@@ -407,19 +408,19 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// The <c>@</c> binds looser than the range and the intersection operators, so its operand is the rest of the
     /// intersection, e.g. <c>@A1:A10 A5</c> is <c>@(A1:A10 A5)</c>.
     /// </summary>
-    private TNode RefImplicitExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefImplicitExpression(ReadAtom? readAtom = null)
     {
-        var start = _tokenSource.StartIndex;
+        var start = readAtom?.Start ?? _tokenSource.StartIndex;
 
-        // The replaced atom has been read already, so an '@' after it can't be its prefix.
-        if (!replaceFirstAtom && _la == Token.INTERSECT)
+        // The atom was read before the parser backtracked, so an '@' after it can't be its prefix.
+        if (readAtom is null && _la == Token.INTERSECT)
         {
             Consume();
-            var refNode = RefImplicitExpression(replaceFirstAtom, refAtom);
+            var refNode = RefImplicitExpression();
             return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), UnaryOperation.ImplicitIntersection, refNode);
         }
 
-        return RefIntersectionExpression(replaceFirstAtom, refAtom);
+        return RefIntersectionExpression(readAtom);
     }
 
     /// <summary>
@@ -429,10 +430,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     ///     ;
     /// </code>
     /// </summary>
-    private TNode RefIntersectionExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefIntersectionExpression(ReadAtom? readAtom = null)
     {
-        var start = _tokenSource.StartIndex;
-        var leftNode = RefRangeExpression(replaceFirstAtom, refAtom);
+        var start = readAtom?.Start ?? _tokenSource.StartIndex;
+        var leftNode = RefRangeExpression(readAtom);
         while (_la == Token.SPACE)
         {
             Consume();
@@ -458,10 +459,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     ///     ;
     /// </code>
     /// </summary>
-    private TNode RefRangeExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefRangeExpression(ReadAtom? readAtom = null)
     {
-        var start = _tokenSource.StartIndex;
-        var leftNode = RefSpillExpression(replaceFirstAtom, refAtom);
+        var start = readAtom?.Start ?? _tokenSource.StartIndex;
+        var leftNode = RefSpillExpression(readAtom);
         while (_la == Token.COLON)
         {
             Consume();
@@ -482,10 +483,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     ///     ;
     /// </c>
     /// </summary>
-    private TNode RefSpillExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefSpillExpression(ReadAtom? readAtom = null)
     {
-        var start = _tokenSource.StartIndex;
-        var refAtomNode = RefAtomExpression(replaceFirstAtom, refAtom);
+        var start = readAtom?.Start ?? _tokenSource.StartIndex;
+        var refAtomNode = RefAtomExpression(readAtom);
         if (_la == Token.SPILL)
         {
             Consume();
@@ -495,11 +496,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         return refAtomNode;
     }
 
-    private TNode RefAtomExpression(bool replaceFirstAtom = false, TNode? refAtom = default)
+    private TNode RefAtomExpression(ReadAtom? readAtom = null)
     {
         // A backtracking of an incorrect detection whether an expression in a braces is value expression or ref expression.
-        if (replaceFirstAtom)
-            return refAtom!;
+        if (readAtom is not null)
+            return readAtom.Value.Node;
 
         switch (_la)
         {
@@ -1081,4 +1082,22 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private static string GetTokenName(int tokenType) => Token.GetSymbolName(tokenType);
 
     private string GetLaTokenName() => GetTokenName(_la);
+
+    /// <summary>
+    /// An atom the parser has already read, when an expression in braces turns out to be a reference
+    /// expression and the parser backtracks. It carries the index the atom starts at, because the
+    /// parser has read past the atom and can no longer tell where it began.
+    /// </summary>
+    private readonly struct ReadAtom
+    {
+        internal ReadAtom(TNode node, int start)
+        {
+            Node = node;
+            Start = start;
+        }
+
+        internal TNode Node { get; }
+
+        internal int Start { get; }
+    }
 }

@@ -273,6 +273,21 @@ public class AstFactoryTests
         Assert.Equal(new[] { new SymbolRange(7, 10), new SymbolRange(1, 11) }, result);
     }
 
+    [Theory]
+    [InlineData("(A1),B2", 0, 7)]
+    [InlineData("(A1):B2", 0, 7)]
+    [InlineData("((A1)):B2", 0, 9)]
+    [InlineData("SUM((A1):B2)", 4, 11)]
+    [InlineData("SUM((Name Jan):(Name Apr))", 4, 25)]
+    public void BinaryOperationRangeOfBacktrackedBrace(string formula, int start, int end)
+    {
+        // An expression in braces is read as a value expression and turns out to be a reference
+        // expression, so the parser backtracks. The range must still start at the brace.
+        var result = new List<SymbolRange>();
+        FormulaParser<object?, string, List<SymbolRange>>.CellFormulaA1(formula, result, new BinaryOperationVisitor());
+        Assert.Equal(new SymbolRange(start, end), result[result.Count - 1]);
+    }
+
     private class LogicalVisitor : BaseVisitor
     {
         public override string LogicalNode(Result context, SymbolRange range, bool logical)

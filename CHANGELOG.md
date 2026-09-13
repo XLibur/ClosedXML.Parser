@@ -85,6 +85,14 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Keep the range of an expression in braces that turns out to be a reference, e.g. `(A1):B2`. The
+  parser reads `(A1)` as a value expression, and when the `:` shows it is a reference expression, it
+  backtracks and passes the node it has already read to the reference expression. That expression
+  took its start from the token the parser had reached, which is past the braces, so every range
+  around them began too late. A modification then spliced the text at the wrong place:
+  `SUM((Total_Cost Jan):(Total_Cost Apr.))` of the EUSES data set came back as
+  `SUM(Total_Cost Jan)(Total_Cost Jan):(Total_Cost Apr.))`, and its R1C1 form no longer parsed. The
+  node the parser has already read now carries the index it starts at.
 - Leave the sheets of a 3D reference into another workbook alone when a sheet is renamed or
   deleted. `RefModVisitor.ExternalReference3D` passed both sheets of `[1]First:Last!A1` to
   `ModifySheet`, so renaming a sheet of this workbook renamed the sheet of the same name in
