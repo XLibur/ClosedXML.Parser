@@ -39,6 +39,25 @@ under Unreleased with each change.
 
 ### Changed
 
+- A formula modification now writes a part of the formula again only when it changes that part, and
+  copies the rest of the text character for character. It used to write every reference, sheet
+  prefix and area again from the values the parser read, so a modifier that changes nothing still
+  changed the text: quotes a sheet name doesn't need were dropped (`'Wk2'!C5` gave `Wk2!C5`), quotes
+  it would be written with were added (`592101500!D11` gave `'592101500'!D11`), an area of one cell
+  was collapsed (`'Org Chart'!D5:D5` gave `'Org Chart'!D5`), a structured reference lost the braces
+  of a single keyword (`[[#All]]` gave `[#All]`), and the whitespace before a formula was dropped.
+  Renaming one sheet therefore re-quoted unrelated references across the whole formula. Of the
+  2,231 formulas in the Enron and EUSES data sets that a do-nothing modifier used to change, 18 are
+  left, and all 18 are the deliberate exception below. A part is compared as a whole, so a reference
+  whose sheet is renamed is still written again in full and its area comes out as the parser read
+  it. The exception: a ref error that swallowed a reference, `#REF!A1` or `#REF!#REF!`, is still
+  always written as `#REF!`, because Excel can't parse the longer form and saves such a reference as
+  a plain `#REF!`.
+  - A conversion between reference styles writes every reference again by definition, so its output
+    is unchanged apart from the whitespace before a formula, which it now keeps: 184 of the 238,572
+    data set formulas.
+  - `CopyVisitor` is gone. It was internal, and writing the text is now the one job of the rewriter
+    behind `FormulaConverter.ModifyA1` and `ModifyR1C1`.
 - Give a sheet-qualified `#REF!` its own method on `IAstFactory`, `SheetErrorNode`. A ref error such
   as `Sheet1!#REF!` or `'[1]Jane''s'!#REF!` used to arrive at `ErrorNode`, whose `range` covered the
   sheet prefix while its `error` did not, so a factory that wanted the sheet had to compare the two

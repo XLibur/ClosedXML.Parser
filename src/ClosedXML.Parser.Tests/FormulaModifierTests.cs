@@ -12,9 +12,36 @@ public class FormulaModifierTests
     [InlineData("(A1),B2")]
     [InlineData("SUM((A1):B2)")]
     [InlineData("SUM((Total_Cost Jan):(Total_Cost Apr.))")]
+    // Quotes a sheet name doesn't need are kept, and quotes it would be written with aren't added.
+    [InlineData("'Wk2'!C5")]
+    [InlineData("592101500!D11")]
+    [InlineData("'Jan:Dec'!A1")]
+    // An area of one cell isn't collapsed, because nothing changed it.
+    [InlineData("'Org Chart'!D5:D5")]
+    [InlineData("SUBTOTAL(9,G10:G10)")]
+    [InlineData("A1 : B2")]
+    // The whitespace around and inside a formula is text like any other.
+    [InlineData("      6:6")]
+    [InlineData(" NOW()")]
+    [InlineData("Sheet! A1")]
+    // A structured reference keeps the braces it was written with.
+    [InlineData("Table1[[#All]]")]
+    [InlineData("[[#Headers]]")]
     public void Modifier_that_changes_nothing_writes_the_formula_as_it_was(string formula)
     {
         Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
+    }
+
+    [Theory]
+    [InlineData("#REF!$T$5", "#REF!")]
+    [InlineData("#REF!B2", "#REF!")]
+    [InlineData("#REF!#REF!", "#REF!")]
+    [InlineData("SUM(#REF!A1:B5)", "SUM(#REF!)")]
+    public void A_ref_error_that_swallowed_a_reference_is_always_written_as_a_ref_error(string formula, string modifiedFormula)
+    {
+        // The one part a modification writes again although nothing changed it: the sheet is gone, and
+        // Excel saves such a reference as a plain #REF!.
+        Assert.Equal(modifiedFormula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
     }
 
     [Fact]
@@ -158,6 +185,24 @@ public class FormulaModifierTests
     public void Bang_references_is_modified(string formula, string reference, string? replacement, string modifiedFormula)
     {
         var modifier = new ShiftReferenceModifier { ReferenceMap = { { reference, replacement } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// Changing an argument of a call is not a reason to write the part before it again. The sheet, the
+    /// book index, the name and the called cell are parts of their own, and nothing changed them.
+    /// </summary>
+    [Theory]
+    [InlineData("'Wk2'!F(A1)", "'Wk2'!F(B2)")]
+    [InlineData("Sheet! F( A1 )", "Sheet! F( B2 )")]
+    [InlineData("[1]Sheet1!F(A1)", "[1]Sheet1!F(B2)")]
+    [InlineData("[1]!F(A1)", "[1]!F(B2)")]
+    [InlineData("'[1]Wk2'!F(A1)", "'[1]Wk2'!F(B2)")]
+    [InlineData("b3(A1)", "b3(B2)")]
+    [InlineData("SUM( A1 )", "SUM( B2 )")]
+    public void Changing_an_argument_leaves_the_call_as_written(string formula, string modifiedFormula)
+    {
+        var modifier = new ShiftReferenceModifier { ReferenceMap = { { "A1", "B2" } } };
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 

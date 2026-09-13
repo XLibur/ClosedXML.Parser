@@ -17,7 +17,7 @@ public class FormulaConverterToR1C1Tests
     [Theory]
     [InlineData("'Old sheet'!#REF!", "'Old sheet'!#REF!")]
     [InlineData("SUM('Jane''s'!#REF!)", "SUM('Jane''s'!#REF!)")]
-    [InlineData("Sheet! #REF!", "Sheet!#REF!")]
+    [InlineData("Sheet! #REF!", "Sheet! #REF!")] // Nothing changed the sheet, so its text stays as written.
     [InlineData("[1]Sheet!#REF!", "[1]Sheet!#REF!")]
     [InlineData("'[1]Old sheet'!#REF!", "'[1]Old sheet'!#REF!")]
     [InlineData("!#REF!", "!#REF!")]
@@ -181,8 +181,10 @@ public class FormulaConverterToR1C1Tests
     [InlineData("[#This Row]", 10, 15, "[#This Row]")]
     [InlineData("[[#Headers],[#Data]]", 10, 15, "[[#Headers],[#Data]]")]
     [InlineData("[[#Data],[#Totals]]", 10, 15, "[[#Data],[#Totals]]")]
-    [InlineData("[[#All]]", 10, 15, "[#All]")]
-    [InlineData("[[#Headers]]", 10, 15, "[#Headers]")]
+    // A structured reference has nothing a conversion changes, so it keeps its own text. It used to
+    // be written again from its parts, which dropped the braces of a single keyword.
+    [InlineData("[[#All]]", 10, 15, "[[#All]]")]
+    [InlineData("[[#Headers]]", 10, 15, "[[#Headers]]")]
     [InlineData("[Column]", 10, 15, "[Column]")]
     [InlineData("[Space column]", 10, 15, "[Space column]")]
     [InlineData("[[#Data],[Column]]", 10, 15, "[[#Data],[Column]]")]
@@ -211,7 +213,7 @@ public class FormulaConverterToR1C1Tests
     }
 
     [Theory]
-    [InlineData(" some_name + other_name", 1, 1, "some_name + other_name")]
+    [InlineData(" some_name + other_name", 1, 1, " some_name + other_name")] // The leading space is kept.
     public void Name(string a1, int row, int col, string r1c1)
     {
         Assert.Equal(r1c1, FormulaConverter.ToR1C1(a1, row, col));
