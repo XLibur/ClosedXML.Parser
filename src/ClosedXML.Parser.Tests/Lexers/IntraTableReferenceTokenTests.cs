@@ -87,4 +87,30 @@ public class IntraTableReferenceTokenTests
             yield return new object?[] { "[  [#Headers]  ,  [#Data]  ]", StructuredReferenceArea.Headers | StructuredReferenceArea.Data, null, null };
         }
     }
+
+    /// <summary>
+    /// A bracket holding nothing but whitespace is not a structured reference. The grammar has no
+    /// alternative for one — a simple column name has to start and end with a non-space — and the
+    /// ANTLR lexer refuses <c>[ ]</c> outright.
+    /// </summary>
+    /// <remarks>
+    /// The Rolex lexer accepts it as a whole <c>INTRA_TABLE_REFERENCE</c> token, which is a
+    /// divergence from ANTLR in its own right; the refusal therefore happens when the token is read.
+    /// A fuzzing run found this as an <see cref="IndexOutOfRangeException"/> out of a three
+    /// character formula, because reading the token peeked one character past its end.
+    /// <para>
+    /// Only a space counts: <c>[\t]</c> is a column named after a tab, because the whitespace of a
+    /// structured reference is the space character alone.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("[ ]")]
+    [InlineData("[  ]")]
+    [InlineData("Table1[ ]")]
+    [InlineData("SUM(Table1[ ])")]
+    public void A_bracket_holding_only_whitespace_is_refused(string formula)
+    {
+        Assert.Throws<ParsingException>(
+            () => FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F()));
+    }
 }

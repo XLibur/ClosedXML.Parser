@@ -226,6 +226,15 @@ internal static class TokenParser
         // Skip potential whitespaces at the beginning of a structured reference (SPACED_LBRACKET)
         i = SkipWhitespaces(input, i);
         area = StructuredReferenceArea.None;
+
+        // An inner reference can't be empty. The grammar has no alternative for a bracket holding
+        // nothing but whitespace -- a simple column name has to start and end with a non-space -- and
+        // the ANTLR lexer refuses `[ ]` outright. The Rolex lexer accepts it as a whole token, so the
+        // refusal has to happen here. Until it did, the peek below read past the end of the token and
+        // `[ ]` came out of the parser as an IndexOutOfRangeException.
+        if (i >= input.Length || input[i] == ']')
+            throw new ParsingException($"A structured reference at position {token.StartIndex} holds no column or keyword.");
+
         if (input[i + 1] == '#')
         {
             // Inner reference contains a keyword.
