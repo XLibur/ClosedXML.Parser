@@ -64,6 +64,23 @@ or Fixed.
   `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
   Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
 
+### Packaging and tooling
+
+#### Changed
+
+- **Breaking:** the package targets `net8.0` alone, where it targeted `netstandard2.0` and
+  `netstandard2.1` before. The minimum framework a consumer needs is therefore .NET 8, and .NET
+  Framework, Unity and older Xamarin can no longer use it. Neither netstandard target served a
+  consumer this fork has — every project here is net8.0 or later — and the `netstandard2.0` asset
+  shipped untested, because a net8.0 reference resolved the `netstandard2.1` one and no test,
+  benchmark or fuzz iteration ever loaded the other. The lower target was also the ceiling on the
+  one everybody loaded: the code it could not compile was written into shared source without a
+  `#if`, so an identifier holding a letter from an astral plane was refused on every target. It
+  cost an implementer twice as well, because `netstandard2.0` has no default interface methods and
+  each new `IAstFactory` member had to go out as a breaking change. The package now carries one
+  `lib/net8.0` folder and no dependencies; the `System.Memory` reference that `netstandard2.0`
+  alone needed is gone.
+
 ## v3.1.0 - 2026-09-13
 
 ### Summary

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ClosedXML.Parser.Pratt.Parselets;
+﻿namespace ClosedXML.Parser.Pratt.Parselets;
 
 internal class IdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContext>
 {

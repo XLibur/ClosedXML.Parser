@@ -1,16 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>10</LangVersion>
-    <!--
-      The SDK leaves this off for netstandard targets. Without a reference assembly the
-      MSBuild workspace that dotnet format loads cannot match this project's ProjectReference
-      to its metadata reference, and every consuming project logs a workspace warning.
-    -->
-    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <Nullable Condition="'$(TargetFramework)' == 'netstandard2.1'">enable</Nullable>
-    <Nullable Condition="'$(TargetFramework)' == 'netstandard2.0'">annotations</Nullable>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <Authors>Jan Havlíček, XLibur Contributors</Authors>
     <!--
       The namespace stays ClosedXML.Parser; only the package id carries the XLibur prefix,
@@ -88,7 +81,6 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="All" />
-    <PackageReference Include="System.Memory" Version="4.5.4" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
   </ItemGroup>
 

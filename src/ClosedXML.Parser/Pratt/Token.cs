@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ClosedXML.Parser.Pratt;
+﻿namespace ClosedXML.Parser.Pratt;
 
 internal readonly struct Token
 {

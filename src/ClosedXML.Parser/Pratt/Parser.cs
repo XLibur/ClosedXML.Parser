@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ClosedXML.Parser.Pratt;
+﻿namespace ClosedXML.Parser.Pratt;
 
 /// <summary>
 /// Pratt parser.
