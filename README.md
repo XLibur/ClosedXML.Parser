@@ -64,7 +64,7 @@ Therefore:
 
 The parser also does not parse a call of a function result, such as `LAMBDA(x,x+1)(2)`.
 
-## Why not use XLParser
+# Why not use XLParser
 
 [ClosedXML](https://github.com/ClosedXML/ClosedXML) previously used [XLParser](https://github.com/spreadsheetlab/XLParser), converting its concrete syntax tree (CST) into an abstract syntax tree (AST). It was later replaced by [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser).
 
@@ -91,12 +91,11 @@ For comparison, lexing the Enron dataset with ANTLR takes approximately **3.2 se
 
 ClosedXML.Parser instead uses a recursive-descent parser (RDP), which completes the same workload in approximately **700 ms** while also avoiding much of the allocation overhead.
 
-
-## Debugging
+# Debugging
 
 Use [vscode-antlr4](https://github.com/mike-lischke/vscode-antlr4/blob/master/doc/grammar-debugging.md) plugin for debugging the grammar.
 
-## Testing strategy
+# Testing strategy
 
 * Each token that contains some data that are extracted for a node (e.g. `A1_REFERENCE` `C5` to `row 5`, `column 3`) has a separate test class in `Lexers` directory with a `{TokenPascalName}TokenTests.cs`
 * Each parser rule has a test class in `Rules` directory. It should contain all possible combinations of a rule and comparing it with the AST nodes.
@@ -104,7 +103,7 @@ Use [vscode-antlr4](https://github.com/mike-lischke/vscode-antlr4/blob/master/do
 * `AntlrCompatibilityTests.cs` checks that the Rolex lexer and the ANTLR lexer produce the same tokens for the data sets.
 * `ClosedXML.Parser.Visualizer.Tests` tests the visualizer.
 
-## Rolex
+# Rolex
 
 [Rolex](https://github.com/codewitch-honey-crisis/Rolex) is a DFA-based lexer generator released under the MIT license. See [Rolex: Unicode Enabled Lexer Generator in C#](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp).
 
@@ -112,8 +111,7 @@ ANTLR remains the source of truth for the lexer grammar. That grammar is used to
 
 This approach adds some complexity to the build and generation process, but upstream benchmarks found the resulting lexer to be approximately twice as fast as the ANTLR lexer: around **1.9 μs per formula**, compared with **3.676 μs per formula** for ANTLR.
 
-
-## Generate lexer
+# Generate lexer
 
 Prepare rolex grammars
 
