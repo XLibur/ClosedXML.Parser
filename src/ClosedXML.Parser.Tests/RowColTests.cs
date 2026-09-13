@@ -112,6 +112,82 @@ public class RowColTests
     }
 
     /// <summary>
+    /// A <see cref="FormulaModifier"/> shifting references is the one caller that legitimately
+    /// builds a <see cref="RowCol"/> by hand, so it needs a way to tell an off-sheet shift from a
+    /// valid one without catching an exception in the middle of a rewrite. Both the bounds and the
+    /// way to test them are part of the public surface, not just visible to this test project.
+    /// </summary>
+    [Theory]
+    [InlineData(nameof(RowCol.MinRow))]
+    [InlineData(nameof(RowCol.MaxRow))]
+    [InlineData(nameof(RowCol.MinCol))]
+    [InlineData(nameof(RowCol.MaxCol))]
+    public void The_bounds_of_a_sheet_are_public(string name)
+    {
+        var field = typeof(RowCol).GetField(name);
+
+        Assert.NotNull(field);
+        Assert.True(field.IsPublic, $"RowCol.{name} has to be public for a caller to read it.");
+    }
+
+    /// <summary>
+    /// The bounds say what a sheet holds, which is fixed by the file format.
+    /// </summary>
+    [Fact]
+    public void The_bounds_of_a_sheet_are_the_sheet()
+    {
+        Assert.Equal(1, RowCol.MinRow);
+        Assert.Equal(1048576, RowCol.MaxRow);
+        Assert.Equal(1, RowCol.MinCol);
+        Assert.Equal(16384, RowCol.MaxCol);
+    }
+
+    /// <summary>
+    /// <c>TryCreate</c> answers what the constructor would do and hands back what it would have
+    /// built, so a caller neither repeats the rule nor pays for an exception to learn the answer.
+    /// </summary>
+    [Theory]
+    [InlineData(Absolute, 1048576, Absolute, 16384, A1)]
+    [InlineData(Relative, 1, Relative, 1, A1)]
+    [InlineData(Relative, 1048575, Relative, 16383, R1C1)]
+    [InlineData(Relative, -1048575, Relative, -16383, R1C1)]
+    [InlineData(Relative, 0, None, 0, R1C1)]
+    [InlineData(None, 0, Absolute, 7, A1)]
+    public void TryCreate_builds_what_the_constructor_builds(
+        ReferenceAxisType rowType, int rowValue, ReferenceAxisType columnType, int columnValue, ReferenceStyle style)
+    {
+        Assert.True(RowCol.TryCreate(rowType, rowValue, columnType, columnValue, style, out var rowCol));
+        Assert.Equal(new RowCol(rowType, rowValue, columnType, columnValue, style), rowCol);
+    }
+
+    /// <summary>
+    /// Everything the constructor refuses, for any of its three reasons, <c>TryCreate</c> refuses
+    /// too — the two read one rule, so they can't drift apart.
+    /// </summary>
+    [Theory]
+    [InlineData(Relative, 0, Relative, 1, A1)] // A position outside the sheet
+    [InlineData(Relative, 1, Relative, 16385, A1)]
+    [InlineData(Relative, int.MaxValue, Relative, 1, A1)]
+    [InlineData(Absolute, 1048577, Relative, 0, R1C1)]
+    [InlineData(Relative, 1048576, Relative, 0, R1C1)] // An offset wider than the sheet
+    [InlineData(Relative, 0, Relative, -16384, R1C1)]
+    [InlineData(Relative, int.MinValue, Relative, 0, R1C1)]
+    [InlineData(None, 0, None, 0, A1)] // Neither axis is an axis
+    [InlineData(None, 5, Relative, 1, A1)] // A None axis carrying a value
+    [InlineData(Relative, 1, None, 5, A1)]
+    public void TryCreate_refuses_what_the_constructor_refuses(
+        ReferenceAxisType rowType, int rowValue, ReferenceAxisType columnType, int columnValue, ReferenceStyle style)
+    {
+        // ThrowsAny, because an out-of-sheet axis raises the ArgumentOutOfRangeException that
+        // derives from ArgumentException and Assert.Throws matches the exact type.
+        Assert.ThrowsAny<ArgumentException>(
+            () => new RowCol(rowType, rowValue, columnType, columnValue, style));
+
+        Assert.False(RowCol.TryCreate(rowType, rowValue, columnType, columnValue, style, out var rowCol));
+        Assert.Equal(default, rowCol);
+    }
+
+    /// <summary>
     /// The furthest values the grammar can produce are held, because refusing them would refuse a
     /// formula Excel writes.
     /// </summary>

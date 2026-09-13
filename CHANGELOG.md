@@ -30,6 +30,15 @@ or Fixed.
   `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
   one reads.
 
+- `RowCol.TryCreate`, which builds a `RowCol` or answers that the arguments don't describe one,
+  instead of raising the exception the constructor does. A `FormulaModifier` shifting references is
+  the one caller that builds a `RowCol` from a position it worked out itself — `ModifyRef` and
+  `ModifyCellFunction` hand one over and take one back — and a reference shifted off a sheet is a
+  `#REF!` rather than a mistake, so it needs a way to ask rather than a reason to catch. It reads
+  the same rule the constructor does, so the two can't disagree about what a sheet holds. The four
+  bounds it is read against, `RowCol.MinRow`, `MaxRow`, `MinCol` and `MaxCol`, are public for the
+  same reason, so a caller clamping a shift need not write the numbers out itself.
+
 #### Changed
 
 - **Breaking:** `RowCol` holds a row and a column that a sheet has, and its constructor refuses one
