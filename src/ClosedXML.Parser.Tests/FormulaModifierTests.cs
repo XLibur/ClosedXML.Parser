@@ -120,6 +120,22 @@ public class FormulaModifierTests
     }
 
     /// <summary>
+    /// A bare <c>first:last!</c> is read as a name, a colon and a single sheet prefix, so a first
+    /// sheet that is also a cell has to be quoted to be read back. The last sheet stands after the
+    /// colon, where a cell-like name is a sheet already.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", "PWD1", "'PWD1:Sheet5'!A1")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", "LOG10", "'LOG10:Sheet5'!A1")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", "PWD1", "Sheet1:PWD1!A1")]
+    [InlineData("[1]Sheet1:Sheet5!A1", "Sheet1", "PWD1", "[1]Sheet1:Sheet5!A1")]
+    public void Reference3D_quotes_a_first_sheet_that_is_also_a_cell(string formula, string oldSheetName, string newSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
     /// A sheet behind a book prefix is a sheet of another workbook, so a sheet of this workbook with the same
     /// name being renamed or deleted doesn't change it.
     /// </summary>
