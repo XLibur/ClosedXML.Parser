@@ -39,6 +39,19 @@ under Unreleased with each change.
 
 ### Changed
 
+- Give a sheet-qualified `#REF!` its own method on `IAstFactory`, `SheetErrorNode`. A ref error such
+  as `Sheet1!#REF!` or `'[1]Jane''s'!#REF!` used to arrive at `ErrorNode`, whose `range` covered the
+  sheet prefix while its `error` did not, so a factory that wanted the sheet had to compare the two
+  lengths, slice the formula text and lex the prefix again. `FormulaModifier` did exactly that, and
+  no other factory could: the Ast, the visualizer and every implementer outside this repository saw
+  `Sheet1!#REF!` as a bare `#REF!` and lost the sheet. The parser has read the sheet and the book
+  index already, so it now hands them over, `AstFactory` keeps them in a `SheetErrorNode` record, and
+  a modification renames that sheet like the sheet of any other reference. `ErrorNode` keeps the
+  errors with no sheet to rename: `#REF!`, `#REF!A1`, `#REF!#REF!` and `!#REF!`. The grammar allows
+  one sheet here, optionally behind a book prefix, and never a sheet range, so the method takes one
+  sheet name and a nullable workbook index. The written output doesn't change.
+  - BREAKING CHANGE: every implementer of `IAstFactory` has to add `SheetErrorNode`. netstandard2.0
+    has no default interface methods, so it can't be given a default.
 - Replace `RefModVisitor` with `FormulaModifier`, which has only the methods a modification
   overrides: `ModifySheet`, `ModifyTable`, `ModifyFunction`, `ModifyRef` and
   `ModifyCellFunction`. A method that returns `null` still replaces the part with `#REF!`.

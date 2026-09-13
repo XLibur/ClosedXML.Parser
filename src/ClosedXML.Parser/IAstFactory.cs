@@ -80,14 +80,32 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// Create a node with an error value.
     /// </summary>
     /// <remarks>
-    /// Sheet related ref errors (e.g. <c>Sheet!REF!</c> or <c>#REF!$A$4</c>) are also use this node. In that case,
-    /// the <paramref name="range"/> contains whole section used to create the error, but <paramref name="error"/>
-    /// contains normalized <c>#REF!</c> error.
+    /// A ref error that swallowed a reference (e.g. <c>#REF!$A$4</c>, <c>#REF!#REF!</c> or <c>!#REF!</c>) also
+    /// uses this node. In that case, the <paramref name="range"/> contains whole section used to create the
+    /// error, but <paramref name="error"/> contains normalized <c>#REF!</c> error. A ref error qualified with
+    /// a sheet, e.g. <c>Sheet1!#REF!</c>, is a <see cref="SheetErrorNode"/> instead, because its sheet is
+    /// still there to be renamed.
     /// </remarks>
     /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
     /// <param name="range">Range in a formula that contains the error.</param>
     /// <param name="error">The error text, string with <c>#</c> until the end of an error. No whitespace. In upper case format.</param>
     TNode ErrorNode(TContext context, SymbolRange range, ReadOnlySpan<char> error);
+
+    /// <summary>
+    /// Create a node for a ref error qualified with a sheet, e.g. <c>Sheet1!#REF!</c> or
+    /// <c>'[1]Jane''s'!#REF!</c>. Only the area the reference pointed to is gone; the sheet is still there and
+    /// a modification renames it like the sheet of any other reference.
+    /// </summary>
+    /// <remarks>
+    /// The grammar allows one sheet here, optionally behind a book prefix, but never a sheet range:
+    /// <c>First:Last!#REF!</c> doesn't parse.
+    /// </remarks>
+    /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
+    /// <param name="range">Range in a formula that contains the sheet prefix and the error.</param>
+    /// <param name="workbookIndex">Index of the workbook the sheet is in, or <c>null</c> when it is in this workbook.</param>
+    /// <param name="sheet">The name of the sheet, unescaped and without the quotes it was written with.</param>
+    /// <param name="error">The error text, as written in the formula, e.g. <c>#REF!</c>.</param>
+    TNode SheetErrorNode(TContext context, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error);
 
     /// <summary>
     /// Create a node with an error value.

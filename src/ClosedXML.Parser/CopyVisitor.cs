@@ -90,6 +90,17 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     }
 
     /// <inheritdoc />
+    public virtual TransformedSymbol SheetErrorNode(ModContext ctx, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error)
+    {
+        var sb = new StringBuilder(sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + error.Length);
+        var nodeText = sb
+            .AppendPrefix(SheetPrefix.Sheet(sheet, workbookIndex))
+            .Append(error)
+            .ToString();
+        return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
+    }
+
+    /// <inheritdoc />
     public virtual TransformedSymbol NumberNode(ModContext ctx, SymbolRange range, double value)
     {
         return TransformedSymbol.CopyOriginal(ctx.Formula, range);

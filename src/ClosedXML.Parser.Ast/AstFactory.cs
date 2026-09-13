@@ -39,6 +39,11 @@ public class F : IAstFactory<ScalarValue, AstNode, Ctx>
         return new ValueNode("Error", error.ToString());
     }
 
+    public AstNode SheetErrorNode(Ctx _, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error)
+    {
+        return new SheetErrorNode(workbookIndex, sheet, error.ToString());
+    }
+
     public AstNode NumberNode(Ctx _, SymbolRange range, double value)
     {
         return new ValueNode("Number", value);

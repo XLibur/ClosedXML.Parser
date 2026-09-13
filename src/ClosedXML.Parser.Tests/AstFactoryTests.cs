@@ -21,6 +21,21 @@ public class AstFactoryTests
     }
 
     [Theory]
+    [InlineData("1+Sheet1!#REF!", 2, 14, null, "Sheet1")]
+    [InlineData("'My Sheet'!#REF!", 0, 16, null, "My Sheet")]
+    [InlineData("1+[3]Sheet1!#REF!", 2, 17, 3, "Sheet1")]
+    [InlineData("'[2]Jane''s'!#REF!", 0, 18, 2, "Jane's")]
+    [InlineData("Sheet1! #REF!", 0, 13, null, "Sheet1")]
+    public void SheetErrorRange(string formula, int start, int end, int? workbookIndex, string sheet)
+    {
+        var result = new Result();
+        FormulaParser<object?, string, Result>.CellFormulaA1(formula, result, new SheetErrorVisitor());
+        Assert.Equal(new SymbolRange(start, end), result.Value);
+        Assert.Equal(workbookIndex, result.WorkbookIndex);
+        Assert.Equal(sheet, result.Sheet);
+    }
+
+    [Theory]
     [InlineData("JOIN(1.15)", 5, 9)]
     public void NumberRange(string formula, int start, int end)
     {
@@ -303,6 +318,17 @@ public class AstFactoryTests
         {
             context.Value = range;
             return string.Empty;
+        }
+    }
+
+    private class SheetErrorVisitor : BaseVisitor
+    {
+        public override string SheetErrorNode(Result context, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error)
+        {
+            context.Value = range;
+            context.WorkbookIndex = workbookIndex;
+            context.Sheet = sheet;
+            return error.ToString();
         }
     }
 
@@ -625,6 +651,11 @@ public class AstFactoryTests
             return _defaultNode;
         }
 
+        public virtual TNode SheetErrorNode(TContext context, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error)
+        {
+            return _defaultNode;
+        }
+
         public virtual TNode NumberNode(TContext context, SymbolRange range, double value)
         {
             return _defaultNode;
@@ -762,5 +793,9 @@ public class AstFactoryTests
     private class Result
     {
         internal SymbolRange? Value { get; set; }
+
+        internal int? WorkbookIndex { get; set; }
+
+        internal string? Sheet { get; set; }
     }
 }

@@ -28,6 +28,9 @@ public sealed class RangeRecordingFactory : IAstFactory<ScalarValue, AstNode, Ct
 
     public AstNode ErrorNode(Ctx context, SymbolRange range, ReadOnlySpan<char> error) => Record(_factory.ErrorNode(context, range, error), range);
 
+    public AstNode SheetErrorNode(Ctx context, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error) =>
+        Record(_factory.SheetErrorNode(context, range, workbookIndex, sheet, error), range);
+
     public AstNode NumberNode(Ctx context, SymbolRange range, double value) => Record(_factory.NumberNode(context, range, value), range);
 
     public AstNode TextNode(Ctx context, SymbolRange range, string text) => Record(_factory.TextNode(context, range, text), range);
