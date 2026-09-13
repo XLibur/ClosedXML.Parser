@@ -1,4 +1,5 @@
-﻿using ClosedXML.Parser.Pratt;
+﻿using System.Text;
+using ClosedXML.Parser.Pratt;
 
 namespace ClosedXML.Parser.Tests.Lexers;
 
@@ -179,10 +180,46 @@ public class LexerTests
     [InlineData("_xlfn.ACOT")]
     [InlineData("\u05D0\u05D1\u05E0")] // stone in hebrew - Letters from other languages
     [InlineData("\u05E9\u05B0\u05DC\u05D5\u05DD")] // shalom - A mark from other languages
+    [InlineData("\U00010400")] // DESERET CAPITAL LETTER LONG I - a letter from an astral plane
+    [InlineData("\U00020000")] // CJK ideograph extension B - another one, of a different category
+    [InlineData("name\U00010400")] // an astral letter after the start of the ident
     [Theory]
     public void Ident_ok(string input)
     {
         AssertToken(TokenType.Ident, input);
+    }
+
+    [InlineData("\U0001F98A")] // FOX FACE, a symbol
+    [InlineData("\U0001F600")] // GRINNING FACE, another symbol
+    [InlineData("\U0001D7CE")] // MATHEMATICAL BOLD DIGIT ZERO, a number
+    [Theory]
+    public void Ident_refuses_a_codepoint_from_an_astral_plane_that_is_not_a_letter(string input)
+    {
+        // A codepoint above the BMP is classified like any other, so the categories that never
+        // start an identifier don't start one here either and no token begins at all.
+        AssertFail(input, "Unable to determine a token");
+    }
+
+    [InlineData("SUM(\U00010400A)")] // the astral letter follows an operator
+    [InlineData("1+\U00010400A")] // and a number
+    [InlineData("A1 \U00010400A")] // and whitespace
+    [InlineData("\U00010400A+1")] // and starts the input
+    [InlineData("\U00010400+\U00020000")] // one on either side of an operator
+    [Theory]
+    public void Every_token_ends_where_the_next_one_begins(string input)
+    {
+        // The lexer walks to the last code unit of a codepoint, so a token whose next codepoint is
+        // a surrogate pair could end one unit inside that pair: its text carried a lone high
+        // surrogate and its range overlapped the token after it. The tokens have to tile the input.
+        var lexer = new Lexer(input);
+        var text = new StringBuilder();
+        for (var token = lexer.Consume(); token.Type != TokenType.Eof; token = lexer.Consume())
+        {
+            Assert.Equal(text.Length, token.Range.Start);
+            text.Append(token.GetText(input));
+        }
+
+        Assert.Equal(input, text.ToString());
     }
 
     [Fact]
