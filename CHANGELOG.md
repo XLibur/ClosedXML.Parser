@@ -7,8 +7,11 @@ under Unreleased with each change.
 ## Contents
 
 - [Unreleased](#unreleased)
+- [v3.0.0](#v300---2026-09-13)
 
 ## Unreleased
+
+## v3.0.0 - 2026-09-13
 
 ### Added
 
