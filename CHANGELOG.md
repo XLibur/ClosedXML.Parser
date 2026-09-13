@@ -13,6 +13,61 @@ or Fixed.
 
 ## Unreleased
 
+### Formula parsers
+
+#### Fixed
+
+- Refuse a structured reference whose brackets hold nothing but whitespace, `[ ]`, instead of
+  raising an `IndexOutOfRangeException` from inside the token parser. Reading the token peeked one
+  character past its end, so three characters of a stored formula came out of the parser as an
+  index error rather than as a `ParsingException`. The grammar has no alternative for an empty
+  inner reference — a simple column name has to start and end with a non-space — and the ANTLR
+  lexer, which is the source of truth, refuses `[ ]` outright. The Rolex lexer still accepts it as
+  a whole `INTRA_TABLE_REFERENCE` token, a divergence between the two lexers that outlives this
+  fix; the refusal therefore happens when the token is read.
+
+### Ast nodes and display strings
+
+#### Fixed
+
+- Write the specifier of a structured reference the way the parser reads it. A range of columns was
+  joined with a comma rather than a colon, so `Table1[[#Data],[A]:[B]]` came out as
+  `Table1[[#Data],[A],[B]]`; the parser fills a missing last column in with the first, so the
+  ordinary `Table1[Column]` came out as `Table1[[Column],[Column]]`; and an external reference lost
+  the bang after its book prefix, so `[4]!Table1[Column]` came out as `[4]Table1[Column]`. None of
+  the three parse back as the node they came from, and the visualizer puts them in its diagram. A
+  lone specifier keeps only its own brackets and everything else gets a pair around the list, so
+  `Table1[#Totals]` and `Table1[[#Headers],[#Data]]` are both written as they are read.
+  `StructureReferenceNode` and `ExternalStructureReferenceNode` write the specifier in one place
+  now, `StructuredReferenceWriter`, instead of each building its own.
+
+### Formula modification and conversion
+
+#### Fixed
+
+- Refuse a formula that is empty or nothing but whitespace with a `ParsingException`, the type all
+  four `FormulaConverter` methods document, instead of an `ArgumentException` naming a parameter
+  the caller never passed. The same text reached the parser as a `ParsingException` and the
+  converter as an argument error, so which exception a caller saw depended on which entry point
+  read it. A null formula is still an argument error, because that is a fault in the call rather
+  than in the formula.
+
+- Name `col` rather than `row` in the `ArgumentOutOfRangeException` for a column anchor outside the
+  sheet.
+
+### Packaging and tooling
+
+#### Added
+
+- A coverage-guided fuzzing harness, `src/ClosedXML.Parser.Fuzz`, driven by libFuzzer through
+  SharpFuzz and run from `fuzz.ps1`. Five targets cover formula parsing in both reference styles,
+  formula modification, conversion between styles and the standalone reference parsers. Each checks
+  a property a wrong answer breaks rather than only that the library did not crash: a reference
+  written back out has to parse as the node it came from, a modification that changes nothing has
+  to return the formula character for character, and text the library wrote has to be text the
+  library can read. The seed corpus is committed alongside, and every defect found keeps its input
+  there. See `src/ClosedXML.Parser.Fuzz/README.md`.
+
 ## v3.0.0 - 2026-09-13
 
 ### Summary
