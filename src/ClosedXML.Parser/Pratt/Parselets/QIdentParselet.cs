@@ -31,7 +31,9 @@ internal class QIdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContex
         if (_parser.LookAhead(1).Type != TokenType.Bang)
             throw Unparseable(token);
 
-        // The token text still carries the apostrophes the lexer matched on.
+        // The token text still carries the apostrophes the lexer matched on. The lexer ends the
+        // token at the first apostrophe that is not doubled, so every one left inside the content
+        // is half of a pair and TokenParser.UnescapeTicks collapses it the way the main parser does.
         var quoted = token.GetText(_parser.Input);
         var content = quoted.Slice(1, quoted.Length - 2);
 
@@ -46,8 +48,8 @@ internal class QIdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContex
         var separator = content.IndexOf(':');
         if (separator >= 0)
         {
-            var firstSheet = Unescape(content.Slice(0, separator));
-            var lastSheet = Unescape(content.Slice(separator + 1));
+            var firstSheet = TokenParser.UnescapeTicks(content.Slice(0, separator));
+            var lastSheet = TokenParser.UnescapeTicks(content.Slice(separator + 1));
             if (!IsSheetName(firstSheet) || !IsSheetName(lastSheet))
                 throw Unparseable(token);
 
@@ -60,7 +62,7 @@ internal class QIdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContex
             return new Node<T>(reference3D, range3D);
         }
 
-        var sheet = Unescape(content);
+        var sheet = TokenParser.UnescapeTicks(content);
         if (!IsSheetName(sheet))
             throw Unparseable(token);
 
@@ -92,15 +94,6 @@ internal class QIdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContex
     private static bool IsSheetName(string sheet)
     {
         return NameUtils.IsSheetNameValid(sheet.AsSpan());
-    }
-
-    /// <summary>
-    /// Collapse the doubled apostrophes. The lexer ends the token at the first apostrophe
-    /// that is not doubled, so every one left inside the content is half of a pair.
-    /// </summary>
-    private static string Unescape(ReadOnlySpan<char> name)
-    {
-        return name.ToString().Replace("''", "'");
     }
 
     private static ParsingException Unparseable(Token token)

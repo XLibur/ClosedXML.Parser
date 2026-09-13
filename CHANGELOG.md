@@ -55,6 +55,18 @@ or Fixed.
   a column above the `XFD` of a sheet can no longer be reached, the letters of one are again written
   through the three a sheet needs rather than the seven the largest `int` spells.
 
+- A quoted sheet name and the item of a dynamic data exchange reference are unescaped in one pass
+  over the text they were read from, instead of building the escaped text and replacing in it. The
+  old way allocated twice — once for the text as it was written, once for the text with its doubled
+  apostrophes collapsed — and threw the first string away. A parse of `Sdemo123|tik!'id1?req?O''BRIEN_STK_SMART_USD'`
+  therefore allocates 384 bytes where it allocated 472, and the time it takes is inside the
+  run-to-run noise of that shape, which is what a reference this rare was expected to show. Above 256
+  characters the scratch space still comes from the heap, so what a long name saves is the pass
+  rather than the allocation. `TokenParser.UnescapeTicks` is now the one reader of a doubled
+  apostrophe — the two sheets of a range reach it too, once the colon between them has been found —
+  so the parser that reads a formula, the one that reads a sheet prefix and the Pratt prototype can
+  no longer disagree about what one means.
+
 #### Fixed
 
 - Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of

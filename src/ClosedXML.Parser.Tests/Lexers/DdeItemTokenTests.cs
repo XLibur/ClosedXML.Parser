@@ -35,6 +35,28 @@ public class DdeItemTokenTests
         Assert.Equal(RolexLexer.GetTokensA1(formula.AsSpan()), RolexLexer.GetTokensR1C1(formula.AsSpan()));
     }
 
+    /// <summary>
+    /// An item is as long as the formula holding it, so one past <c>MaxStackAllocChars</c> unescapes
+    /// through a buffer taken from the heap rather than the stack. Both paths write the same item.
+    /// </summary>
+    [Theory]
+    [InlineData(255)]
+    [InlineData(256)]
+    [InlineData(257)]
+    [InlineData(1000)]
+    public void Item_longer_than_the_stack_buffer_is_unescaped(int escapedLength)
+    {
+        // A run of letters with one doubled tick halfway along it.
+        var before = (escapedLength - 2) / 2;
+        var after = escapedLength - 2 - before;
+        var tokenText = "'" + new string('x', before) + "''" + new string('y', after) + "'";
+
+        AssertFormula.AssertTokenType(tokenText, FormulaLexer.DDE_ITEM);
+        var item = TokenParser.ParseDdeItem(tokenText, new Token(Token.DDE_ITEM, 0, tokenText.Length));
+
+        Assert.Equal(new string('x', before) + "'" + new string('y', after), item);
+    }
+
     [Fact]
     public void Quoted_sheet_prefix_is_longer_match_than_item()
     {
