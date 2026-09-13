@@ -383,12 +383,21 @@ public readonly struct RowCol : IEquatable<RowCol>
     /// </summary>
     /// <remarks>
     /// The letters are found from the last one back, so they are collected in a buffer and written
-    /// in the order they are read. A column has at most three letters, which is why the buffer can
-    /// come off the stack.
+    /// in the order they are read.
+    /// <para>
+    /// The buffer holds seven letters rather than the three a column of a sheet needs. The
+    /// constructor takes any <see cref="int"/> as a column and only <see cref="ToA1OrError"/>
+    /// holds a converted one to the sheet, so a column above <c>ZZZ</c> reaches here from the
+    /// public constructor and from <see cref="ToA1"/>, whose single wrap only brings an offset
+    /// within one sheet width back into range. Seven letters is what the largest <see cref="int"/>
+    /// spells, so every column the type can hold is written rather than refused.
+    /// </para>
     /// </remarks>
     private void AppendA1Column(StringBuilder sb)
     {
-        const int maxColumnLetters = 3;
+        // A1 column letters are bijective base 26, so int.MaxValue (2147483647) is the seven
+        // letters FXSHRXW. Anything shorter turns a column this type accepts into an index error.
+        const int maxColumnLetters = 7;
         Span<char> letters = stackalloc char[maxColumnLetters];
         var columnIndex = ColumnValue;
         var i = maxColumnLetters;
