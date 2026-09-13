@@ -35,6 +35,12 @@ internal readonly struct TransformedSymbol
     internal int Length => _transformedText?.Length ?? _range.End - _range.Start;
 
     /// <summary>
+    /// Is the symbol the text of the original formula, i.e. was nothing in it changed? A node whose
+    /// parts are all original is written back as it was, character for character.
+    /// </summary>
+    internal bool IsOriginal => _transformedText is null;
+
+    /// <summary>
     /// Create a symbol that is different from what was in the original formula.
     /// </summary>
     /// <param name="formula">Text of whole formula.</param>

@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using JetBrains.Annotations;
 
 namespace ClosedXML.Parser;
@@ -79,12 +80,22 @@ public static class FormulaConverter
 
     private static string Normalize(TransformedSymbol transformedFormula, string originalFormula)
     {
-        // Because of intersection operator, we trim the whitespaces at the end before sending
-        // formula to the parser. Add them back, if necessary.
+        // The whitespace around a formula is outside its root node: the parser trims the end before
+        // lexing, because a space is the intersection operator, and skips a leading space token. So
+        // neither is copied with the nodes and both are put back here.
         var trimmed = originalFormula.TrimEnd();
         var endLength = originalFormula.Length - trimmed.Length;
         var trimmedEnd = originalFormula.AsSpan().Slice(trimmed.Length, endLength);
-        return transformedFormula.ToString(trimmedEnd);
+        var start = transformedFormula.OriginalRange.Start;
+        if (start == 0)
+            return transformedFormula.ToString(trimmedEnd);
+
+        var body = transformedFormula.AsSpan();
+        return new StringBuilder(start + body.Length + endLength)
+            .Append(originalFormula.AsSpan().Slice(0, start))
+            .Append(body)
+            .Append(trimmedEnd)
+            .ToString();
     }
 
     private sealed class ToR1C1Modifier : FormulaModifier
