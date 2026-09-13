@@ -260,48 +260,18 @@ internal static class TokenParser
         area = StructuredReferenceArea.None;
 
         RequireItem(input, i, token);
-        if (IsKeywordStart(input, i))
-        {
-            // Inner reference contains a keyword.
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
 
-            // `INNER_REFERENCE : KEYWORD_LIST`, i.e. the keyword list is the whole inner
-            // reference and no column range follows it (e.g. '[[#All]]').
-            if (IsEndOfInnerReference(input, i))
+        // KEYWORD_LIST can contain at most two item specifiers, so the reader runs at most twice.
+        for (var keyword = 0; keyword < 2; keyword++)
+        {
+            if (ReadKeywordItem(input, token, ref i, ref area))
             {
                 firstColumn = null;
                 lastColumn = null;
                 return;
             }
-
-            i = SkipComma(input, i);
-            RequireItem(input, i, token);
         }
 
-        if (IsKeywordStart(input, i))
-        {
-            // Item is a keyword list, either
-            // * '[#Headers]' SPACED_COMMA '[#Data]'
-            // * '[#Data]' SPACED_COMMA '[#Totals]'
-            var listItem = GetArea(input, ++i);
-            i += GetLength(listItem) + 1;
-            area |= listItem;
-
-            // As above, for a two keyword list (e.g. '[[#Headers],[#Data]]').
-            if (IsEndOfInnerReference(input, i))
-            {
-                firstColumn = null;
-                lastColumn = null;
-                return;
-            }
-
-            i = SkipComma(input, i);
-            RequireItem(input, i, token);
-        }
-
-        // KEYWORD_LIST can contain at most two item specifiers.
         // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
         i = GetStructuredName(input, i, out firstColumn);
         if (i < input.Length && input[i] == ':')
@@ -556,6 +526,35 @@ internal static class TokenParser
 
         startIdx = i;
         return row;
+    }
+
+    /// <summary>
+    /// Read one item of an inner reference, when the item at <paramref name="i"/> is a keyword
+    /// rather than a column name, and add it to <paramref name="area"/>. The first such item is
+    /// the keyword an inner reference contains; a second one makes a keyword list, either
+    /// <c>'[#Headers]' SPACED_COMMA '[#Data]'</c> or <c>'[#Data]' SPACED_COMMA '[#Totals]'</c>.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> when the keyword list is the whole inner reference and no column range follows
+    /// it, i.e. the `INNER_REFERENCE : KEYWORD_LIST` alternative — '[[#All]]' for one keyword and
+    /// '[[#Headers],[#Data]]' for two. <c>false</c> when the item is not a keyword at all, or when
+    /// a comma follows the keyword and another item starts after it.
+    /// </returns>
+    private static bool ReadKeywordItem(ReadOnlySpan<char> input, Token token, ref int i, ref StructuredReferenceArea area)
+    {
+        if (!IsKeywordStart(input, i))
+            return false;
+
+        var listItem = GetArea(input, ++i);
+        i += GetLength(listItem) + 1;
+        area |= listItem;
+
+        if (IsEndOfInnerReference(input, i))
+            return true;
+
+        i = SkipComma(input, i);
+        RequireItem(input, i, token);
+        return false;
     }
 
     /// <summary>
