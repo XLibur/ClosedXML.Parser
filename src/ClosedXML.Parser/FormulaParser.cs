@@ -601,6 +601,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     var start = _tokenSource.StartIndex;
                     var prefix = SheetPrefix.ReadRange(_input.AsSpan(), _tokenSource);
+                    RequireSheetName(prefix.FirstSheet!, start);
+                    RequireSheetName(prefix.LastSheet!, start);
                     Consume();
 
                     var area = A1Reference();
@@ -645,6 +647,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                             throw Error("External workbook not expected.");
 
                         var lastSheetName = lastPrefix.FirstSheet!;
+                        RequireSheetName(firstSheetName, start);
+                        RequireSheetName(lastSheetName, _tokenSource.StartIndex);
 
                         Consume(); // SINGLE_SHEET_PREFIX
 
@@ -698,6 +702,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     var prefix = SheetPrefix.ReadSingle(_input.AsSpan(), sheetPrefix);
                     var sheetName = prefix.FirstSheet!;
                     Consume();
+
+                    // The prefix of a DDE reference is an application and a topic rather than a
+                    // sheet, and only the token after it says which this is.
+                    if (_la != Token.DDE_ITEM)
+                        RequireSheetName(sheetName, start);
 
                     var area = A1Reference();
                     if (area is not null)
@@ -1102,6 +1111,20 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         return _factory.Function(_context, range, functionName, args);
     }
 
+    /// <summary>
+    /// Refuse a sheet prefix naming a sheet no workbook could hold. Such a name has no spelling the
+    /// formula can be written back in - it needs quotes, and a quoted name holding a <c>?</c> reads
+    /// back as a DDE item - so it must not reach a node.
+    /// </summary>
+    /// <param name="sheet">The name the prefix gives the sheet.</param>
+    /// <param name="startIndex">Where the prefix holding the name starts, which the parser may have
+    /// read past by the time it knows the prefix names a sheet.</param>
+    private void RequireSheetName(string sheet, int startIndex)
+    {
+        if (!NameUtils.IsSheetNameValid(sheet.AsSpan()))
+            throw Error(startIndex, $"A sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ], so '{sheet}' doesn't name a sheet.");
+    }
+
     private Exception UnexpectedTokenError(params int[] expectedToken)
     {
         return Error($"Unexpected token {GetLaTokenName()}, expected one of {string.Join(",", expectedToken.Select(GetTokenName))}.");
@@ -1114,7 +1137,12 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
     private Exception Error(string message)
     {
-        return new ParsingException($"Error at char {_tokenSource.StartIndex} of '{_input}': {message}");
+        return Error(_tokenSource.StartIndex, message);
+    }
+
+    private Exception Error(int startIndex, string message)
+    {
+        return new ParsingException($"Error at char {startIndex} of '{_input}': {message}");
     }
 
     private ReadOnlySpan<char> GetCurrentToken()

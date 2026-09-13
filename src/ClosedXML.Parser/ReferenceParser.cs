@@ -200,7 +200,9 @@ public static class ReferenceParser
 
         var prefix = SheetPrefix.ReadSingle(text.AsSpan(), tokens[0]);
         sheetName = prefix.FirstSheet!;
-        if (prefix.BookIndex is not null || !IsWholeReference(tokens, 1, text, TokenParser.A1Style, out area))
+        if (prefix.BookIndex is not null ||
+            !NameUtils.IsSheetNameValid(sheetName.AsSpan()) ||
+            !IsWholeReference(tokens, 1, text, TokenParser.A1Style, out area))
         {
             sheetName = string.Empty;
             area = default;
@@ -242,7 +244,7 @@ public static class ReferenceParser
 
         var prefix = SheetPrefix.ReadSingle(text.AsSpan(), tokens[0]);
         sheetName = prefix.FirstSheet!;
-        if (prefix.BookIndex is not null)
+        if (prefix.BookIndex is not null || !NameUtils.IsSheetNameValid(sheetName.AsSpan()))
         {
             sheetName = string.Empty;
             name = string.Empty;
