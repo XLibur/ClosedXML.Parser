@@ -64,8 +64,9 @@ public static class NameUtils
     /// </summary>
     /// <remarks>
     /// Sheet names can't contain <c>*</c>,<c>/</c>,<c>:</c>,<c>?</c>,<c>[</c>,<c>\</c>,
-    /// <c>]</c>, but method doesn't check for that. Also, it can't start with <c>'</c>,
-    /// though it can be non-first character.
+    /// <c>]</c>, but method doesn't check for that - see <see cref="IsSheetNameValid"/>. It answers
+    /// for the application and the topic of a DDE link too, which are held to none of those rules,
+    /// so it asks only how the text has to be written and not whether it could name a sheet.
     /// </remarks>
     /// <param name="name">The name. Must be at least 1 char long.</param>
     /// <returns>True, if the sheet name should be quoted in formula.</returns>
@@ -93,6 +94,14 @@ public static class NameUtils
         // it is first character, but no quotes are required, if
         // it is a non-first character.
         if (char.IsHighSurrogate(name[0]))
+            return true;
+
+        // The tables were collected from Excel, which can't make a sheet name that starts with an
+        // apostrophe, so they have no answer for one and the name came back needing no quotes - and
+        // was then written bare, as `'leading!`, which no lexer reads. IsSheetNameValid refuses such
+        // a sheet name now, but this method answers for the application and the topic of a DDE link
+        // as well, and either of those can start with an apostrophe.
+        if (name[0] == '\'')
             return true;
 
         // The codepoint requires quotes as a first char.
@@ -158,9 +167,18 @@ public static class NameUtils
     /// Is the name of a sheet valid?
     /// </summary>
     /// <param name="sheetName">Name of the sheet.</param>
+    /// <remarks>
+    /// A name may not start or end with an apostrophe, which Excel refuses and the library has its
+    /// own reason to refuse: a sheet prefix is quoted with apostrophes, so one at either end has
+    /// nowhere to go. An apostrophe anywhere else is ordinary and is doubled inside the quotes, so
+    /// <c>Jane's</c> is a name and <c>'Jane</c> is not.
+    /// </remarks>
     public static bool IsSheetNameValid(ReadOnlySpan<char> sheetName)
     {
         if (sheetName.Length is 0 or > 31)
+            return false;
+
+        if (sheetName[0] == '\'' || sheetName[sheetName.Length - 1] == '\'')
             return false;
 
         return sheetName.IndexOfAny(InvalidSheetChars) == -1;

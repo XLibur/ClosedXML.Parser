@@ -23,6 +23,14 @@ U+202A–U+202E, U+303D and U+303E as the first character of a name, U+2065–U+
 U+303D anywhere in it. That is why the data is read back out of a saved `.xlsx` rather
 than from the UI, and why the two positions get separate tables.
 
+A codepoint Excel refuses in a sheet name has no row at all, rather than a row recording
+whatever the probe fell back to. `* / : ? [ \ ]` are refused anywhere and are in neither
+file. An apostrophe is refused only as the first character, so `ident-sheet-first.txt`
+has no `0027` row while `ident-sheet-next.txt` keeps its `0027 YES`, which is a real
+observation. `NameUtils.ShouldQuote` answers for a leading apostrophe before it reaches
+the mask: it is written quoted, which is what the application or the topic of a DDE link
+needs, and no sheet name may start with one.
+
 ## Running a collection
 
 Needs Excel installed and PowerShell. Excel is driven over COM, invisibly.

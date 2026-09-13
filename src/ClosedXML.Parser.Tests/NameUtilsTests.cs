@@ -185,10 +185,58 @@ public class NameUtilsTests
     }
 
     /// <summary>
+    /// The collected quoting tables have no answer for an apostrophe in the first position, because
+    /// Excel can't make a sheet name that starts with one, so the name came back needing no quotes
+    /// and was written bare. <see cref="NameUtils.ShouldQuote"/> answers for a DDE application and
+    /// topic as well, and those can start with an apostrophe, so it has to say the text needs quotes
+    /// rather than have the writer emit it unquoted.
+    /// </summary>
+    [Theory]
+    [InlineData("'leading", true)]
+    [InlineData("'", true)]
+    [InlineData("'both'", true)]
+    [InlineData("trailing'", true)]
+    [InlineData("Jane's", true)]
+    [InlineData("plain", false)]
+    public void Name_starting_with_an_apostrophe_should_be_quoted(string name, bool shouldBeQuoted)
+    {
+        Assert.Equal(shouldBeQuoted, NameUtils.ShouldQuote(name));
+    }
+
+    /// <summary>
+    /// Excel refuses a sheet name that starts or ends with an apostrophe, and the library has its own
+    /// reason to agree: a sheet prefix is quoted with apostrophes, so one at either end has nowhere to
+    /// go. A leading one is worse than unreadable - <see cref="NameUtils.ShouldQuote"/> says such a
+    /// name needs no quotes, so it is written bare, as <c>'leading!</c>, which no lexer reads at all.
+    /// An apostrophe anywhere else is ordinary and is doubled inside the quotes.
+    /// </summary>
+    [Theory]
+    [InlineData("'leading", false)]
+    [InlineData("trailing'", false)]
+    [InlineData("'both'", false)]
+    [InlineData("'", false)]
+    [InlineData("''", false)]
+    [InlineData("Jane's", true)]
+    [InlineData("a'b", true)]
+    [InlineData("a''b", true)]
+    public void Sheet_name_cant_start_or_end_with_an_apostrophe(string name, bool isValid)
+    {
+        Assert.Equal(isValid, NameUtils.IsSheetNameValid(name));
+    }
+
+    /// <summary>
     /// Excel refuses a sheet name containing any of these, so the data files leave them
     /// out entirely rather than record an answer that could never be exercised.
     /// </summary>
     private static readonly int[] ForbiddenInSheetName = { '*', '/', ':', '?', '[', '\\', ']' };
+
+    /// <summary>
+    /// An apostrophe is refused only in the first position, so it is left out of the first
+    /// table and kept in the other. <see cref="NameUtils.ShouldQuote"/> answers for it before
+    /// it reaches the mask, because a quoted name is what a leading apostrophe has to be
+    /// written as and Excel can't be asked.
+    /// </summary>
+    private const int ForbiddenFirstInSheetName = '\'';
 
     [Theory]
     [InlineData("ident-sheet-first.txt")]
@@ -198,8 +246,10 @@ public class NameUtilsTests
         // The comparison below only reaches codepoints the file actually lists, so on its
         // own a truncated or partly deleted file passes while the masks keep stale values.
         // Pin the coverage down first.
+        var isFirst = path == "ident-sheet-first.txt";
         var codepoints = ReadQuotationData(path).Select(entry => entry.Codepoint).ToList();
-        var expected = Enumerable.Range(1, 0xFFFF).Where(cp => !ForbiddenInSheetName.Contains(cp));
+        var expected = Enumerable.Range(1, 0xFFFF)
+            .Where(cp => !ForbiddenInSheetName.Contains(cp) && !(isFirst && cp == ForbiddenFirstInSheetName));
 
         Assert.Equal(codepoints.Count, codepoints.Distinct().Count());
         Assert.Equal(expected, codepoints.OrderBy(codepoint => codepoint));

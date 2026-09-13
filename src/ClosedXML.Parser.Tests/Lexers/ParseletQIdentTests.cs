@@ -10,8 +10,6 @@ public class ParseletQIdentTests
     // Quoted for an apostrophe, which is doubled inside the quotes
     [InlineData("'Jane''s'!A1", "Jane's")]
     [InlineData("'a''''b'!A1", "a''b")]
-    [InlineData("'''leading'!A1", "'leading")]
-    [InlineData("'trailing'''!A1", "trailing'")]
     // Quoted for being a logical literal, which is otherwise read as TRUE/FALSE
     [InlineData("'TRUE'!A1", "TRUE")]
     [InlineData("'false'!A1", "false")]
@@ -20,6 +18,19 @@ public class ParseletQIdentTests
         var node = Assert.IsType<SheetReferenceNode>(Parse(formula));
 
         Assert.Equal(expectedSheet, node.Sheet);
+    }
+
+    /// <summary>
+    /// A sheet name may not start or end with an apostrophe, so neither of these names a sheet even
+    /// though the quotes and the doubling read as one. The main parser already refused both, reading
+    /// the quoted text as a DDE item; this parser used to accept them.
+    /// </summary>
+    [Theory]
+    [InlineData("'''leading'!A1")]
+    [InlineData("'trailing'''!A1")]
+    public void Quoted_sheet_reference_refuses_a_name_bounded_by_an_apostrophe(string formula)
+    {
+        Assert.Throws<ParsingException>(() => Parse(formula));
     }
 
     [Theory]

@@ -115,6 +115,32 @@ or Fixed.
 - Name `col` rather than `row` in the `ArgumentOutOfRangeException` for a column anchor outside the
   sheet.
 
+### Sheet names and quoting
+
+#### Changed
+
+- `NameUtils.IsSheetNameValid` refuses a name that starts or ends with an apostrophe. Excel refuses
+  one, and the library has its own reason to agree: a sheet prefix is quoted with apostrophes, so one
+  at either end has nowhere to go. A leading apostrophe was worse than unreadable — `ShouldQuote`
+  says such a name needs no quotes, so `'leading` was written bare as `'leading!`, which neither
+  lexer reads at all. A trailing one was written `'trailing'''!`, which the Rolex lexer reads back
+  correctly but the ANTLR lexer reads as a DDE item; that divergence is now unreachable through the
+  library. An apostrophe anywhere else is ordinary and is doubled inside the quotes, so `Jane's` and
+  `a'b` are names as before.
+
+  The Pratt parser accepted `'''leading'!A1` and `'trailing'''!A1` and no longer does, which brings
+  it into line with the main parser — that one already refused both, reading the quoted text as a
+  DDE item. No formula in the enron or euses data sets reads differently.
+
+- `NameUtils.ShouldQuote` says a name starting with an apostrophe has to be quoted. The quoting
+  tables are collected from what Excel saves, and Excel refuses to name a sheet that way, so the
+  probe had nothing to observe and the table recorded the fallback: the name needed no quotes and was
+  written bare. `ShouldQuote` answers for the application and the topic of a DDE link as well, and
+  either of those can start with an apostrophe, so the answer is not academic. The unobservable row
+  is gone from `tools/sheet-quotation/ident-sheet-first.txt`, the way the seven characters Excel
+  refuses anywhere are already left out of both tables; `ident-sheet-next.txt` keeps its `0027 YES`,
+  which is a real observation.
+
 ### Packaging and tooling
 
 #### Added
