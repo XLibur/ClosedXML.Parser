@@ -134,6 +134,18 @@ internal static class StringBuilderExtensions
         return sb;
     }
 
+    /// <summary>
+    /// Append what stands before the argument list of a call, as it was written: the sheet prefix or the
+    /// book prefix, the name of the function or the called cell, and the whitespace among them. Used when
+    /// an argument changed but the call itself didn't, so the call keeps its own text.
+    /// </summary>
+    public static StringBuilder AppendOriginalCallee(this StringBuilder sb, ModContext ctx, SymbolRange range, IReadOnlyList<TransformedSymbol> arguments)
+    {
+        var argumentsStart = arguments.Count == 0 ? range.End : arguments[0].OriginalRange.Start;
+        var braceIdx = GetStartBraceIndex(ctx, range, argumentsStart);
+        return sb.Append(ctx.Formula.AsSpan().Slice(range.Start, braceIdx - range.Start));
+    }
+
     private static StringBuilder AppendStartBrace(this StringBuilder sb, ModContext ctx, SymbolRange range, TransformedSymbol firstNode)
     {
         var firstNodeStart = firstNode.OriginalRange.Start;

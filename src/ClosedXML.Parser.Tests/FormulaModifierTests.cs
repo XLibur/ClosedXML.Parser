@@ -188,6 +188,24 @@ public class FormulaModifierTests
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 
+    /// <summary>
+    /// Changing an argument of a call is not a reason to write the part before it again. The sheet, the
+    /// book index, the name and the called cell are parts of their own, and nothing changed them.
+    /// </summary>
+    [Theory]
+    [InlineData("'Wk2'!F(A1)", "'Wk2'!F(B2)")]
+    [InlineData("Sheet! F( A1 )", "Sheet! F( B2 )")]
+    [InlineData("[1]Sheet1!F(A1)", "[1]Sheet1!F(B2)")]
+    [InlineData("[1]!F(A1)", "[1]!F(B2)")]
+    [InlineData("'[1]Wk2'!F(A1)", "'[1]Wk2'!F(B2)")]
+    [InlineData("b3(A1)", "b3(B2)")]
+    [InlineData("SUM( A1 )", "SUM( B2 )")]
+    public void Changing_an_argument_leaves_the_call_as_written(string formula, string modifiedFormula)
+    {
+        var modifier = new ShiftReferenceModifier { ReferenceMap = { { "A1", "B2" } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
     [Fact]
     public void ModifyCellFunction_can_shift_called_cell()
     {

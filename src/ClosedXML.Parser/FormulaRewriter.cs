@@ -238,12 +238,17 @@ public partial class FormulaModifier
         public TransformedSymbol Function(ModContext ctx, SymbolRange range, ReadOnlySpan<char> functionName, IReadOnlyList<TransformedSymbol> arguments)
         {
             var modifiedFunction = ctx.Modifier.ModifyFunction(ctx, functionName);
-            if (modifiedFunction.SequenceEqual(functionName) && AllOriginal(arguments))
+            var nameChanged = !modifiedFunction.SequenceEqual(functionName);
+            if (!nameChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var nodeText = new StringBuilder(modifiedFunction.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
-                .AppendFunction(ctx, range, modifiedFunction, arguments)
-                .ToString();
+            var sb = new StringBuilder(modifiedFunction.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
+            if (nameChanged)
+                sb.Append(modifiedFunction);
+            else
+                sb.AppendOriginalCallee(ctx, range, arguments);
+
+            var nodeText = sb.AppendArguments(ctx, range, arguments).ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
@@ -253,37 +258,42 @@ public partial class FormulaModifier
             if (modifiedSheet is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
 
-            if (modifiedSheet == sheetName && AllOriginal(arguments))
+            var sheetChanged = modifiedSheet != sheetName;
+            if (!sheetChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var nodeText = new StringBuilder(sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
-                .AppendPrefix(SheetPrefix.Sheet(modifiedSheet))
-                .AppendFunction(ctx, range, functionName, arguments)
-                .ToString();
+            var sb = new StringBuilder(sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
+            if (sheetChanged)
+                sb.AppendPrefix(SheetPrefix.Sheet(modifiedSheet)).Append(functionName);
+            else
+                sb.AppendOriginalCallee(ctx, range, arguments);
+
+            var nodeText = sb.AppendArguments(ctx, range, arguments).ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
         public TransformedSymbol ExternalFunction(ModContext ctx, SymbolRange range, int workbookIndex, string sheetName, ReadOnlySpan<char> functionName, IReadOnlyList<TransformedSymbol> arguments)
         {
+            // The sheet is a sheet of another workbook, so nothing before the arguments can change.
             if (AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
             var nodeText = new StringBuilder(BOOK_PREFIX_LEN + sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
-                .AppendPrefix(SheetPrefix.Sheet(sheetName, workbookIndex))
-                .AppendFunction(ctx, range, functionName, arguments)
+                .AppendOriginalCallee(ctx, range, arguments)
+                .AppendArguments(ctx, range, arguments)
                 .ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
         public TransformedSymbol ExternalFunction(ModContext ctx, SymbolRange range, int workbookIndex, ReadOnlySpan<char> functionName, IReadOnlyList<TransformedSymbol> arguments)
         {
+            // The function is a function of another workbook, so nothing before the arguments can change.
             if (AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
             var nodeText = new StringBuilder(BOOK_PREFIX_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
-                .AppendBookIndex(workbookIndex)
-                .AppendReferenceSeparator()
-                .AppendFunction(ctx, range, functionName, arguments)
+                .AppendOriginalCallee(ctx, range, arguments)
+                .AppendArguments(ctx, range, arguments)
                 .ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
@@ -294,13 +304,17 @@ public partial class FormulaModifier
             if (modifiedCell is null)
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
 
-            if (modifiedCell.Value == cell && AllOriginal(arguments))
+            var cellChanged = modifiedCell.Value != cell;
+            if (!cellChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var nodeText = new StringBuilder(MAX_R1_C1_LEN + SHEET_SEPARATOR_LEN + arguments.Sum(static x => x.Length))
-                .AppendRef(modifiedCell.Value)
-                .AppendArguments(ctx, range, arguments)
-                .ToString();
+            var sb = new StringBuilder(MAX_R1_C1_LEN + SHEET_SEPARATOR_LEN + arguments.Sum(static x => x.Length));
+            if (cellChanged)
+                sb.AppendRef(modifiedCell.Value);
+            else
+                sb.AppendOriginalCallee(ctx, range, arguments);
+
+            var nodeText = sb.AppendArguments(ctx, range, arguments).ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
