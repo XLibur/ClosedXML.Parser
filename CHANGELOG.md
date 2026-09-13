@@ -15,6 +15,18 @@ or Fixed.
 
 ### Formula parsers
 
+#### Added
+
+- `FormulaModifier.ModifySheetRange`, which a formula modification asks about the two sheets a 3D
+  reference spans, so deleting the sheet at one end can narrow the reference the way Excel does:
+  `SUM(Sheet1:Sheet3!A1)` becomes `SUM(Sheet2:Sheet3!A1)` when `Sheet1` is deleted. Naming the
+  sheet that takes over needs tab order, which the parser doesn't hold — it reads a formula, not a
+  workbook — so the hook hands both sheets over together and takes back the pair that is left, or
+  `null` for a `#REF!`. Its default asks `ModifySheet` about each end on its own and gives up the
+  whole reference when either sheet is gone, which is what every modification did before, so an
+  existing one answers as it always did. Both names it answers with are held to the same rule a
+  rename is: a sheet name no workbook could hold raises an `InvalidOperationException`.
+
 #### Changed
 
 - Refuse a sheet name no workbook could hold, so `€?:D!A1` and `a?:D!A1` are parse errors rather

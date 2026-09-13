@@ -151,6 +151,92 @@ public class FormulaModifierTests
     }
 
     /// <summary>
+    /// The hook that gets both ends of a 3D reference at once defaults to asking
+    /// <c>ModifySheet</c> about each end on its own, so a modifier that doesn't override it answers
+    /// exactly as it did before the hook existed.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", null, "#REF!")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", null, "#REF!")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", "New", "New:Sheet5!A1")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", "New", "Sheet1:New!A1")]
+    public void ModifySheetRange_defaults_to_asking_about_each_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// Deleting the sheet at one end of a 3D reference narrows it rather than breaking it, the way
+    /// Excel does. The parser reads a formula rather than a workbook, so it takes the narrowed pair
+    /// from a modifier that knows tab order.
+    /// </summary>
+    [Theory]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1" }, "SUM(Sheet2:Sheet3!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet3" }, "SUM(Sheet1:Sheet2!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!$A$1)", new[] { "Sheet1" }, "SUM(Sheet2:Sheet3!$A$1)")]
+    // A sheet standing between the two ends leaves the reference as it was written.
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet2" }, "SUM(Sheet1:Sheet3!A1)")]
+    // One sheet left of the span is still a pair, and every sheet gone is a #REF!.
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1", "Sheet2" }, "SUM(Sheet3:Sheet3!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1", "Sheet2", "Sheet3" }, "SUM(#REF!)")]
+    public void ModifySheetRange_can_narrow_a_3D_reference(string formula, string[] deletedSheets, string modifiedFormula)
+    {
+        var modifier = new TabOrderModifier(new[] { "Sheet1", "Sheet2", "Sheet3" }, deletedSheets);
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    [Fact]
+    public void ModifySheetRange_can_delete_the_whole_reference()
+    {
+        var modifier = new SheetRangeModifier { Sheets = null };
+        AssertModifiedA1("Sheet1:Sheet5!A1", modifier, "#REF!");
+    }
+
+    [Fact]
+    public void ModifySheetRange_quotes_the_sheets_it_answers_with()
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange("First sheet", "Last") };
+        AssertModifiedA1("Sheet1:Sheet5!A1", modifier, "'First sheet:Last'!A1");
+    }
+
+    /// <summary>
+    /// Both ends of the answer are held to the rule a single sheet name is held to, because both
+    /// are written back into the formula.
+    /// </summary>
+    [Theory]
+    [InlineData("a?", "Sheet5")]
+    [InlineData("Sheet1", "a?")]
+    public void ModifySheetRange_cant_answer_with_a_name_no_workbook_could_hold(string firstSheet, string lastSheet)
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange(firstSheet, lastSheet) };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1("Sheet1:Sheet5!A1", "Sheet", 1, 1, modifier));
+        Assert.Contains("a?", ex.Message);
+    }
+
+    /// <summary>
+    /// Only a 3D reference of this workbook spans sheets a modification may change, so nothing else
+    /// asks the hook.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1!A1")]
+    [InlineData("[1]Sheet1:Sheet5!A1")]
+    [InlineData("'[1]Sheet1:Sheet5'!A1")]
+    public void ModifySheetRange_is_asked_about_a_3D_reference_of_this_workbook(string formula)
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange("First", "Last") };
+        AssertModifiedA1(formula, modifier, formula);
+    }
+
+    [Fact]
+    public void A_sheet_range_holds_two_sheets()
+    {
+        Assert.Throws<ArgumentNullException>(() => new SheetRange(null!, "Last"));
+        Assert.Throws<ArgumentNullException>(() => new SheetRange("First", null!));
+    }
+
+    /// <summary>
     /// A sheet behind a book prefix is a sheet of another workbook, so a sheet of this workbook with the same
     /// name being renamed or deleted doesn't change it.
     /// </summary>
@@ -330,6 +416,48 @@ public class FormulaModifierTests
         protected override string? ModifySheet(ModContext ctx, string sheetName)
         {
             return SheetMap.GetValueOrDefault(sheetName, sheetName);
+        }
+    }
+
+    /// <summary>
+    /// Deletes sheets from a workbook whose tab order it knows, the way Excel does: a 3D reference
+    /// keeps the sheets of its span that are left, and is a <c>#REF!</c> once none are.
+    /// </summary>
+    private sealed class TabOrderModifier : FormulaModifier
+    {
+        private readonly string[] _tabOrder;
+        private readonly string[] _deletedSheets;
+
+        public TabOrderModifier(string[] tabOrder, string[] deletedSheets)
+        {
+            _tabOrder = tabOrder;
+            _deletedSheets = deletedSheets;
+        }
+
+        protected override string? ModifySheet(ModContext ctx, string sheetName)
+        {
+            return _deletedSheets.Contains(sheetName) ? null : sheetName;
+        }
+
+        protected override SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+        {
+            var first = Array.IndexOf(_tabOrder, firstSheet);
+            var last = Array.IndexOf(_tabOrder, lastSheet);
+            var spanned = _tabOrder[first..(last + 1)].Except(_deletedSheets).ToList();
+            return spanned.Count > 0 ? new SheetRange(spanned[0], spanned[^1]) : null;
+        }
+    }
+
+    /// <summary>
+    /// Answers with <see cref="Sheets"/> for every 3D reference, whatever it spans.
+    /// </summary>
+    private sealed class SheetRangeModifier : FormulaModifier
+    {
+        public SheetRange? Sheets { get; init; }
+
+        protected override SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+        {
+            return Sheets;
         }
     }
 

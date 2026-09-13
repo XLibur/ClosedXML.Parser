@@ -36,6 +36,34 @@ public partial class FormulaModifier
     }
 
     /// <summary>
+    /// Modify the sheets a 3D reference spans, e.g. narrow the reference when the sheet at one of
+    /// its ends is deleted. It gets the two sheets of one reference together, and both are sheets
+    /// of this workbook: a 3D reference behind a book prefix spans sheets of another workbook and
+    /// is left as it is.
+    /// </summary>
+    /// <param name="ctx">Where the formula is.</param>
+    /// <param name="firstSheet">The sheet the reference starts at.</param>
+    /// <param name="lastSheet">The sheet the reference ends at.</param>
+    /// <returns>The sheets the reference spans now, or <c>null</c> if the part should be <c>#REF!</c>.</returns>
+    /// <remarks>
+    /// Deleting the sheet at one end narrows the reference rather than breaking it: Excel turns
+    /// <c>Sheet1:Sheet3!A1</c> into <c>Sheet2:Sheet3!A1</c> when <c>Sheet1</c> is deleted. Only a
+    /// caller that knows tab order can name the sheet that takes over, which is why the two sheets
+    /// arrive together. This default asks <see cref="ModifySheet"/> about each end on its own and
+    /// gives up the whole reference when either sheet is gone. Each name it answers with is held
+    /// to the same rule <see cref="ModifySheet"/> is.
+    /// </remarks>
+    protected virtual SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+    {
+        var modifiedFirstSheet = ModifySheet(ctx, firstSheet);
+        var modifiedLastSheet = ModifySheet(ctx, lastSheet);
+        if (modifiedFirstSheet is null || modifiedLastSheet is null)
+            return null;
+
+        return new SheetRange(modifiedFirstSheet, modifiedLastSheet);
+    }
+
+    /// <summary>
     /// Modify the name of a table of this workbook.
     /// </summary>
     /// <param name="ctx">Where the formula is.</param>
