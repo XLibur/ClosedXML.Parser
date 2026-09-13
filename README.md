@@ -4,7 +4,7 @@
 >
 > This repository is a fork of [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser), Copyright (c) 2023, Jan Havlíček.
 >
-> The sole purpose of this fork is to bundle some fixes needed by the [XLibur](https://github.com/XLibur/XLibur) library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push pull requests with these fixes back to upstream [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser).
+> The sole purpose of this fork is to bundle some fixes needed by the [XLibur](https://github.com/XLibur/XLibur) library, published as the `XLibur.ClosedXML.Parser` NuGet package. We aim to push some pull requests with these fixes back to upstream [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser). Some are likely not to stay local, as they are opinionated and may not benefit upstreams goals (i.e. dropping netstandard20)
 
 ClosedParser parses Excel formulas, in the form that OOXML files store them, into an abstract syntax tree that can be evaluated.
 
