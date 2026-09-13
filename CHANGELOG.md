@@ -30,6 +30,22 @@ or Fixed.
   `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
   one reads.
 
+#### Changed
+
+- **Breaking:** `RowCol` holds a row and a column that a sheet has, and its constructor refuses one
+  it doesn't with an `ArgumentOutOfRangeException`. A position — an A1 axis of either type, or an
+  absolute R1C1 one — is a row of 1 to 1048576 or a column of 1 to 16384. A relative R1C1 axis is an
+  offset from the formula's own cell instead, and the furthest one cell of a sheet can be from
+  another is one short of the sheet, so an offset reaches 1048575 rows or 16383 columns either way.
+  Those are the bounds the grammar admits, so every reference a formula can be parsed into is still
+  held and only a `RowCol` built by hand is refused, which is the breaking part.
+  It is also what makes `ToA1` keep the promise of its remarks, that a converted reference out of
+  the sheet is looped back into it. The loop adds or subtracts one sheet width once, which is
+  enough for every offset the parser produces but not for a wider one built by hand: a column offset
+  of 1000000 converted to column 983617, and `int.MaxValue` overflowed to a negative column. Because
+  a column above the `XFD` of a sheet can no longer be reached, the letters of one are again written
+  through the three a sheet needs rather than the seven the largest `int` spells.
+
 #### Fixed
 
 - Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of
