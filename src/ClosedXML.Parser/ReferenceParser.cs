@@ -198,8 +198,9 @@ public static class ReferenceParser
             return false;
         }
 
-        TokenParser.ParseSingleSheetPrefix(text.AsSpan(), tokens[0], out var workbookIndex, out sheetName);
-        if (workbookIndex is not null || !IsWholeReference(tokens, 1, text, TokenParser.A1Style, out area))
+        var prefix = SheetPrefix.ReadSingle(text.AsSpan(), tokens[0]);
+        sheetName = prefix.FirstSheet!;
+        if (prefix.BookIndex is not null || !IsWholeReference(tokens, 1, text, TokenParser.A1Style, out area))
         {
             sheetName = string.Empty;
             area = default;
@@ -239,8 +240,9 @@ public static class ReferenceParser
             return false;
         }
 
-        TokenParser.ParseSingleSheetPrefix(text.AsSpan(), tokens[0], out var workbookIndex, out sheetName);
-        if (workbookIndex is not null)
+        var prefix = SheetPrefix.ReadSingle(text.AsSpan(), tokens[0]);
+        sheetName = prefix.FirstSheet!;
+        if (prefix.BookIndex is not null)
         {
             sheetName = string.Empty;
             name = string.Empty;

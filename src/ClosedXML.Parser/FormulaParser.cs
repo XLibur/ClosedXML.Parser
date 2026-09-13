@@ -347,15 +347,15 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     isPureRef = false;
                     var start = _tokenSource.StartIndex;
-                    TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), _tokenSource, out var wbIndex, out var sheetName);
+                    var prefix = SheetPrefix.ReadSingle(_input.AsSpan(), _tokenSource);
                     Consume();
                     var functionName = TokenParser.ParseFunctionName(_input.AsSpan(), _tokenSource);
                     Consume();
                     var args = ArgumentList();
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
-                    return wbIndex is null
-                        ? _factory.Function(_context, range, sheetName, functionName, args)
-                        : _factory.ExternalFunction(_context, range, wbIndex.Value, sheetName, functionName, args);
+                    return prefix.BookIndex is null
+                        ? _factory.Function(_context, range, prefix.FirstSheet!, functionName, args)
+                        : _factory.ExternalFunction(_context, range, prefix.BookIndex.Value, prefix.FirstSheet!, functionName, args);
                 }
 
                 // function_call : BOOK_PREFIX USER_DEFINED_FUNCTION_NAME argument_list
@@ -363,7 +363,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     isPureRef = false;
                     var start = _tokenSource.StartIndex;
-                    var wbIndex = TokenParser.ParseBookPrefix(_input.AsSpan(), _tokenSource);
+                    var wbIndex = SheetPrefix.ReadBookPrefix(_input.AsSpan(), _tokenSource);
                     Consume();
                     var functionName = TokenParser.ParseFunctionName(_input.AsSpan(), _tokenSource);
                     Consume();
@@ -594,8 +594,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.SHEET_RANGE_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
-                    TokenParser.ParseSheetRangePrefix(_input.AsSpan(), _tokenSource, out var wbIdx, out var firstName,
-                        out var secondName);
+                    var prefix = SheetPrefix.ReadRange(_input.AsSpan(), _tokenSource);
                     Consume();
 
                     var area = A1Reference();
@@ -603,9 +602,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                         throw UnexpectedTokenError(Token.A1_CELL, Token.A1_SPAN_REFERENCE);
 
                     var end = _tokenSource.StartIndex;
-                    return wbIdx is not null
-                        ? _factory.ExternalReference3D(_context, new SymbolRange(start, end), wbIdx.Value, firstName, secondName, area.Value)
-                        : _factory.Reference3D(_context, new SymbolRange(start, end), firstName, secondName, area.Value);
+                    return prefix.BookIndex is not null
+                        ? _factory.ExternalReference3D(_context, new SymbolRange(start, end), prefix.BookIndex.Value, prefix.FirstSheet!, prefix.LastSheet!, area.Value)
+                        : _factory.Reference3D(_context, new SymbolRange(start, end), prefix.FirstSheet!, prefix.LastSheet!, area.Value);
                 }
 
             // ref_function_call
@@ -635,9 +634,11 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                         Consume(); // COLON
 
                         // TODO: Decouple book prefix from single sheet prefix
-                        TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), _tokenSource, out var wbIdx, out string lastSheetName);
-                        if (wbIdx is not null)
+                        var lastPrefix = SheetPrefix.ReadSingle(_input.AsSpan(), _tokenSource);
+                        if (lastPrefix.BookIndex is not null)
                             throw Error("External workbook not expected.");
+
+                        var lastSheetName = lastPrefix.FirstSheet!;
 
                         Consume(); // SINGLE_SHEET_PREFIX
 
@@ -657,7 +658,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             case Token.BOOK_PREFIX:
                 {
                     var start = _tokenSource.StartIndex;
-                    var bookPrefix = TokenParser.ParseBookPrefix(_input.AsSpan(), _tokenSource);
+                    var bookPrefix = SheetPrefix.ReadBookPrefix(_input.AsSpan(), _tokenSource);
                     Consume();
 
                     // dde_reference: BOOK_PREFIX DDE_ITEM
@@ -688,16 +689,17 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 {
                     var start = _tokenSource.StartIndex;
                     var sheetPrefix = _tokenSource;
-                    TokenParser.ParseSingleSheetPrefix(_input.AsSpan(), sheetPrefix, out var wbIdx, out string sheetName);
+                    var prefix = SheetPrefix.ReadSingle(_input.AsSpan(), sheetPrefix);
+                    var sheetName = prefix.FirstSheet!;
                     Consume();
 
                     var area = A1Reference();
                     if (area is not null)
                     {
                         var end = _tokenSource.StartIndex;
-                        return wbIdx is null
+                        return prefix.BookIndex is null
                             ? _factory.SheetReference(_context, new SymbolRange(start, end), sheetName, area.Value)
-                            : _factory.ExternalSheetReference(_context, new SymbolRange(start, end), wbIdx.Value, sheetName, area.Value);
+                            : _factory.ExternalSheetReference(_context, new SymbolRange(start, end), prefix.BookIndex.Value, sheetName, area.Value);
                     }
 
                     if (_la == Token.REF_CONSTANT)
@@ -711,7 +713,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     // A sheet name can contain `|` too, but only a DDE link is followed by a quoted item.
                     if (_la == Token.DDE_ITEM)
                     {
-                        if (!TokenParser.TryParseDdeLinkPrefix(_input.AsSpan(), sheetPrefix, out var application, out var topic))
+                        if (!prefix.TryGetDdeLink(out var application, out var topic))
                             throw Error($"A dynamic data exchange item must follow a book prefix or an 'application|topic' prefix, but the prefix is '{_input.Substring(sheetPrefix.StartIndex, sheetPrefix.Length)}'.");
 
                         var item = TokenParser.ParseDdeItem(_input.AsSpan(), _tokenSource);
@@ -724,9 +726,9 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     Match(Token.NAME);
                     var name = TokenParser.ParseName(_input.AsSpan(), nameToken);
                     var range = new SymbolRange(start, _tokenSource.StartIndex);
-                    return wbIdx is null
+                    return prefix.BookIndex is null
                         ? _factory.SheetName(_context, range, sheetName, name)
-                        : _factory.ExternalSheetName(_context, range, wbIdx.Value, sheetName, name);
+                        : _factory.ExternalSheetName(_context, range, prefix.BookIndex.Value, sheetName, name);
                 }
 
             // structure_reference - only for formulas directly in the table, e.g. totals row.

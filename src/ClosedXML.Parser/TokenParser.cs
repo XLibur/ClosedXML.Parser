@@ -8,14 +8,14 @@ namespace ClosedXML.Parser;
 
 /// <summary>
 /// Reads the meaning out of the tokens of a formula. A caller hands over a token and the formula it was
-/// lexed from, and gets back what the token says, e.g. a workbook index and an unescaped sheet name, or a
-/// reference area. No caller has to know how the text of a token is written, and a caller can't pass the
-/// wrong slice of a formula. It also recognizes the patterns of tokens that several callers look for, e.g.
+/// lexed from, and gets back what the token says, e.g. a name, the name of a function or a reference
+/// area. No caller has to know how the text of a token is written, and a caller can't pass the wrong
+/// slice of a formula. It also recognizes the patterns of tokens that several callers look for, e.g.
 /// the tokens of a reference.
 /// </summary>
 /// <remarks>
 /// The literal constants (numbers, strings, errors and logical values) are read by the parser, their
-/// only reader.
+/// only reader. A sheet prefix is read by <see cref="SheetPrefix"/>, which writes one as well.
 /// </remarks>
 internal static class TokenParser
 {
@@ -30,77 +30,6 @@ internal static class TokenParser
     /// Reads formulas written in the <see cref="ReferenceStyle.R1C1"/> reference style.
     /// </summary>
     internal static readonly IReferenceStyle R1C1Style = new R1C1ReferenceStyle();
-
-    /// <summary>
-    /// Read a <see cref="Token.SINGLE_SHEET_PREFIX"/> token, e.g. <c>'[1]Jane''s'!</c>.
-    /// </summary>
-    internal static void ParseSingleSheetPrefix(ReadOnlySpan<char> formula, Token token, out int? index, out string sheetName)
-    {
-        Debug.Assert(token.SymbolId == Token.SINGLE_SHEET_PREFIX);
-
-        // There can be whitespaces after exclamation mark at the end of a token.
-        var input = Text(formula, token).TrimEnd();
-        var isEscaped = input[0] == '\'';
-        input = isEscaped
-            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!).
-            : input.Slice(0, input.Length - 1); // only strip exclamation mark
-
-        // Parse optional WORKBOOK_INDEX
-        input = ExtractWorkbookIndex(input, out index);
-
-        var sheetRangeSpan = input;
-        if (!isEscaped)
-        {
-            // SHEET_NAME
-            sheetName = sheetRangeSpan.ToString();
-            return;
-        }
-
-        // The ending '! have been stripped from escape
-        sheetName = GetEscapedSheetName(input);
-    }
-
-    /// <summary>
-    /// Read a <see cref="Token.SHEET_RANGE_PREFIX"/> token, e.g. <c>'[1]first:second'!</c>.
-    /// </summary>
-    internal static void ParseSheetRangePrefix(ReadOnlySpan<char> formula, Token token, out int? index, out string firstSheetName, out string secondSheetName)
-    {
-        Debug.Assert(token.SymbolId == Token.SHEET_RANGE_PREFIX);
-
-        var input = Text(formula, token);
-        var isEscaped = input[0] == '\'';
-        input = isEscaped
-            ? input.Slice(1, input.Length - 3) // second sheet name ends with TICK EXCLAMATION_MARK ('!).
-            : input.Slice(0, input.Length - 1); // only strip exclamation mark
-
-        // Parse optional WORKBOOK_INDEX
-        input = ExtractWorkbookIndex(input, out index);
-
-        var sheetRangeSpan = input;
-        if (!isEscaped)
-        {
-            // SHEET_NAME ':' SHEET_NAME
-            var endIndex = sheetRangeSpan.IndexOf(':');
-            firstSheetName = sheetRangeSpan.Slice(0, endIndex).ToString();
-            secondSheetName = sheetRangeSpan.Slice(endIndex + 1).ToString();
-            return;
-        }
-
-        // Parse SHEET_NAME_SPECIAL which can contain escaped tick (') as double tick
-        firstSheetName = GetEscapedSheetName(ref input, ':'); // Even escaped sheet name can't contain :
-        secondSheetName = GetEscapedSheetName(input);
-    }
-
-    /// <summary>
-    /// Read the workbook index of a <see cref="Token.BOOK_PREFIX"/> token, e.g. <c>[1]</c>.
-    /// </summary>
-    internal static int ParseBookPrefix(ReadOnlySpan<char> formula, Token token)
-    {
-        Debug.Assert(token.SymbolId == Token.BOOK_PREFIX);
-        ExtractWorkbookIndex(Text(formula, token), out var index);
-        Debug.Assert(index.HasValue);
-        return index!.Value;
-    }
 
     /// <summary>
     /// Read a <see cref="Token.NAME"/> token, i.e. a defined name or a name of a table.
@@ -340,41 +269,6 @@ internal static class TokenParser
         return input.Slice(1, input.Length - 2).ToString().Replace("''", "'");
     }
 
-    /// <summary>
-    /// Read a <see cref="Token.SINGLE_SHEET_PREFIX"/> token as the application and the topic of a DDE link
-    /// (e.g. <c>Sdemo123|tik!</c>). It must have no workbook index and a non-empty part on each side of the
-    /// first <c>|</c>.
-    /// </summary>
-    internal static bool TryParseDdeLinkPrefix(ReadOnlySpan<char> formula, Token token, out string application, out string topic)
-    {
-        ParseSingleSheetPrefix(formula, token, out var index, out var name);
-        var separatorIndex = name.IndexOf('|');
-        if (index is not null || separatorIndex <= 0 || separatorIndex == name.Length - 1)
-        {
-            application = string.Empty;
-            topic = string.Empty;
-            return false;
-        }
-
-        application = name.Substring(0, separatorIndex);
-        topic = name.Substring(separatorIndex + 1);
-        return true;
-    }
-
-    /// <summary>
-    /// Does <paramref name="prefix"/> read back as the sheet prefix of <paramref name="name"/>, with no
-    /// workbook index? A writer uses it to find out whether a prefix can stay unquoted.
-    /// </summary>
-    internal static bool ReadsBackAsSheetPrefix(string prefix, string name)
-    {
-        var tokens = RolexLexer.GetTokensA1(prefix.AsSpan());
-        if (tokens.Count != 2 || tokens[0].SymbolId != Token.SINGLE_SHEET_PREFIX || tokens[0].Length != prefix.Length)
-            return false;
-
-        ParseSingleSheetPrefix(prefix.AsSpan(), tokens[0], out var workbookIndex, out var sheetName);
-        return workbookIndex is null && sheetName == name;
-    }
-
     private static ReadOnlySpan<char> Text(ReadOnlySpan<char> formula, Token token) => formula.Slice(token.StartIndex, token.Length);
 
     /// <summary>
@@ -385,60 +279,6 @@ internal static class TokenParser
         Debug.Assert(token.SymbolId is Token.A1_CELL or Token.A1_SPAN_REFERENCE or Token.BANG_REFERENCE);
         var text = Text(formula, token);
         return token.SymbolId == Token.BANG_REFERENCE ? text.Slice(1) : text;
-    }
-
-    private static ReadOnlySpan<char> ExtractWorkbookIndex(ReadOnlySpan<char> input, out int? wbIndex)
-    {
-        if (input[0] != '[')
-        {
-            wbIndex = null;
-            return input;
-        }
-
-        var i = 0;
-        var number = 0;
-        var c = input[++i];
-        do
-        {
-            number = number * 10 + c - '0';
-            c = input[++i];
-        } while (c != ']');
-
-        wbIndex = number;
-        return input.Slice(i + 1);
-    }
-
-    private static string GetEscapedSheetName(ref ReadOnlySpan<char> input, char endChar)
-    {
-        Span<char> buffer = stackalloc char[input.Length];
-        var bufferIdx = 0;
-        var inputIdx = 0;
-        do
-        {
-            if (input[inputIdx] == '\'')
-                inputIdx++;
-
-            buffer[bufferIdx++] = input[inputIdx++];
-        } while (input[inputIdx] != endChar);
-
-        input = input.Slice(inputIdx + 1);
-        return buffer.Slice(0, bufferIdx).ToString();
-    }
-
-    private static string GetEscapedSheetName(ReadOnlySpan<char> input)
-    {
-        Span<char> buffer = stackalloc char[input.Length];
-        var bufferIdx = 0;
-        var inputIdx = 0;
-        do
-        {
-            if (input[inputIdx] == '\'')
-                inputIdx++;
-
-            buffer[bufferIdx++] = input[inputIdx++];
-        } while (input.Length > inputIdx);
-
-        return buffer.Slice(0, bufferIdx).ToString();
     }
 
     /// <summary>

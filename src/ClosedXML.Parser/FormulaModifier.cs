@@ -144,13 +144,18 @@ public class FormulaModifier
             // Sheet!#REF! is a valid formula per grammar and Excel, though it displeases me. The symbol
             // is a sheet prefix token followed by the error token, so read the sheet the way the parser does.
             var errorText = symbol.Slice(symbol.Length - error.Length);
-            var sheetPrefix = new Token(Token.SINGLE_SHEET_PREFIX, range.Start, range.Length - error.Length);
-            TokenParser.ParseSingleSheetPrefix(ctx.Formula.AsSpan(), sheetPrefix, out var workbookIndex, out var sheet);
+            var sheetPrefixToken = new Token(Token.SINGLE_SHEET_PREFIX, range.Start, range.Length - error.Length);
+            var sheetPrefix = SheetPrefix.ReadSingle(ctx.Formula.AsSpan(), sheetPrefixToken);
             var nodeText = new StringBuilder();
-            if (workbookIndex is null)
-                nodeText.AppendSheetReference(ctx.Modifier.ModifySheet(ctx, sheet));
+            if (sheetPrefix.BookIndex is null)
+            {
+                var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheetPrefix.FirstSheet!);
+                nodeText.AppendPrefix(modifiedSheet is null ? SheetPrefix.Deleted : SheetPrefix.Sheet(modifiedSheet));
+            }
             else
-                nodeText.AppendExternalSheetReference(workbookIndex.Value, sheet); // A sheet of another workbook isn't modified.
+            {
+                nodeText.AppendPrefix(sheetPrefix); // A sheet of another workbook isn't modified.
+            }
 
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText.Append(errorText).ToString());
         }

@@ -114,7 +114,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + MAX_R1_C1_LEN);
         var nodeText = sb
-            .AppendSheetReference(sheet)
+            .AppendPrefix(SheetPrefix.Sheet(sheet))
             .AppendRef(reference)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -135,24 +135,8 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     public virtual TransformedSymbol Reference3D(ModContext ctx, SymbolRange range, string firstSheet, string lastSheet, ReferenceArea reference)
     {
         var sb = new StringBuilder(firstSheet.Length + QUOTE_RESERVE + lastSheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + MAX_R1_C1_LEN);
-        if (NameUtils.ShouldQuote(firstSheet.AsSpan()) || NameUtils.ShouldQuote(lastSheet.AsSpan()))
-        {
-            sb
-                .Append('\'')
-                .AppendEscapedSheetName(firstSheet)
-                .Append(':')
-                .AppendEscapedSheetName(lastSheet)
-                .Append('\'');
-        }
-        else
-        {
-            sb.Append(firstSheet)
-                .Append(':')
-                .Append(lastSheet);
-        }
-
         var nodeText = sb
-            .AppendReferenceSeparator()
+            .AppendPrefix(SheetPrefix.Range(firstSheet, lastSheet))
             .AppendRef(reference)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -163,7 +147,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(BOOK_PREFIX_LEN + sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + MAX_R1_C1_LEN);
         var nodeText = sb
-            .AppendExternalSheetReference(workbookIndex, sheet)
+            .AppendPrefix(SheetPrefix.Sheet(sheet, workbookIndex))
             .AppendRef(reference)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -173,27 +157,8 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     public virtual TransformedSymbol ExternalReference3D(ModContext ctx, SymbolRange range, int workbookIndex, string firstSheet, string lastSheet, ReferenceArea reference)
     {
         var sb = new StringBuilder(BOOK_PREFIX_LEN + firstSheet.Length + QUOTE_RESERVE + lastSheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + MAX_R1_C1_LEN);
-        if (NameUtils.ShouldQuote(firstSheet.AsSpan()) || NameUtils.ShouldQuote(lastSheet.AsSpan()))
-        {
-            sb
-                .Append('\'')
-                .AppendBookIndex(workbookIndex)
-                .AppendEscapedSheetName(firstSheet)
-                .Append(':')
-                .AppendEscapedSheetName(lastSheet)
-                .Append('\'');
-        }
-        else
-        {
-            sb
-                .AppendBookIndex(workbookIndex)
-                .Append(firstSheet)
-                .Append(':')
-                .Append(lastSheet);
-        }
-
         var nodeText = sb
-            .AppendReferenceSeparator()
+            .AppendPrefix(SheetPrefix.Range(firstSheet, lastSheet, workbookIndex))
             .AppendRef(reference)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -224,7 +189,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
         var nodeText = sb
-            .AppendSheetReference(sheetName)
+            .AppendPrefix(SheetPrefix.Sheet(sheetName))
             .AppendFunction(ctx, range, functionName, arguments)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -235,7 +200,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(BOOK_PREFIX_LEN + sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
         var nodeText = sb
-            .AppendExternalSheetReference(workbookIndex, sheetName)
+            .AppendPrefix(SheetPrefix.Sheet(sheetName, workbookIndex))
             .AppendFunction(ctx, range, functionName, arguments)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -291,7 +256,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + name.Length);
         var nodeText = sb
-            .AppendSheetReference(sheet)
+            .AppendPrefix(SheetPrefix.Sheet(sheet))
             .Append(name)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -325,7 +290,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(BOOK_PREFIX_LEN + sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + name.Length);
         var nodeText = sb
-            .AppendExternalSheetReference(workbookIndex, sheet)
+            .AppendPrefix(SheetPrefix.Sheet(sheet, workbookIndex))
             .Append(name)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
@@ -348,7 +313,7 @@ internal class CopyVisitor : IAstFactory<TransformedSymbol, TransformedSymbol, M
     {
         var sb = new StringBuilder(application.Length + topic.Length + 1 + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + item.Length + QUOTE_RESERVE);
         var nodeText = sb
-            .AppendDdeLink(application, topic)
+            .AppendPrefix(SheetPrefix.DdeLink(application, topic))
             .AppendDdeItem(item)
             .ToString();
         return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
