@@ -4,6 +4,6 @@ public record ExternalSheetReferenceNode(int WorkbookIndex, string Sheet, Refere
 {
     public override string GetDisplayString(ReferenceStyle style)
     {
-        return $"[{WorkbookIndex}]{Sheet}!{Reference.GetDisplayString(style)}";
+        return $"{SheetPrefixWriter.Sheet(Sheet, WorkbookIndex)}{Reference.GetDisplayString(style)}";
     }
 }
