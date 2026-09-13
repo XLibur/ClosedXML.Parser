@@ -306,11 +306,12 @@ public readonly struct RowCol : IEquatable<RowCol>
         switch (ColumnType)
         {
             case Absolute:
-                sb.Append('$').Append(GetA1Reference());
+                sb.Append('$');
+                AppendA1Column(sb);
                 break;
 
             case Relative:
-                sb.Append(GetA1Reference());
+                AppendA1Column(sb);
                 break;
 
             case None:
@@ -377,20 +378,31 @@ public readonly struct RowCol : IEquatable<RowCol>
         }
     }
 
-    private string GetA1Reference()
+    /// <summary>
+    /// Write the column letters of the column, e.g. <c>XFD</c> for column 16384.
+    /// </summary>
+    /// <remarks>
+    /// The letters are found from the last one back, so they are collected in a buffer and written
+    /// in the order they are read. A column has at most three letters, which is why the buffer can
+    /// come off the stack.
+    /// </remarks>
+    private void AppendA1Column(StringBuilder sb)
     {
+        const int maxColumnLetters = 3;
+        Span<char> letters = stackalloc char[maxColumnLetters];
         var columnIndex = ColumnValue;
-        var column = string.Empty;
+        var i = maxColumnLetters;
         do
         {
             columnIndex -= 1;
             var index = columnIndex % 26;
             columnIndex -= index;
             columnIndex /= 26;
-            column = (char)('A' + index) + column;
+            letters[--i] = (char)('A' + index);
         } while (columnIndex > 0);
 
-        return column;
+        for (; i < maxColumnLetters; ++i)
+            sb.Append(letters[i]);
     }
 
     /// <summary>
