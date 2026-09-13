@@ -4,6 +4,6 @@ public record ExternalReference3DNode(int WorkbookIndex, string FirstSheet, stri
 {
     public override string GetDisplayString(ReferenceStyle style)
     {
-        return $"[{WorkbookIndex}]{FirstSheet}:{LastSheet}!{Reference.GetDisplayString(style)}";
+        return $"{SheetPrefixWriter.Range(FirstSheet, LastSheet, WorkbookIndex)}{Reference.GetDisplayString(style)}";
     }
 }

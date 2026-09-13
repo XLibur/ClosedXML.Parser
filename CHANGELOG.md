@@ -117,6 +117,21 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Quote a sheet name that needs quotes in the display string of an Ast node. `SheetNameNode` and
+  `SheetErrorNode` were the only nodes that did, so a sheet called `My Sheet` came out bare from the
+  other seven: `My Sheet!A1` from `SheetReferenceNode`, `[1]My Sheet!A1` from
+  `ExternalSheetReferenceNode`, and the same from `ExternalSheetNameNode`, `ExternalFunctionNode`,
+  `FunctionNode`, `Reference3DNode` and `ExternalReference3DNode`. None of those strings parse back
+  as the node they came from, and the visualizer puts them in its diagram. The rule is the one the
+  library already applies to a written formula: quote when `NameUtils.ShouldQuote` says so, double
+  an apostrophe inside the name, and let the quote wrap the whole prefix, book index included,
+  `'[2]Jane''s'!A1`. Either sheet of a 3D reference needing quotes quotes the pair,
+  `'My Jan:Dec'!A1`. A name that needs no quotes still stays bare. All nine nodes that carry a sheet
+  write their prefix in one place now, `SheetPrefixWriter`, instead of each building its own. A
+  first sheet of a 3D reference that is also a cell, e.g. `PWD1:Dec!A1`, still comes out unquoted;
+  that is [#31](https://github.com/XLibur/ClosedXML.Parser/issues/31), and a written formula has it
+  too.
+  [#34](https://github.com/XLibur/ClosedXML.Parser/issues/34)
 - Keep the range of an expression in braces that turns out to be a reference, e.g. `(A1):B2`. The
   parser reads `(A1)` as a value expression, and when the `:` shows it is a reference expression, it
   backtracks and passes the node it has already read to the reference expression. That expression
