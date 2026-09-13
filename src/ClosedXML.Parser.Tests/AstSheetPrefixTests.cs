@@ -86,12 +86,47 @@ public class AstSheetPrefixTests
         AssertFormula.SingleNodeParsed(expected, node);
     }
 
+    /// <summary>
+    /// A bare <c>first:last!</c> reads back as a name, a colon and a single sheet prefix, so a
+    /// first sheet that is also a cell has to be quoted. The name is written without knowing the
+    /// reference style of the formula it ends up in, so it has to be a name in both styles. The
+    /// last sheet stands after the colon, where a cell-like name is a sheet already.
+    /// </summary>
+    [Theory]
+    [InlineData("PWD1", "Dec", "'PWD1:Dec'!A1")]
+    [InlineData("LOG10", "Dec", "'LOG10:Dec'!A1")]
+    [InlineData("R1C1", "Dec", "'R1C1:Dec'!A1")]
+    [InlineData("C", "Dec", "'C:Dec'!A1")]
+    [InlineData("Jan", "PWD1", "Jan:PWD1!A1")]
+    public void Reference_3d_quotes_a_first_sheet_that_is_also_a_cell(string firstSheet, string lastSheet, string expected)
+    {
+        var node = new Reference3DNode(firstSheet, lastSheet, Cell);
+
+        Assert.Equal(expected, node.GetDisplayString(A1));
+        AssertFormula.SingleNodeParsed(expected, node);
+    }
+
     [Theory]
     [InlineData("Jan", "Dec", "[2]Jan:Dec!A1")]
     [InlineData("My Jan", "Dec", "'[2]My Jan:Dec'!A1")]
     [InlineData("Jan", "My Dec", "'[2]Jan:My Dec'!A1")]
     [InlineData("Jane's", "Dec", "'[2]Jane''s:Dec'!A1")]
     public void External_reference_3d(string firstSheet, string lastSheet, string expected)
+    {
+        var node = new ExternalReference3DNode(2, firstSheet, lastSheet, Cell);
+
+        Assert.Equal(expected, node.GetDisplayString(A1));
+        AssertFormula.SingleNodeParsed(expected, node);
+    }
+
+    /// <summary>
+    /// A book prefix already says a sheet prefix has started, so a cell-like first sheet behind one
+    /// needs no quotes.
+    /// </summary>
+    [Theory]
+    [InlineData("PWD1", "Dec", "[2]PWD1:Dec!A1")]
+    [InlineData("R1C1", "Dec", "[2]R1C1:Dec!A1")]
+    public void External_reference_3d_leaves_a_cell_like_first_sheet_bare(string firstSheet, string lastSheet, string expected)
     {
         var node = new ExternalReference3DNode(2, firstSheet, lastSheet, Cell);
 

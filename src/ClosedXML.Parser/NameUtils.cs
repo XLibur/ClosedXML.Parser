@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClosedXML.Parser.Rolex;
 
 namespace ClosedXML.Parser;
 
@@ -115,6 +117,41 @@ public static class NameUtils
     {
         return name.Equals("TRUE".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
                name.Equals("FALSE".AsSpan(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Should the name be quoted in the first position of a 3D reference, e.g.
+    /// <c>'PWD1:Dec'!A1</c>? Everything <see cref="ShouldQuote"/> quotes is quoted here too.
+    /// </summary>
+    /// <remarks>
+    /// A bare <c>first:last!</c> reads back as <c>NAME COLON SINGLE_SHEET_PREFIX</c>, so the first
+    /// sheet has to lex as a name. <see cref="ShouldQuote"/> doesn't ask that, because it answers
+    /// for a name standing on its own, where the <c>!</c> of <c>PWD1!A1</c> settles it. Here there
+    /// is no <c>!</c> yet, and a name that is also a cell (<c>PWD1</c>, <c>LOG10</c> in A1,
+    /// <c>R1C1</c> in R1C1) lexes as the cell, taking the prefix with it. A name is written without
+    /// knowing the reference style of the formula it ends up in, so it has to be a name in both.
+    /// <para>
+    /// Only the first sheet of a bare 3D reference asks this. A book prefix has already said a
+    /// sheet prefix has started, so <c>[2]PWD1:Dec!A1</c> stays bare, and the last sheet stands
+    /// after the colon, where a cell-like name is a sheet already.
+    /// </para>
+    /// </remarks>
+    /// <param name="name">The name. Must be at least 1 char long.</param>
+    /// <returns>True, if the name should be quoted as the first sheet of a 3D reference.</returns>
+    /// <exception cref="ArgumentException">If name is empty.</exception>
+    public static bool ShouldQuoteAsFirstSheet(ReadOnlySpan<char> name)
+    {
+        if (ShouldQuote(name))
+            return true;
+
+        return !IsWholeName(RolexLexer.GetTokensA1(name), name.Length) ||
+               !IsWholeName(RolexLexer.GetTokensR1C1(name), name.Length);
+    }
+
+    private static bool IsWholeName(List<Token> tokens, int length)
+    {
+        // The lexer always ends with an EOF token, so a single name is two tokens.
+        return tokens.Count == 2 && tokens[0].SymbolId == Token.NAME && tokens[0].Length == length;
     }
 
     /// <summary>

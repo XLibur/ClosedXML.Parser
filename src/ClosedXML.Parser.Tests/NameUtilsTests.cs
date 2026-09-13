@@ -14,6 +14,30 @@ public class NameUtilsTests
         _output = output;
     }
 
+    /// <summary>
+    /// The first sheet of a bare 3D reference stands where nothing has said a sheet prefix has
+    /// started yet, so a name that is also a cell has to be quoted there although
+    /// <see cref="NameUtils.ShouldQuote"/> leaves it bare. The name is written without knowing the
+    /// reference style of the formula it ends up in, so it has to be a name in both.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1", false)] // A name in both styles
+    [InlineData("Jan", false)]
+    [InlineData("LOG", false)] // A function name is still a name
+    [InlineData("PWD1", true)] // A cell in A1: column PWD, row 1
+    [InlineData("LOG10", true)]
+    [InlineData("XFD1048576", true)] // The last cell of a sheet
+    [InlineData("R1C1", true)] // A cell in R1C1
+    [InlineData("C", true)] // A whole column in R1C1
+    [InlineData("R", true)]
+    [InlineData("My Sheet", true)] // Needs quotes on its own, so it needs them here
+    [InlineData("Jane's", true)]
+    [InlineData("TRUE", true)]
+    public void Name_should_be_quoted_as_the_first_sheet_of_a_3d_reference_when_it_is_also_a_cell(string sheetName, bool shouldBeQuoted)
+    {
+        Assert.Equal(shouldBeQuoted, NameUtils.ShouldQuoteAsFirstSheet(sheetName.AsSpan()));
+    }
+
     [Theory]
     [InlineData("A", false)] // First char - Letter-like
     [InlineData("Z", false)]
