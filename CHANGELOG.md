@@ -15,6 +15,20 @@ or Fixed.
 
 ### Formula parsers
 
+#### Changed
+
+- Refuse a sheet name no workbook could hold, so `€?:D!A1` and `a?:D!A1` are parse errors rather
+  than 3D references. `NameUtils.IsSheetNameValid` already said such a name is illegal, and the
+  parser assembled a `Reference3DNode` from it anyway — a node with no spelling in the language:
+  writing it asks for quotes, and a quoted name holding a `?` reads back as a DDE item rather than
+  as a sheet prefix, so `FormulaConverter.ToR1C1` produced text the library could not read back.
+  Two shapes reached the parser, because a sheet name token is narrower than a sheet name: the
+  first sheet of a bare 3D reference, which is a `NAME` token and so may hold a `?`, and any name
+  longer than the 31 characters a sheet may have. The prefix of a DDE reference is an application
+  and a topic rather than a sheet, so it is not held to the rule, and a name of the same text that
+  names something other than a sheet is untouched. No formula in the enron or euses data sets reads
+  differently.
+
 #### Fixed
 
 - Refuse a structured reference with an item that holds nothing but whitespace, `[ ]` or
@@ -45,6 +59,14 @@ or Fixed.
 - Read the last column of a simple range to the closing bracket, so `[a:b:c]` is the columns `a` to
   `b:c`. A range has one separator and two columns; stopping the second name at a colon as well cut
   it short at `b` and dropped the rest without a word.
+
+### Standalone reference parsing
+
+#### Changed
+
+- `ReferenceParser.TryParseSheetA1` and `ReferenceParser.TryParseSheetName` return `false` for a
+  sheet name `NameUtils.IsSheetNameValid` rejects, the rule the formula parsers now hold a sheet
+  prefix to, instead of handing back a name no workbook could hold.
 
 ### Ast nodes and display strings
 
