@@ -14,6 +14,20 @@ or Fixed.
 
 ## Unreleased
 
+### Summary
+
+XLibur.ClosedXML.Parser 3.1.0 is a fix release, and most of it comes out of two new test tools: a
+coverage-guided fuzzing harness driven by libFuzzer, and a differential sweep of the two lexers over
+every short input from a bracket-and-punctuation alphabet. Structured references take the largest
+share. Three items that reached the parser as an `IndexOutOfRangeException` or a
+`NotSupportedException` are now read or refused properly, `[:b]` is a column called `:b` rather than
+a range with a nameless side, `[a:b:c]` keeps the whole of its second column name, and a structured
+reference is written the way the parser reads it: a range of columns keeps its colon, an ordinary
+`Table1[Column]` is no longer doubled, and the four characters the grammar escapes are escaped. The
+library also holds a sheet name to one rule everywhere. The formula parsers, `ReferenceParser` and a
+`FormulaModifier` rename all refuse a name no workbook could hold, including a name that starts or
+ends with an apostrophe, instead of building a reference that has no spelling to write it in. An
+empty formula now raises the `ParsingException` all four `FormulaConverter` methods document.
 ## v3.1.0 - 2026-09-13
 
 ### Formula parsers
