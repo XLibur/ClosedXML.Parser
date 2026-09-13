@@ -33,6 +33,26 @@ public class AstStructureReferenceTests
         AssertFormula.SingleNodeParsed(expected, node);
     }
 
+    /// <summary>
+    /// A column name escapes a tick, either square bracket and a hash with a tick. Written bare they
+    /// read as something else: a column called <c>#</c> came out as <c>[#]</c>, and a hash after a
+    /// bracket starts a keyword, so the string no longer parsed at all.
+    /// </summary>
+    [Theory]
+    [InlineData("#", "Table1['#]")]
+    [InlineData("#t", "Table1['#t]")]
+    [InlineData("[Col", "Table1['[Col]")]
+    [InlineData("a]b", "Table1[a']b]")]
+    [InlineData("Jane's", "Table1[Jane''s]")]
+    [InlineData("[]'#", "Table1['[']'''#]")]
+    public void A_column_name_escapes_what_it_has_to(string column, string expected)
+    {
+        var node = new StructureReferenceNode("Table1", StructuredReferenceArea.None, column, column);
+
+        Assert.Equal(expected, node.GetDisplayString(A1));
+        AssertFormula.SingleNodeParsed(expected, node);
+    }
+
     [Theory]
     [InlineData(StructuredReferenceArea.None, "Column", "Column", "[Column]")]
     [InlineData(StructuredReferenceArea.Data, "First", "Last", "[[#Data],[First]:[Last]]")]

@@ -61,6 +61,12 @@ or Fixed.
   `StructureReferenceNode` and `ExternalStructureReferenceNode` write the specifier in one place
   now, `StructuredReferenceWriter`, instead of each building its own.
 
+- Escape a tick, either square bracket and a hash in the column name of a structured reference, the
+  four characters the grammar has an escape for. Written bare they read as something else: a column
+  called `#` came out as `[#]`, and a hash after a bracket starts a keyword, so the string no longer
+  parsed at all; a column called `[Col` came out as `[[Col]`. The library already unescapes all four
+  when it reads a name, so the two halves now agree.
+
 ### Formula modification and conversion
 
 #### Fixed

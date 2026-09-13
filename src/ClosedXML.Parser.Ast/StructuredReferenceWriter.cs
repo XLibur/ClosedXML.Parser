@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace ClosedXML.Parser;
 
 /// <summary>
@@ -31,7 +33,11 @@ internal static class StructuredReferenceWriter
         var first = firstColumn ?? lastColumn;
         var last = lastColumn ?? firstColumn;
         var isRange = first != last;
-        var columns = first is null ? null : isRange ? $"[{first}]:[{last}]" : $"[{first}]";
+        var columns = first is null
+            ? null
+            : isRange
+                ? $"[{Escape(first)}]:[{Escape(last!)}]"
+                : $"[{Escape(first)}]";
 
         if (regions.Count == 0 && columns is null)
             return "[]";
@@ -48,5 +54,36 @@ internal static class StructuredReferenceWriter
             specifiers.Add(columns);
 
         return $"[{string.Join(",", specifiers)}]";
+    }
+
+    /// <summary>
+    /// The characters a column name has to escape with a tick, i.e. the grammar's
+    /// escape-column-characters.
+    /// </summary>
+    private static readonly char[] Escaped = ['\'', '[', ']', '#'];
+
+    /// <summary>
+    /// A column name with a tick before each character that needs one.
+    /// </summary>
+    /// <remarks>
+    /// Writing them bare produced text that reads as something else entirely, which is how a
+    /// fuzzing run found this: a column called <c>#</c> came out as <c>[#]</c>, and a <c>#</c>
+    /// after a bracket starts a keyword, so the string no longer parsed at all.
+    /// </remarks>
+    private static string Escape(string name)
+    {
+        if (name.IndexOfAny(Escaped) < 0)
+            return name;
+
+        var sb = new StringBuilder(name.Length + 4);
+        foreach (var c in name)
+        {
+            if (Array.IndexOf(Escaped, c) >= 0)
+                sb.Append('\'');
+
+            sb.Append(c);
+        }
+
+        return sb.ToString();
     }
 }
