@@ -228,7 +228,7 @@ internal static class TokenParser
         area = StructuredReferenceArea.None;
 
         RequireItem(input, i, token);
-        if (input[i + 1] == '#')
+        if (IsKeywordStart(input, i))
         {
             // Inner reference contains a keyword.
             var listItem = GetArea(input, ++i);
@@ -248,7 +248,7 @@ internal static class TokenParser
             RequireItem(input, i, token);
         }
 
-        if (input[i + 1] == '#')
+        if (IsKeywordStart(input, i))
         {
             // Item is a keyword list, either
             // * '[#Headers]' SPACED_COMMA '[#Data]'
@@ -553,6 +553,24 @@ internal static class TokenParser
     /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// Does the item of an inner reference at <paramref name="i"/> start a keyword, i.e. is it
+    /// <c>[#</c> rather than a column name?
+    /// </summary>
+    /// <remarks>
+    /// The opening bracket is what tells the two apart, and testing only for the <c>#</c> is what
+    /// this replaced. A column name escapes a <c>#</c> with a tick, so <c>[ '#]</c> is a column
+    /// named <c>#</c> — but its second character is a <c>#</c> as well, so the keyword reader took
+    /// it for <c>[#…]</c>, found no keyword to match, and raised a
+    /// <see cref="NotSupportedException"/> from a default arm whose comment says the tokenizer has
+    /// ruled the case out. Both callers have passed <see cref="RequireItem"/>, so the character
+    /// after <paramref name="i"/> is there to read.
+    /// </remarks>
+    private static bool IsKeywordStart(ReadOnlySpan<char> input, int i)
+    {
+        return input[i] == '[' && input[i + 1] == '#';
+    }
+
     private static void RequireItem(ReadOnlySpan<char> input, int i, Token token)
     {
         if (i + 1 >= input.Length || input[i] == ']')

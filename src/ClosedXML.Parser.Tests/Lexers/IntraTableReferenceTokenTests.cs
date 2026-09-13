@@ -44,6 +44,16 @@ public class IntraTableReferenceTokenTests
             yield return new object?[] { "['''#]", StructuredReferenceArea.None, "'#", null };
             yield return new object?[] { "['[']'''#]", StructuredReferenceArea.None, "[]'#", null };
 
+            // An escaped character after a space, where the item of an inner reference starts.
+            // A tick-escaped '#' opens a column whose second character is a '#', the same shape a
+            // keyword has, so only the opening bracket tells `[[#Data]]` from `[ '#]`.
+            yield return new object?[] { "[ '#]", StructuredReferenceArea.None, "#", null };
+            yield return new object?[] { "[ '#t]", StructuredReferenceArea.None, "#t", null };
+            yield return new object?[] { "[ '[]", StructuredReferenceArea.None, "[", null };
+            yield return new object?[] { "[ '']", StructuredReferenceArea.None, "'", null };
+            yield return new object?[] { "[[#Data], '#]", StructuredReferenceArea.Data, "#", null };
+            yield return new object?[] { "[[#Headers],[#Data], '#]", StructuredReferenceArea.Headers | StructuredReferenceArea.Data, "#", null };
+
             // INTRA_TABLE_REFERENCE : SPACED_LBRACKET INNER_REFERENCE SPACED_RBRACKET
             // where inner reference is `COLUMN_RANGE : COLUMN(':' COLUMN)?`
             yield return new object?[] { "[[First]]", StructuredReferenceArea.None, "First", null };

@@ -27,6 +27,14 @@ or Fixed.
   a whole `INTRA_TABLE_REFERENCE` token, a divergence between the two lexers that outlives this
   fix; the refusal therefore happens when the token is read.
 
+- Read a tick-escaped `#` at the start of a structured reference item as the column name it is,
+  `[ '#]`, instead of raising a `NotSupportedException`. A column name escapes a `#` with a tick, so
+  such a column has a `#` as its second character — the same shape a keyword has — and the keyword
+  reader looked no further than that character. It then found no keyword to match and threw from a
+  default arm whose comment says the tokenizer has ruled the case out. The opening bracket is what
+  tells the two apart, and both places that look for a keyword ask for it now. `['#]` and `[['#]]`
+  were already read correctly; it was only the item after a space or a comma that was not.
+
 ### Ast nodes and display strings
 
 #### Fixed
