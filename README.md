@@ -64,7 +64,7 @@ Therefore:
 
 The parser also does not parse a call of a function result, such as `LAMBDA(x,x+1)(2)`.
 
-# Why not use XLParser
+## Why not use XLParser
 
 [ClosedXML](https://github.com/ClosedXML/ClosedXML) previously used [XLParser](https://github.com/spreadsheetlab/XLParser), converting its concrete syntax tree (CST) into an abstract syntax tree (AST). It was later replaced by [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser).
 
