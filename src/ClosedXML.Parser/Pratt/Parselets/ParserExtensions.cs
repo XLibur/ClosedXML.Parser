@@ -1,6 +1,4 @@
-﻿using static ClosedXML.Parser.Pratt.CompatUtils;
-
-namespace ClosedXML.Parser.Pratt.Parselets;
+﻿namespace ClosedXML.Parser.Pratt.Parselets;
 
 internal static class ParserExtensions
 {
@@ -188,7 +186,7 @@ internal static class ParserExtensions
         if (absCol) ++i;
 
         var col = 0;
-        while (i < text.Length && IsAsciiLetter(text[i]))
+        while (i < text.Length && char.IsAsciiLetter(text[i]))
             col = col * 26 + GetColIndex(text[i++]) + 1;
 
         if (col is < RowCol.MinCol or > RowCol.MaxCol || i >= text.Length)
@@ -205,7 +203,7 @@ internal static class ParserExtensions
             return false;
 
         var row = 0;
-        while (i < text.Length && IsAsciiDigit(text[i]))
+        while (i < text.Length && char.IsAsciiDigit(text[i]))
             row = row * 10 + text[i++] - '0';
 
         if (row is < RowCol.MinRow or > RowCol.MaxRow || i < text.Length)
@@ -234,7 +232,7 @@ internal static class ParserExtensions
         if (absCol) ++i;
 
         var col = 0;
-        while (i < text.Length && IsAsciiLetter(text[i]))
+        while (i < text.Length && char.IsAsciiLetter(text[i]))
             col = col * 26 + GetColIndex(text[i++]) + 1;
 
         if (col is < RowCol.MinCol or > RowCol.MaxCol || i < text.Length)
@@ -270,7 +268,7 @@ internal static class ParserExtensions
             return false;
 
         var row = 0;
-        while (i < text.Length && IsAsciiDigit(text[i]))
+        while (i < text.Length && char.IsAsciiDigit(text[i]))
             row = row * 10 + text[i++] - '0';
 
         if (row is < RowCol.MinRow or > RowCol.MaxRow || i < text.Length)
