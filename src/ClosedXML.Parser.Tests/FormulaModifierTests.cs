@@ -71,7 +71,6 @@ public class FormulaModifierTests
     }
 
     [Theory]
-    [InlineData("Old!#REF!", "Old", null, "#REF!#REF!")]
     [InlineData("Old!#REF!", "Old", "New", "New!#REF!")]
     [InlineData("'Old sheet'!#REF!", "Old sheet", "New", "New!#REF!")]
     [InlineData("'Old sheet'!#REF!", "Old sheet", "New sheet", "'New sheet'!#REF!")]
@@ -79,6 +78,22 @@ public class FormulaModifierTests
     public void ErrorNode_can_modify_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
     {
         var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// A sheet error names a sheet whose area is gone. Delete that sheet as well and there is nothing
+    /// left to name, so the whole part is a plain <c>#REF!</c>, the way Excel saves it - not the
+    /// <c>#REF!#REF!</c> that writing the error behind a deleted prefix would give.
+    /// </summary>
+    [Theory]
+    [InlineData("Old!#REF!", "Old", "#REF!")]
+    [InlineData("'Old sheet'!#REF!", "Old sheet", "#REF!")]
+    [InlineData("Old! #REF!", "Old", "#REF!")]
+    [InlineData("SUM(Old!#REF!,A1)", "Old", "SUM(#REF!,A1)")]
+    public void A_sheet_error_whose_sheet_is_deleted_is_a_ref_error(string formula, string deletedSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { deletedSheetName, null } } };
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 

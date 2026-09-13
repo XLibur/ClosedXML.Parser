@@ -141,9 +141,14 @@ public partial class FormulaModifier
             if (modifiedSheet == sheet)
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var prefix = modifiedSheet is null ? SheetPrefix.Deleted : SheetPrefix.Sheet(modifiedSheet);
+            // A sheet error names a sheet that is still there. Once that sheet is gone too, nothing is
+            // left to name, and Excel saves such a reference as a plain `#REF!` - writing the error
+            // behind a deleted prefix would give `#REF!#REF!`, a formula Excel can't read. See ErrorNode.
+            if (modifiedSheet is null)
+                return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
+
             var sb = new StringBuilder(sheet.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + error.Length);
-            var nodeText = sb.AppendPrefix(prefix).Append(error).ToString();
+            var nodeText = sb.AppendPrefix(SheetPrefix.Sheet(modifiedSheet)).Append(error).ToString();
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 

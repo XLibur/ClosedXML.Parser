@@ -31,6 +31,13 @@ or Fixed.
 
 #### Fixed
 
+- Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of
+  `#REF!#REF!`. A sheet error, `Sheet1!#REF!`, names a sheet whose area is gone; delete that sheet
+  too and nothing is left to name, which is why Excel saves such a reference as a plain `#REF!`.
+  The rewriter instead wrote the prefix of a deleted sheet and then the error behind it, spelling
+  `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
+  Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
+
 - Refuse a structured reference with an item that holds nothing but whitespace, `[ ]` or
   `[[#Data], ]`, instead of raising an `IndexOutOfRangeException` from inside the token parser.
   Reading the token peeked one character past its end wherever an item was expected — after the
