@@ -28,6 +28,8 @@ public class FormulaShapeBenchmarks
         new("EscapedText", "\"He said \"\"hi\"\" to \"&A1"),
         new("FutureFunction", "_xlfn.XLOOKUP(A1,Sheet2!B:B,Sheet2!C:C,\"none\")"),
         new("RefOperators", "SUM((A1:B5 B2:C7,D1:D3))"),
+        // The item of a DDE reference carries its apostrophes doubled, like a sheet name.
+        new("DdeItem", "Sdemo123|tik!'id1?req?O''BRIEN_STK_SMART_USD'"),
         // A formula of the Enron data set.
         new("Long", "SUM(IF((DelPoint= \"4C\")*IF((DType = \"firm\")+(DType = \"econ\")>0,1,0)*(OFFSET(DelPoint,0,B3+2)<0),OFFSET(DelPoint,0,B3+2),0))"),
     ];

@@ -286,10 +286,48 @@ internal static class TokenParser
         Debug.Assert(token.SymbolId == Token.DDE_ITEM);
 
         // Strip the enclosing ticks. The lexer guarantees there is at least one character between them
-        // and that the ticks inside come in pairs. Unlike a sheet name, an item has no length limit, so
-        // it isn't unescaped through a stack buffer.
+        // and that the ticks inside come in pairs.
         var input = Text(formula, token);
-        return input.Slice(1, input.Length - 2).ToString().Replace("''", "'");
+        return UnescapeTicks(input.Slice(1, input.Length - 2));
+    }
+
+    /// <summary>
+    /// Collapse the doubled ticks of a quoted text — a sheet name, a DDE item — into the single ticks
+    /// they stand for. The quotes around the text are the caller's to strip, so every tick left in
+    /// <paramref name="input"/> is the first half of a pair.
+    /// </summary>
+    /// <remarks>
+    /// One pass over the input, and one allocation up to <see cref="MaxStackAllocChars"/>: the string
+    /// that comes out. Reading the text and then replacing in it always allocated two, the second of
+    /// them the answer and the first one garbage. Past that many characters the scratch space comes
+    /// from the heap, for the reason <see cref="MaxStackAllocChars"/> describes, and the saving is
+    /// only the pass rather than the allocation.
+    /// </remarks>
+    internal static string UnescapeTicks(ReadOnlySpan<char> input)
+    {
+        var firstTick = input.IndexOf('\'');
+        if (firstTick < 0)
+            return input.ToString();
+
+        Span<char> buffer = input.Length <= MaxStackAllocChars
+            ? stackalloc char[MaxStackAllocChars]
+            : new char[input.Length];
+
+        // The text up to the first tick stands as it is. From there every tick is written once and
+        // its twin stepped over, so a text holding n of them comes out with n / 2. A tick standing
+        // on its own keeps whatever follows it, which is what replacing in the string did: no caller
+        // can hand one over, and dropping a character on an input none of them has is no better.
+        input.Slice(0, firstTick).CopyTo(buffer);
+        var bufferIdx = firstTick;
+        for (var inputIdx = firstTick; inputIdx < input.Length; inputIdx++)
+        {
+            var c = input[inputIdx];
+            buffer[bufferIdx++] = c;
+            if (c == '\'' && inputIdx + 1 < input.Length && input[inputIdx + 1] == '\'')
+                inputIdx++;
+        }
+
+        return buffer.Slice(0, bufferIdx).ToString();
     }
 
     private static ReadOnlySpan<char> Text(ReadOnlySpan<char> formula, Token token) => formula.Slice(token.StartIndex, token.Length);
