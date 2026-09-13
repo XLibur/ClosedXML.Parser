@@ -3,6 +3,7 @@
   <Project Path="ClosedXML.ANTLR/ClosedXML.ANTLR.csproj" />
   <Project Path="ClosedXML.Parser.Ast/ClosedXML.Parser.Ast.csproj" />
   <Project Path="ClosedXML.Parser.Benchmarks/ClosedXML.Parser.Benchmarks.csproj" />
+  <Project Path="ClosedXML.Parser.Fuzz/ClosedXML.Parser.Fuzz.csproj" />
   <Project Path="ClosedXML.Parser.Tests/ClosedXML.Parser.Tests.csproj" />
   <Project Path="ClosedXML.Parser.Visualizer.Tests/ClosedXML.Parser.Visualizer.Tests.csproj" />
   <Project Path="ClosedXML.Parser.Visualizer/ClosedXML.Parser.Visualizer.csproj" />

@@ -1,0 +1,1 @@
+VLOOKUP(I8,[1]Sheet3!A$3:B$84,2,TRUE)

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!--
+      A single target framework on purpose: the harness is published into one directory and
+      SharpFuzz rewrites the assemblies that land there. A multi-targeted harness gives the
+      instrumenter two copies to choose between.
+    -->
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Both assemblies are instrumented by fuzz.ps1. The AST project is where the display
+      strings are written, and the round-trip properties in FuzzTargets read them.
+    -->
+    <ProjectReference Include="..\ClosedXML.Parser\ClosedXML.Parser.csproj" />
+    <ProjectReference Include="..\ClosedXML.Parser.Ast\ClosedXML.Parser.Ast.csproj" />
+    <PackageReference Include="SharpFuzz" Version="2.3.0" />
+  </ItemGroup>
+
+</Project>

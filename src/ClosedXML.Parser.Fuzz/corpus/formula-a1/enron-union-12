@@ -1,0 +1,1 @@
+SUM(IF((DelPoint= "4C")*(DType = "pre")*(OFFSET(DelPoint,0,B3+2)>0),OFFSET(DelPoint,0,B3+2),0))
