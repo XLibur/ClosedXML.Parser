@@ -1,0 +1,1 @@
+SUM(IF((DelPoint= "PV")*IF((DType = "firm")+(DType = "econ")>0,1,0)*(OFFSET(DelPoint,0,B3+2)<0),OFFSET(DelPoint,0,B3+2),0))

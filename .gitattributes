@@ -1,0 +1,4 @@
+# A fuzzing seed is an exact byte sequence: the input that reproduced a defect. Normalising line
+# endings would rewrite it silently, and the seed would stop reproducing what it was saved for, so
+# the corpus is never touched.
+src/ClosedXML.Parser.Fuzz/corpus/** -text

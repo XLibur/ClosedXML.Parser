@@ -1,0 +1,1 @@
+SUM(IF(B$41:B$55 = 0,0,$Z$41:$Z$55-B$41:B$55))-INDEX([2]Balancing!$R$4:$R$27,B$3)

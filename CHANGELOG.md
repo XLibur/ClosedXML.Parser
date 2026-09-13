@@ -13,6 +13,87 @@ or Fixed.
 
 ## Unreleased
 
+### Formula parsers
+
+#### Fixed
+
+- Refuse a structured reference with an item that holds nothing but whitespace, `[ ]` or
+  `[[#Data], ]`, instead of raising an `IndexOutOfRangeException` from inside the token parser.
+  Reading the token peeked one character past its end wherever an item was expected — after the
+  opening bracket and after each comma — so three characters of a stored formula came out of the
+  parser as an index error rather than as a `ParsingException`. The grammar has no alternative for an empty
+  inner reference — a simple column name has to start and end with a non-space — and the ANTLR
+  lexer, which is the source of truth, refuses `[ ]` outright. The Rolex lexer still accepts it as
+  a whole `INTRA_TABLE_REFERENCE` token, a divergence between the two lexers that outlives this
+  fix; the refusal therefore happens when the token is read.
+
+- Read a tick-escaped `#` at the start of a structured reference item as the column name it is,
+  `[ '#]`, instead of raising a `NotSupportedException`. A column name escapes a `#` with a tick, so
+  such a column has a `#` as its second character — the same shape a keyword has — and the keyword
+  reader looked no further than that character. It then found no keyword to match and threw from a
+  default arm whose comment says the tokenizer has ruled the case out. The opening bracket is what
+  tells the two apart, and both places that look for a keyword ask for it now. `['#]` and `[['#]]`
+  were already read correctly; it was only the item after a space or a comma that was not.
+
+- Read a colon with nothing on one side of it as part of a column name rather than as the separator
+  of a range, so `[:b]` is a column called `:b`. A colon is an ordinary column character, and the
+  two sides of a range are each a column, which cannot be empty — so that is the only reading the
+  grammar leaves. Splitting it invented a column with no name, and a column with no name has no
+  spelling in the bracketed form a display string is written in: `[[]:[b]]` is not a structured
+  reference, so the reference did not survive being written out.
+
+- Read the last column of a simple range to the closing bracket, so `[a:b:c]` is the columns `a` to
+  `b:c`. A range has one separator and two columns; stopping the second name at a colon as well cut
+  it short at `b` and dropped the rest without a word.
+
+### Ast nodes and display strings
+
+#### Fixed
+
+- Write the specifier of a structured reference the way the parser reads it. A range of columns was
+  joined with a comma rather than a colon, so `Table1[[#Data],[A]:[B]]` came out as
+  `Table1[[#Data],[A],[B]]`; the parser fills a missing last column in with the first, so the
+  ordinary `Table1[Column]` came out as `Table1[[Column],[Column]]`; and an external reference lost
+  the bang after its book prefix, so `[4]!Table1[Column]` came out as `[4]Table1[Column]`. None of
+  the three parse back as the node they came from, and the visualizer puts them in its diagram. A
+  lone specifier keeps only its own brackets and everything else gets a pair around the list, so
+  `Table1[#Totals]` and `Table1[[#Headers],[#Data]]` are both written as they are read.
+  `StructureReferenceNode` and `ExternalStructureReferenceNode` write the specifier in one place
+  now, `StructuredReferenceWriter`, instead of each building its own.
+
+- Escape a tick, either square bracket and a hash in the column name of a structured reference, the
+  four characters the grammar has an escape for. Written bare they read as something else: a column
+  called `#` came out as `[#]`, and a hash after a bracket starts a keyword, so the string no longer
+  parsed at all; a column called `[Col` came out as `[[Col]`. The library already unescapes all four
+  when it reads a name, so the two halves now agree.
+
+### Formula modification and conversion
+
+#### Fixed
+
+- Refuse a formula that is empty or nothing but whitespace with a `ParsingException`, the type all
+  four `FormulaConverter` methods document, instead of an `ArgumentException` naming a parameter
+  the caller never passed. The same text reached the parser as a `ParsingException` and the
+  converter as an argument error, so which exception a caller saw depended on which entry point
+  read it. A null formula is still an argument error, because that is a fault in the call rather
+  than in the formula.
+
+- Name `col` rather than `row` in the `ArgumentOutOfRangeException` for a column anchor outside the
+  sheet.
+
+### Packaging and tooling
+
+#### Added
+
+- A coverage-guided fuzzing harness, `src/ClosedXML.Parser.Fuzz`, driven by libFuzzer through
+  SharpFuzz and run from `fuzz.ps1`. Five targets cover formula parsing in both reference styles,
+  formula modification, conversion between styles and the standalone reference parsers. Each checks
+  a property a wrong answer breaks rather than only that the library did not crash: a reference
+  written back out has to parse as the node it came from, a modification that changes nothing has
+  to return the formula character for character, and text the library wrote has to be text the
+  library can read. The seed corpus is committed alongside, and every defect found keeps its input
+  there. See `src/ClosedXML.Parser.Fuzz/README.md`.
+
 ## v3.0.0 - 2026-09-13
 
 ### Summary

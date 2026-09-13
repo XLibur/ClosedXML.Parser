@@ -1,0 +1,1 @@
+SUMIF(OFFSET(CBalancingVol,B$3,0),">0")

@@ -212,11 +212,31 @@ internal static class TokenParser
             }
 
             // Read simple column
+            var start = i;
             i = GetStructuredName(input, i, out firstColumn);
             if (i < input.Length && input[i] == ':')
-                GetStructuredName(input, i + 1, out lastColumn);
+            {
+                // A range has one separator and two columns, so the second name runs to the closing
+                // bracket. Stopping it at a colon as well cut `[a:b:c]` down to `a` and `b` and
+                // dropped the rest of the name without a word.
+                GetStructuredName(input, i + 1, out lastColumn, stopAtRange: false);
+
+                // A colon with nothing on one side of it is a character of the name, not a
+                // separator. The two sides of a range are each a COLUMN and a COLUMN is a simple
+                // column name, which can't be empty, so `[:b]` has only one reading left: a column
+                // called `:b`. Splitting it invented an empty column, and an empty column has no
+                // spelling in the bracketed form a display string is written in — `[[]:[b]]` is not
+                // a structured reference at all, so the name never survived being written out.
+                if (firstColumn.Length == 0 || lastColumn.Length == 0)
+                {
+                    GetStructuredName(input, start, out firstColumn, stopAtRange: false);
+                    lastColumn = null;
+                }
+            }
             else
+            {
                 lastColumn = null;
+            }
 
             return;
         }
@@ -226,7 +246,9 @@ internal static class TokenParser
         // Skip potential whitespaces at the beginning of a structured reference (SPACED_LBRACKET)
         i = SkipWhitespaces(input, i);
         area = StructuredReferenceArea.None;
-        if (input[i + 1] == '#')
+
+        RequireItem(input, i, token);
+        if (IsKeywordStart(input, i))
         {
             // Inner reference contains a keyword.
             var listItem = GetArea(input, ++i);
@@ -243,9 +265,10 @@ internal static class TokenParser
             }
 
             i = SkipComma(input, i);
+            RequireItem(input, i, token);
         }
 
-        if (input[i + 1] == '#')
+        if (IsKeywordStart(input, i))
         {
             // Item is a keyword list, either
             // * '[#Headers]' SPACED_COMMA '[#Data]'
@@ -263,13 +286,14 @@ internal static class TokenParser
             }
 
             i = SkipComma(input, i);
+            RequireItem(input, i, token);
         }
 
         // KEYWORD_LIST can contain at most two item specifiers.
         // After keyword list, we get either a COLUMN or a COLUMN:COLUMN
         i = GetStructuredName(input, i, out firstColumn);
         if (i < input.Length && input[i] == ':')
-            GetStructuredName(input, i + 1, out lastColumn);
+            GetStructuredName(input, i + 1, out lastColumn, stopAtRange: false); // One separator, so the rest is the name.
         else
             lastColumn = null;
     }
@@ -533,6 +557,46 @@ internal static class TokenParser
         return i >= input.Length || input[i] == ']';
     }
 
+    /// <summary>
+    /// Demand that an item of an inner reference starts at <paramref name="i"/>, i.e. that the
+    /// bracket or the comma before it is followed by something other than the end of the token.
+    /// </summary>
+    /// <remarks>
+    /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
+    /// column range, a simple column name has to start and end with a non-space, and neither can be
+    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
+    /// accepts it as a whole token, so the refusal has to happen when the token is read.
+    /// <para>
+    /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
+    /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.
+    /// The check covers the character after <paramref name="i"/> as well, because every caller peeks
+    /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
+    /// </para>
+    /// </remarks>
+    /// <summary>
+    /// Does the item of an inner reference at <paramref name="i"/> start a keyword, i.e. is it
+    /// <c>[#</c> rather than a column name?
+    /// </summary>
+    /// <remarks>
+    /// The opening bracket is what tells the two apart, and testing only for the <c>#</c> is what
+    /// this replaced. A column name escapes a <c>#</c> with a tick, so <c>[ '#]</c> is a column
+    /// named <c>#</c> — but its second character is a <c>#</c> as well, so the keyword reader took
+    /// it for <c>[#…]</c>, found no keyword to match, and raised a
+    /// <see cref="NotSupportedException"/> from a default arm whose comment says the tokenizer has
+    /// ruled the case out. Both callers have passed <see cref="RequireItem"/>, so the character
+    /// after <paramref name="i"/> is there to read.
+    /// </remarks>
+    private static bool IsKeywordStart(ReadOnlySpan<char> input, int i)
+    {
+        return input[i] == '[' && input[i + 1] == '#';
+    }
+
+    private static void RequireItem(ReadOnlySpan<char> input, int i, Token token)
+    {
+        if (i + 1 >= input.Length || input[i] == ']')
+            throw new ParsingException($"A structured reference at position {token.StartIndex} has an item with no column or keyword in it.");
+    }
+
     private static int SkipComma(ReadOnlySpan<char> input, int i)
     {
         // comma might be wrapped in whitespaces.
@@ -561,13 +625,26 @@ internal static class TokenParser
     /// <param name="input">Input span.</param>
     /// <param name="startIdx">First index of expected name. It will either contain a bracket or first letter of column name.</param>
     /// <param name="columnName">Parsed name.</param>
-    private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName)
+    /// <param name="stopAtRange">
+    /// Whether a colon ends a name written without brackets. It does where a range can still follow
+    /// — the first column of a simple range — and not where one cannot, because a range has one
+    /// separator and the name after it runs to the end.
+    /// </param>
+    /// <remarks>
+    /// A bracketed name always runs to its closing bracket, colons and all: the brackets are what
+    /// say where it ends, so <c>[[a]:[b:c]]</c> is the columns <c>a</c> to <c>b:c</c>. Stopping a
+    /// bracketed name at a colon cut that one down to <c>b</c> and lost the rest, and the loss only
+    /// showed up as a display string that no longer read back as the node it came from.
+    /// </remarks>
+    private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName, bool stopAtRange = true)
     {
         Span<char> buffer = stackalloc char[input.Length];
         var bufferIdx = 0;
-        var i = startIdx + (input[startIdx] == '[' ? 1 : 0);
+        var bracketed = input[startIdx] == '[';
+        var i = startIdx + (bracketed ? 1 : 0);
+        var endsAtColon = stopAtRange && !bracketed;
         var c = input[i];
-        for (; c is not ']' and not ':'; c = input[++i])
+        for (; c is not ']' && (!endsAtColon || c is not ':'); c = input[++i])
         {
             if (c == '\'')
                 c = input[++i];

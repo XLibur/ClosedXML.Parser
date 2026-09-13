@@ -10,3 +10,9 @@ TestResults
 artifacts
 .tools
 BenchmarkDotNet.Artifacts
+
+# Fuzzing. The working tree of a run (publish output, the SharpFuzz instrumenter, the growing
+# corpus, crash artifacts) and the libFuzzer driver, which is a prebuilt binary that cannot be
+# restored by NuGet. The committed seed corpus under src/ClosedXML.Parser.Fuzz/corpus is not here.
+/temp/
+/tools/libfuzzer-dotnet*

@@ -1,0 +1,1 @@
+COUNTIF(Regions!C$2:C$4499,">0")
