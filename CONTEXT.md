@@ -58,6 +58,12 @@ A reference addressing a table by name and its parts by column or region rather 
 cell (`Table1[Column]`).
 _Avoid_: table reference, intra-table reference
 
+**Sheet error**:
+A reference whose area is gone but whose sheet is not, written `Sheet1!#REF!`. The sheet is still
+named, so a formula modification renames it like the sheet of any other reference. A reference whose
+sheet itself was deleted is a plain `#REF!` instead.
+_Avoid_: ref error (for this one), deleted reference
+
 **Cell function**:
 A call that uses a cell reference as the function being called (`R7C3(TRUE)`), rather
 than a function name. A macro-sheet construct, and written in the formula's reference
@@ -83,3 +89,16 @@ Rewriting a stored formula so its sheets, tables, functions and references follo
 to the workbook, such as a renamed or deleted sheet, while the rest of its text stays as
 written. A sheet behind a book prefix belongs to another workbook and is never renamed.
 _Avoid_: transformation, rewrite
+
+A part of a formula is written again only when a modification changes it, i.e. when the answer it
+gives differs from what it was asked about. Every other part keeps its own text, character for
+character: the quotes a sheet name was written with, an area of one cell written `D5:D5`, the
+braces of a structured reference, and the whitespace around and inside the formula. A part is
+compared as a whole, so a reference whose sheet is renamed is written again in full, and its area
+then comes out as the parser read it, not as it was written.
+
+**Swallowed ref error**:
+A ref error that ate the reference after it, `#REF!A1` or `#REF!#REF!`. Excel can't parse that form
+and saves a reference whose sheet was deleted as a plain `#REF!`, so a formula modification writes
+it as `#REF!` even though nothing changed it. It is the one exception to the rule above.
+_Avoid_: deleted reference

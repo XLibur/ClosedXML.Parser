@@ -706,7 +706,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                     {
                         var error = GetCurrentToken(); // Sheet1!#REF! is a valid
                         Consume();
-                        return _factory.ErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), error);
+                        return _factory.SheetErrorNode(_context, new SymbolRange(start, _tokenSource.StartIndex), prefix.BookIndex, sheetName, error);
                     }
 
                     // The prefix of a displayed DDE formula is the application and the topic of the link, e.g. `Sdemo123|tik!`.
