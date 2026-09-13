@@ -161,6 +161,51 @@ public class FormulaModifierTests
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 
+    /// <summary>
+    /// A modification writes the sheet prefix again, so a rename to a name no workbook could hold
+    /// would put text in the formula that the library can't read back: the name needs quotes, and a
+    /// quoted name holding a <c>?</c> reads as a DDE item. The modifier is the caller's code, so
+    /// this is a fault in the call rather than in the formula.
+    /// </summary>
+    [Theory]
+    [InlineData("Old!A1", "Old", "a?")]
+    [InlineData("Old!A1:B2", "Old", "a/b")]
+    [InlineData("Old!Name", "Old", "a]b")]
+    [InlineData("Old!#REF!", "Old", "a?")]
+    [InlineData("Old!F(1)", "Old", "a?")]
+    [InlineData("Old:Last!A1", "Old", "a?")]
+    [InlineData("First:Old!A1", "Old", "a?")]
+    [InlineData("Old!A1", "Old", "")]
+    public void A_sheet_cant_be_renamed_to_a_name_no_workbook_could_hold(string formula, string oldSheetName, string newSheetName)
+    {
+        var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, modifier));
+        Assert.Contains(newSheetName, ex.Message);
+    }
+
+    [Fact]
+    public void A_sheet_cant_be_renamed_to_a_name_longer_than_a_sheet_name_may_be()
+    {
+        var modifier = new SheetModifier { SheetMap = { { "Old", new string('a', 32) } } };
+
+        Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1("Old!A1", "Sheet", 1, 1, modifier));
+    }
+
+    /// <summary>
+    /// The rule is about a rename, so the two answers that are not one are untouched: <c>null</c>
+    /// still deletes the sheet, and a name at the 31 character limit is still a name.
+    /// </summary>
+    [Theory]
+    [InlineData("Old!A1", "Old", null, "#REF!")]
+    [InlineData("Old!A1", "Old", "New Sheet", "'New Sheet'!A1")]
+    [InlineData("Old!A1", "Old", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!A1")]
+    public void A_rename_to_a_name_a_workbook_could_hold_is_untouched(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
     [Theory]
     [InlineData("Sdemo123|tik!'item'", "Sdemo123|tik", "New", "Sdemo123|tik!'item'")]
     [InlineData("Sdemo123|tik!'item'", "Sdemo123|tik", null, "Sdemo123|tik!'item'")]

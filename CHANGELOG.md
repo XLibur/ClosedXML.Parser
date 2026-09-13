@@ -69,6 +69,18 @@ or Fixed.
 
 ### Formula modification and conversion
 
+#### Changed
+
+- Refuse a `FormulaModifier` that renames a sheet to a name `NameUtils.IsSheetNameValid` rejects,
+  with an `InvalidOperationException` from `FormulaConverter.ModifyA1` and `ModifyR1C1`. A renamed
+  sheet is written back into the formula, and a name no workbook could hold has no spelling to write
+  it in: it needs quotes, and a quoted name holding a `?` reads back as a DDE item rather than as a
+  sheet prefix, so the modification produced text the library could not read. The modifier is the
+  caller's own code, so this is a fault in the call rather than in the formula and is not a
+  `ParsingException`. Only a rename is held to the rule: `null` still means the sheet is gone and
+  the part becomes `#REF!`, a name the modifier leaves alone is never refused, and the prefix of a
+  DDE reference is an application and a topic rather than a sheet and was already left alone.
+
 #### Fixed
 
 - Refuse a formula that is empty or nothing but whitespace with a `ParsingException`, the type all

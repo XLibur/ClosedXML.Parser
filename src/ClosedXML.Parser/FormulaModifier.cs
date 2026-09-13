@@ -24,6 +24,12 @@ public partial class FormulaModifier
     /// <param name="ctx">Where the formula is.</param>
     /// <param name="sheetName">Original sheet name.</param>
     /// <returns>New sheet name, or <c>null</c> if the sheet has been deleted and the part should be <c>#REF!</c>.</returns>
+    /// <remarks>
+    /// A new name must be one <see cref="NameUtils.IsSheetNameValid"/> accepts. A renamed sheet is
+    /// written back into the formula, and a name no workbook could hold has no spelling to write, so
+    /// returning one raises an <see cref="InvalidOperationException"/> rather than producing a
+    /// formula the library can't read back.
+    /// </remarks>
     protected virtual string? ModifySheet(ModContext ctx, string sheetName)
     {
         return sheetName;
