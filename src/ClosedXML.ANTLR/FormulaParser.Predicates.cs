@@ -44,6 +44,18 @@ public partial class FormulaParser
     }
 
     /// <summary>
+    /// Does the token before the current one end with a space? The lexer puts the whitespace after an operator into
+    /// its token, so the space intersection operator of e.g. <c>(A1) B2</c> is the end of the <c>) </c> token and
+    /// there is no <c>SPACE</c> token for it.
+    /// </summary>
+    private bool IsSpaceAfterPreviousToken()
+    {
+        var previousToken = TokenStream.LT(-1);
+        return previousToken is not null &&
+               TokenParser.IsSpaceAtEnd(previousToken.Text.AsSpan(), WholeToken(previousToken.Type, previousToken.Text));
+    }
+
+    /// <summary>
     /// A predicate gets the text of one token, so the token spans all of it.
     /// </summary>
     private static ParserToken WholeToken(int symbolId, string text) => new(symbolId, 0, text.Length);

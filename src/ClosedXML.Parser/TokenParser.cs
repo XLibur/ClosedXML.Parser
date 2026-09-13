@@ -99,6 +99,25 @@ internal static class TokenParser
     }
 
     /// <summary>
+    /// Does a token end with whitespace that contains a space? The lexer puts the whitespace after an operator
+    /// into its token, so the space of an intersection operator can end up at the end of the token before it,
+    /// e.g. the <c>) </c> of <c>(A1) B2</c>. A line break alone is not a space, the same as for a
+    /// <see cref="Token.SPACE"/> token.
+    /// </summary>
+    internal static bool IsSpaceAtEnd(ReadOnlySpan<char> formula, Token token)
+    {
+        var text = Text(formula, token);
+        var index = text.Length;
+        while (index > 0 && text[index - 1] is ' ' or '\r' or '\n')
+        {
+            if (text[--index] == ' ')
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Read a reference from the tokens at <paramref name="index"/>.
     /// <code>
     /// a1_reference

@@ -79,9 +79,13 @@ ref_implicit_expression
  * space before `@` into the INTERSECT token, so after a reference, an INTERSECT with a
  * space is the intersection operator too. The predicate checks the space the same way
  * the recursive descent parser does, see FormulaParser.Predicates.cs.
+ *
+ * The lexer puts the whitespace after an operator into its token too, so the space
+ * intersection operator of `(A1) B2` is the end of the `) ` CLOSE_BRACE token and there
+ * is no SPACE token for it. The second alternative of the loop is that space.
  */
 ref_intersection_expression
-        : ref_range_expression (SPACE ref_range_expression)* ({IsSpaceBeforeAt(CurrentToken.Text)}? INTERSECT ref_implicit_expression)?
+        : ref_range_expression (SPACE ref_range_expression | {IsSpaceAfterPreviousToken()}? ref_range_expression)* ({IsSpaceBeforeAt(CurrentToken.Text)}? INTERSECT ref_implicit_expression)?
         ;
 
 ref_range_expression
