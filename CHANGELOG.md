@@ -117,6 +117,19 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Parse a space intersection after an expression in braces, e.g. `(A1) B2`. The lexer puts the
+  whitespace around an operator into its token, so the `)` of `(A1) B2` is lexed as `) ` and there is
+  no `SPACE` token left for the intersection operator. Both parsers looped on a `SPACE` token, so
+  `(A1) B2` failed with "the rest `B2` wasn't" parsed and `SUM((A1) B2)` with an unexpected token,
+  although the comment that explains the backtracking to a reference expression in `FormulaParser`
+  uses this very shape as its example. A space at the end of the token before a reference is now the
+  intersection operator too, which also fixes the other tokens that take the space: a spill range
+  (`A1# B2`), a structured reference (`[Col] B2`) and a call of a function that returns a reference
+  (`INDEX(A1:B2,1,1) B2`). It is the operator only before a reference, so `(A1) + B2` is still an
+  addition. `FormulaParser.g4` gets the same alternative behind a predicate, the way the space before
+  an `@` already is, and the ANTLR parser is regenerated; the lexer grammar and both DFA tables are
+  untouched. A space before an `@` that another token took, `(A1) @B1`, is still not the intersection
+  operator. No formula of the data sets parses differently.
 - Keep the range of an expression in braces that turns out to be a reference, e.g. `(A1):B2`. The
   parser reads `(A1)` as a value expression, and when the `:` shows it is a reference expression, it
   backtracks and passes the node it has already read to the reference expression. That expression

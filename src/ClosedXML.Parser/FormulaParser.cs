@@ -426,7 +426,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// <summary>
     /// <code>
     /// ref_intersection_expression
-    ///     : ref_range_expression (SPACE ref_range_expression)* ({space before @}? INTERSECT ref_implicit_expression)?
+    ///     : ref_range_expression ((SPACE | {space at end of previous token}?) ref_range_expression)* ({space before @}? INTERSECT ref_implicit_expression)?
     ///     ;
     /// </code>
     /// </summary>
@@ -434,9 +434,15 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     {
         var start = readAtom?.Start ?? _tokenSource.StartIndex;
         var leftNode = RefRangeExpression(readAtom);
-        while (_la == Token.SPACE)
+
+        // The lexer puts the whitespace after an operator into its token, so the space of `(A1) B2` is the end of
+        // the `) ` CLOSE_BRACE token and there is no SPACE token for the operator. The space is the operator only
+        // when a ref_atom_expression follows, e.g. the space of `(A1) + B2` belongs to no operator.
+        while (_la == Token.SPACE || (StartsRefAtomExpression(_la) && IsSpaceAfterPreviousToken()))
         {
-            Consume();
+            if (_la == Token.SPACE)
+                Consume();
+
             var rightNode = RefRangeExpression();
             leftNode = _factory.BinaryNode(_context, new SymbolRange(start, _tokenSource.StartIndex), BinaryOperation.Intersection, leftNode, rightNode);
         }
@@ -983,6 +989,41 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     {
         var idx = _tokenIndex + lookAhead;
         return idx < _tokens.Count ? _tokens[idx].SymbolId : Token.EofSymbolId;
+    }
+
+    /// <summary>
+    /// Does the token before the current one end with a space? A caller has read at least one token, so there
+    /// always is a token before the current one.
+    /// </summary>
+    private bool IsSpaceAfterPreviousToken()
+    {
+        return TokenParser.IsSpaceAtEnd(_input.AsSpan(), _tokens[_tokenIndex - 1]);
+    }
+
+    /// <summary>
+    /// Can the token start a <c>ref_atom_expression</c>, i.e. does <see cref="RefAtomExpression"/> accept it?
+    /// </summary>
+    private static bool StartsRefAtomExpression(int symbolId)
+    {
+        switch (symbolId)
+        {
+            case Token.REF_CONSTANT:
+            case Token.OPEN_BRACE:
+            case Token.A1_CELL:
+            case Token.A1_SPAN_REFERENCE:
+            case Token.BANG_REFERENCE:
+            case Token.BANG_NAME:
+            case Token.SHEET_RANGE_PREFIX:
+            case Token.REF_FUNCTION_LIST:
+            case Token.NAME:
+            case Token.BOOK_PREFIX:
+            case Token.SINGLE_SHEET_PREFIX:
+            case Token.INTRA_TABLE_REFERENCE:
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     private static double ParseNumber(ReadOnlySpan<char> number)
