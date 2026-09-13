@@ -17,10 +17,11 @@ or Fixed.
 
 #### Fixed
 
-- Refuse a structured reference whose brackets hold nothing but whitespace, `[ ]`, instead of
-  raising an `IndexOutOfRangeException` from inside the token parser. Reading the token peeked one
-  character past its end, so three characters of a stored formula came out of the parser as an
-  index error rather than as a `ParsingException`. The grammar has no alternative for an empty
+- Refuse a structured reference with an item that holds nothing but whitespace, `[ ]` or
+  `[[#Data], ]`, instead of raising an `IndexOutOfRangeException` from inside the token parser.
+  Reading the token peeked one character past its end wherever an item was expected — after the
+  opening bracket and after each comma — so three characters of a stored formula came out of the
+  parser as an index error rather than as a `ParsingException`. The grammar has no alternative for an empty
   inner reference — a simple column name has to start and end with a non-space — and the ANTLR
   lexer, which is the source of truth, refuses `[ ]` outright. The Rolex lexer still accepts it as
   a whole `INTRA_TABLE_REFERENCE` token, a divergence between the two lexers that outlives this

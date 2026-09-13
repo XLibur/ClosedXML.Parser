@@ -108,6 +108,9 @@ public class IntraTableReferenceTokenTests
     [InlineData("[  ]")]
     [InlineData("Table1[ ]")]
     [InlineData("SUM(Table1[ ])")]
+    [InlineData("[[#Data], ]")]
+    [InlineData("[[#Headers],[#Data], ]")]
+    [InlineData("Table1[[#Data], ]")]
     public void A_bracket_holding_only_whitespace_is_refused(string formula)
     {
         Assert.Throws<ParsingException>(
