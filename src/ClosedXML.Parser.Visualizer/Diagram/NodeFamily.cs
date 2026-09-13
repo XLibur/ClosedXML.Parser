@@ -49,6 +49,7 @@ public static class NodeFamilies
         ["Array"] = NodeFamily.Value,
 
         ["Error"] = NodeFamily.Error,
+        ["SheetError"] = NodeFamily.Error,
 
         ["Binary"] = NodeFamily.Operator,
         ["Unary"] = NodeFamily.Operator,
