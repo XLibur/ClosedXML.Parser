@@ -9,10 +9,11 @@ public class SingleSheetPrefixTokenTests
     public void Token_data_are_extracted_and_unescaped(string tokenText, int? expectedWorkbookIndex, string expectedSheetName)
     {
         AssertFormula.AssertTokenType(tokenText, FormulaLexer.SINGLE_SHEET_PREFIX);
-        TokenParser.ParseSingleSheetPrefix(tokenText, new Token(Token.SINGLE_SHEET_PREFIX, 0, tokenText.Length), out var workbookIndex, out var sheetName);
+        var prefix = SheetPrefix.ReadSingle(tokenText, new Token(Token.SINGLE_SHEET_PREFIX, 0, tokenText.Length));
 
-        Assert.Equal(expectedWorkbookIndex, workbookIndex);
-        Assert.Equal(expectedSheetName, sheetName);
+        Assert.Equal(expectedWorkbookIndex, prefix.BookIndex);
+        Assert.Equal(expectedSheetName, prefix.FirstSheet);
+        Assert.Null(prefix.LastSheet);
     }
 
     public static IEnumerable<object?[]> Data

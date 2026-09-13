@@ -35,52 +35,18 @@ internal static class StringBuilderExtensions
 #endif
     }
 
-    public static StringBuilder AppendSheetReference(this StringBuilder sb, string? sheetName)
+    /// <summary>
+    /// Append a <see cref="SheetPrefix"/>, which decides the quotes it needs.
+    /// </summary>
+    public static StringBuilder AppendPrefix(this StringBuilder sb, SheetPrefix prefix)
     {
-        if (sheetName is null)
-            return sb.Append("#REF!");
-
-        return NameUtils.EscapeName(sb, sheetName).AppendReferenceSeparator();
+        return prefix.Append(sb);
     }
 
-    public static StringBuilder AppendExternalSheetReference(this StringBuilder sb, int workbookIndex, string sheetName)
-    {
-        if (NameUtils.ShouldQuote(sheetName.AsSpan()))
-        {
-            return sb
-                .Append('\'')
-                .AppendBookIndex(workbookIndex)
-                .AppendEscapedSheetName(sheetName)
-                .Append('\'')
-                .AppendReferenceSeparator();
-        }
-
-        return sb
-            .AppendBookIndex(workbookIndex)
-            .AppendSheetReference(sheetName);
-    }
     public static StringBuilder AppendEscapedSheetName(this StringBuilder sb, string sheetName)
     {
         var startIndex = sb.Length;
         return sb.Append(sheetName).Replace("'", "''", startIndex, sheetName.Length);
-    }
-
-    /// <summary>
-    /// Append the application and the topic of a DDE link as a prefix (e.g. <c>Sdemo123|tik!</c>).
-    /// </summary>
-    /// <remarks>
-    /// Excel writes the link bare, although <see cref="NameUtils.ShouldQuote"/> would quote it as a
-    /// sheet name, because of the <c>|</c>. The link stays bare whenever the lexer reads it back as
-    /// the same link, and is quoted only when it wouldn't be (e.g. with a space).
-    /// </remarks>
-    public static StringBuilder AppendDdeLink(this StringBuilder sb, string application, string topic)
-    {
-        var link = application + '|' + topic;
-        var prefix = link + '!';
-        if (TokenParser.ReadsBackAsSheetPrefix(prefix, link))
-            return sb.Append(prefix);
-
-        return sb.Append('\'').AppendEscapedSheetName(link).Append('\'').AppendReferenceSeparator();
     }
 
     /// <summary>

@@ -8,11 +8,11 @@ public class SheetRangePrefixTokenTests
     public void Token_data_are_extracted_and_unescaped(string tokenText, int? expectedWorkbookIndex, string expectedFirstSheetName, string expectedSecondSheetName)
     {
         AssertFormula.AssertTokenType(tokenText, FormulaLexer.SHEET_RANGE_PREFIX);
-        TokenParser.ParseSheetRangePrefix(tokenText, new Token(Token.SHEET_RANGE_PREFIX, 0, tokenText.Length), out var workbookIndex, out var firstSheetName, out var secondSheetName);
+        var prefix = SheetPrefix.ReadRange(tokenText, new Token(Token.SHEET_RANGE_PREFIX, 0, tokenText.Length));
 
-        Assert.Equal(expectedWorkbookIndex, workbookIndex);
-        Assert.Equal(expectedFirstSheetName, firstSheetName);
-        Assert.Equal(expectedSecondSheetName, secondSheetName);
+        Assert.Equal(expectedWorkbookIndex, prefix.BookIndex);
+        Assert.Equal(expectedFirstSheetName, prefix.FirstSheet);
+        Assert.Equal(expectedSecondSheetName, prefix.LastSheet);
     }
 
     public static IEnumerable<object?[]> Data

@@ -1,5 +1,6 @@
 using ParserToken = ClosedXML.Parser.Token;
 using TokenParser = ClosedXML.Parser.TokenParser;
+using SheetPrefix = ClosedXML.Parser.SheetPrefix;
 
 /// <summary>
 /// Semantic predicates of <c>FormulaParser.g4</c>. They read a token through the <c>TokenParser</c> of the
@@ -18,7 +19,7 @@ public partial class FormulaParser
     private bool IsDdeLinkPrefix(string token)
     {
         return CurrentToken.Type == SINGLE_SHEET_PREFIX &&
-               TokenParser.TryParseDdeLinkPrefix(token.AsSpan(), WholeToken(ParserToken.SINGLE_SHEET_PREFIX, token), out _, out _);
+               SheetPrefix.ReadSingle(token.AsSpan(), WholeToken(ParserToken.SINGLE_SHEET_PREFIX, token)).TryGetDdeLink(out _, out _);
     }
 
     /// <summary>
