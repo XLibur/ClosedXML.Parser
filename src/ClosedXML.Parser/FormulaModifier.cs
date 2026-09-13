@@ -36,6 +36,40 @@ public partial class FormulaModifier
     }
 
     /// <summary>
+    /// Modify the sheets a 3D reference spans, e.g. narrow the reference when the sheet at one of
+    /// its ends is deleted. It gets the two sheets of one reference together, and both are sheets
+    /// of this workbook: a 3D reference behind a book prefix spans sheets of another workbook and
+    /// is left as it is.
+    /// </summary>
+    /// <param name="ctx">Where the formula is.</param>
+    /// <param name="firstSheet">The sheet the reference starts at.</param>
+    /// <param name="lastSheet">The sheet the reference ends at.</param>
+    /// <returns>The sheets the reference spans now, or <c>null</c> if the part should be <c>#REF!</c>.</returns>
+    /// <remarks>
+    /// Deleting the sheet at one end narrows the reference rather than breaking it: Excel turns
+    /// <c>Sheet1:Sheet3!A1</c> into <c>Sheet2:Sheet3!A1</c> when <c>Sheet1</c> is deleted. Only a
+    /// caller that knows tab order can name the sheet that takes over, which is why the two sheets
+    /// arrive together. This default asks <see cref="ModifySheet"/> about each end on its own and
+    /// gives up the whole reference when either sheet is gone. Each name it answers with is held
+    /// to the same rule <see cref="ModifySheet"/> is.
+    /// </remarks>
+    protected virtual SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+    {
+        var modifiedFirstSheet = ModifySheet(ctx, firstSheet);
+        var modifiedLastSheet = ModifySheet(ctx, lastSheet);
+        if (modifiedFirstSheet is null || modifiedLastSheet is null)
+        {
+            // The reference is gone, so there is no pair left for the rewriter to hold to the name
+            // rule. A rename the caller got wrong is a fault either way, so it is caught here.
+            CheckRename(firstSheet, modifiedFirstSheet);
+            CheckRename(lastSheet, modifiedLastSheet);
+            return null;
+        }
+
+        return new SheetRange(modifiedFirstSheet, modifiedLastSheet);
+    }
+
+    /// <summary>
     /// Modify the name of a table of this workbook.
     /// </summary>
     /// <param name="ctx">Where the formula is.</param>
@@ -78,5 +112,23 @@ public partial class FormulaModifier
     protected virtual RowCol? ModifyCellFunction(ModContext ctx, RowCol cell)
     {
         return cell;
+    }
+
+    /// <summary>
+    /// Hold a rename to what a sheet may be called. A renamed sheet is written back into the
+    /// formula, and a name no workbook could hold has no spelling to write: it needs quotes, and a
+    /// quoted name holding a <c>?</c> reads back as a DDE item rather than a sheet prefix. Only a
+    /// rename is checked, so a formula the modification left alone is never refused, and
+    /// <c>null</c> keeps its meaning - the sheet is gone.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The modification renamed the sheet to a name
+    /// <see cref="NameUtils.IsSheetNameValid"/> rejects.</exception>
+    private static void CheckRename(string sheet, string? modifiedSheet)
+    {
+        if (modifiedSheet is not null && modifiedSheet != sheet && !NameUtils.IsSheetNameValid(modifiedSheet.AsSpan()))
+        {
+            throw new InvalidOperationException(
+                $"The modifier renamed the sheet '{sheet}' to '{modifiedSheet}', which can't name a sheet: a sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ].");
+        }
     }
 }

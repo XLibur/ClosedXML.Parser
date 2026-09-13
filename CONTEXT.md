@@ -49,6 +49,13 @@ A reference spanning a range of sheets, written with a first and last sheet name
 (`first:last!A1`).
 _Avoid_: sheet range reference
 
+**Sheet range**:
+The two sheets a 3D reference names, its first and its last (the `first:last` of
+`first:last!A1`). The reference covers both of them and every sheet standing between them in
+the workbook; which sheets those are is tab order, and the parser reads a formula rather than
+a workbook, so it holds the two names and nothing else.
+_Avoid_: sheet span, 3D range
+
 **Bang reference**:
 A reference with an empty sheet prefix (`!A1`), pointing into the workbook scope rather
 than a named sheet.
@@ -96,6 +103,12 @@ character: the quotes a sheet name was written with, an area of one cell written
 braces of a structured reference, and the whitespace around and inside the formula. A part is
 compared as a whole, so a reference whose sheet is renamed is written again in full, and its area
 then comes out as the parser read it, not as it was written.
+
+A sheet range is asked about as a whole rather than one sheet at a time, because deleting the sheet
+at either end narrows the reference instead of breaking it: `Sheet1:Sheet3!A1` becomes
+`Sheet2:Sheet3!A1` when `Sheet1` is deleted. Naming the sheet that takes over needs tab order, so
+the answer comes from the caller, and a modification that doesn't give one asks about each end on
+its own and writes `#REF!` when either sheet is gone.
 
 **Swallowed ref error**:
 A ref error that ate the reference after it, `#REF!A1` or `#REF!#REF!`. Excel can't parse that form

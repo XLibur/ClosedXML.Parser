@@ -71,7 +71,6 @@ public class FormulaModifierTests
     }
 
     [Theory]
-    [InlineData("Old!#REF!", "Old", null, "#REF!#REF!")]
     [InlineData("Old!#REF!", "Old", "New", "New!#REF!")]
     [InlineData("'Old sheet'!#REF!", "Old sheet", "New", "New!#REF!")]
     [InlineData("'Old sheet'!#REF!", "Old sheet", "New sheet", "'New sheet'!#REF!")]
@@ -79,6 +78,22 @@ public class FormulaModifierTests
     public void ErrorNode_can_modify_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
     {
         var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// A sheet error names a sheet whose area is gone. Delete that sheet as well and there is nothing
+    /// left to name, so the whole part is a plain <c>#REF!</c>, the way Excel saves it - not the
+    /// <c>#REF!#REF!</c> that writing the error behind a deleted prefix would give.
+    /// </summary>
+    [Theory]
+    [InlineData("Old!#REF!", "Old", "#REF!")]
+    [InlineData("'Old sheet'!#REF!", "Old sheet", "#REF!")]
+    [InlineData("Old! #REF!", "Old", "#REF!")]
+    [InlineData("SUM(Old!#REF!,A1)", "Old", "SUM(#REF!,A1)")]
+    public void A_sheet_error_whose_sheet_is_deleted_is_a_ref_error(string formula, string deletedSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { deletedSheetName, null } } };
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 
@@ -133,6 +148,122 @@ public class FormulaModifierTests
     {
         var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
         AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// The hook that gets both ends of a 3D reference at once defaults to asking
+    /// <c>ModifySheet</c> about each end on its own, so a modifier that doesn't override it answers
+    /// exactly as it did before the hook existed.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", null, "#REF!")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", null, "#REF!")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet1", "New", "New:Sheet5!A1")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", "New", "Sheet1:New!A1")]
+    public void ModifySheetRange_defaults_to_asking_about_each_sheet(string formula, string oldSheetName, string? newSheetName, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// Deleting the sheet at one end of a 3D reference narrows it rather than breaking it, the way
+    /// Excel does. The parser reads a formula rather than a workbook, so it takes the narrowed pair
+    /// from a modifier that knows tab order.
+    /// </summary>
+    [Theory]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1" }, "SUM(Sheet2:Sheet3!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet3" }, "SUM(Sheet1:Sheet2!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!$A$1)", new[] { "Sheet1" }, "SUM(Sheet2:Sheet3!$A$1)")]
+    // A sheet standing between the two ends leaves the reference as it was written.
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet2" }, "SUM(Sheet1:Sheet3!A1)")]
+    // One sheet left of the span is still a pair, and every sheet gone is a #REF!.
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1", "Sheet2" }, "SUM(Sheet3:Sheet3!A1)")]
+    [InlineData("SUM(Sheet1:Sheet3!A1)", new[] { "Sheet1", "Sheet2", "Sheet3" }, "SUM(#REF!)")]
+    public void ModifySheetRange_can_narrow_a_3D_reference(string formula, string[] deletedSheets, string modifiedFormula)
+    {
+        var modifier = new TabOrderModifier(new[] { "Sheet1", "Sheet2", "Sheet3" }, deletedSheets);
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    [Fact]
+    public void ModifySheetRange_can_delete_the_whole_reference()
+    {
+        var modifier = new SheetRangeModifier { Sheets = null };
+        AssertModifiedA1("Sheet1:Sheet5!A1", modifier, "#REF!");
+    }
+
+    [Fact]
+    public void ModifySheetRange_quotes_the_sheets_it_answers_with()
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange("First sheet", "Last") };
+        AssertModifiedA1("Sheet1:Sheet5!A1", modifier, "'First sheet:Last'!A1");
+    }
+
+    /// <summary>
+    /// Both ends of the answer are held to the rule a single sheet name is held to, because both
+    /// are written back into the formula.
+    /// </summary>
+    [Theory]
+    [InlineData("a?", "Sheet5")]
+    [InlineData("Sheet1", "a?")]
+    public void ModifySheetRange_cant_answer_with_a_name_no_workbook_could_hold(string firstSheet, string lastSheet)
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange(firstSheet, lastSheet) };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1("Sheet1:Sheet5!A1", "Sheet", 1, 1, modifier));
+        Assert.Contains("a?", ex.Message);
+    }
+
+    /// <summary>
+    /// A 3D reference with no sheets left is answered with <c>null</c>, so a range that names no
+    /// sheets - a <c>default</c> one - is a fault in the call rather than a null reference from
+    /// inside the writer.
+    /// </summary>
+    [Fact]
+    public void ModifySheetRange_cant_answer_with_a_range_that_names_no_sheets()
+    {
+        var modifier = new SheetRangeModifier { Sheets = default(SheetRange) };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1("Sheet1:Sheet5!A1", "Sheet", 1, 1, modifier));
+        Assert.Contains("names no sheets", ex.Message);
+    }
+
+    /// <summary>
+    /// The name rule holds at both ends even when the sheet at the other end is deleted. The part
+    /// comes out as <c>#REF!</c> either way, but a rename to a name no workbook could hold is a
+    /// fault in the call, and it is caught wherever it is answered.
+    /// </summary>
+    [Theory]
+    [InlineData("Old:Last!A1", "Old", "Last")]
+    [InlineData("First:Old!A1", "Old", "First")]
+    public void A_rename_in_a_3D_reference_is_checked_when_the_other_sheet_is_deleted(string formula, string renamedSheet, string deletedSheet)
+    {
+        var modifier = new SheetModifier { SheetMap = { { renamedSheet, "a?" }, { deletedSheet, null } } };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, modifier));
+        Assert.Contains("a?", ex.Message);
+    }
+
+    /// <summary>
+    /// Only a 3D reference of this workbook spans sheets a modification may change, so nothing else
+    /// asks the hook.
+    /// </summary>
+    [Theory]
+    [InlineData("Sheet1!A1")]
+    [InlineData("[1]Sheet1:Sheet5!A1")]
+    [InlineData("'[1]Sheet1:Sheet5'!A1")]
+    public void ModifySheetRange_is_asked_about_a_3D_reference_of_this_workbook(string formula)
+    {
+        var modifier = new SheetRangeModifier { Sheets = new SheetRange("First", "Last") };
+        AssertModifiedA1(formula, modifier, formula);
+    }
+
+    [Fact]
+    public void A_sheet_range_holds_two_sheets()
+    {
+        Assert.Throws<ArgumentNullException>(() => new SheetRange(null!, "Last"));
+        Assert.Throws<ArgumentNullException>(() => new SheetRange("First", null!));
     }
 
     /// <summary>
@@ -315,6 +446,48 @@ public class FormulaModifierTests
         protected override string? ModifySheet(ModContext ctx, string sheetName)
         {
             return SheetMap.GetValueOrDefault(sheetName, sheetName);
+        }
+    }
+
+    /// <summary>
+    /// Deletes sheets from a workbook whose tab order it knows, the way Excel does: a 3D reference
+    /// keeps the sheets of its span that are left, and is a <c>#REF!</c> once none are.
+    /// </summary>
+    private sealed class TabOrderModifier : FormulaModifier
+    {
+        private readonly string[] _tabOrder;
+        private readonly string[] _deletedSheets;
+
+        public TabOrderModifier(string[] tabOrder, string[] deletedSheets)
+        {
+            _tabOrder = tabOrder;
+            _deletedSheets = deletedSheets;
+        }
+
+        protected override string? ModifySheet(ModContext ctx, string sheetName)
+        {
+            return _deletedSheets.Contains(sheetName) ? null : sheetName;
+        }
+
+        protected override SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+        {
+            var first = Array.IndexOf(_tabOrder, firstSheet);
+            var last = Array.IndexOf(_tabOrder, lastSheet);
+            var spanned = _tabOrder[first..(last + 1)].Except(_deletedSheets).ToList();
+            return spanned.Count > 0 ? new SheetRange(spanned[0], spanned[^1]) : null;
+        }
+    }
+
+    /// <summary>
+    /// Answers with <see cref="Sheets"/> for every 3D reference, whatever it spans.
+    /// </summary>
+    private sealed class SheetRangeModifier : FormulaModifier
+    {
+        public SheetRange? Sheets { get; init; }
+
+        protected override SheetRange? ModifySheetRange(ModContext ctx, string firstSheet, string lastSheet)
+        {
+            return Sheets;
         }
     }
 

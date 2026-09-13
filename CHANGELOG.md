@@ -32,6 +32,20 @@ empty formula now raises the `ParsingException` all four `FormulaConverter` meth
 
 ### Formula parsers
 
+#### Added
+
+- `FormulaModifier.ModifySheetRange`, which a formula modification asks about the two sheets a 3D
+  reference spans, so deleting the sheet at one end can narrow the reference the way Excel does:
+  `SUM(Sheet1:Sheet3!A1)` becomes `SUM(Sheet2:Sheet3!A1)` when `Sheet1` is deleted. Naming the
+  sheet that takes over needs tab order, which the parser doesn't hold — it reads a formula, not a
+  workbook — so the hook hands both sheets over together and takes back the pair that is left, or
+  `null` for a `#REF!`. Its default asks `ModifySheet` about each end on its own and gives up the
+  whole reference when either sheet is gone, which is what every modification did before, so an
+  existing one answers as it always did. Both names it answers with are held to the same rule a
+  rename is, wherever in the pair they are answered: a sheet name no workbook could hold raises an
+  `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
+  one reads.
+
 #### Changed
 
 - Allocate less on the paths that change nothing. A modification that leaves a part of a formula
@@ -57,6 +71,12 @@ empty formula now raises the `ParsingException` all four `FormulaConverter` meth
 
 #### Fixed
 
+- Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of
+  `#REF!#REF!`. A sheet error, `Sheet1!#REF!`, names a sheet whose area is gone; delete that sheet
+  too and nothing is left to name, which is why Excel saves such a reference as a plain `#REF!`.
+  The rewriter instead wrote the prefix of a deleted sheet and then the error behind it, spelling
+  `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
+  Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
 - Refuse a formula that nests deeper than 256 levels, instead of taking the whole process down with
   a `StackOverflowException`. The parser descends by recursion and counted nothing, so a formula
   that nested deeply enough ran the stack out — and a stack overflow cannot be caught, so a host
