@@ -185,6 +185,27 @@ public class NameUtilsTests
     }
 
     /// <summary>
+    /// Excel refuses a sheet name that starts or ends with an apostrophe, and the library has its own
+    /// reason to agree: a sheet prefix is quoted with apostrophes, so one at either end has nowhere to
+    /// go. A leading one is worse than unreadable - <see cref="NameUtils.ShouldQuote"/> says such a
+    /// name needs no quotes, so it is written bare, as <c>'leading!</c>, which no lexer reads at all.
+    /// An apostrophe anywhere else is ordinary and is doubled inside the quotes.
+    /// </summary>
+    [Theory]
+    [InlineData("'leading", false)]
+    [InlineData("trailing'", false)]
+    [InlineData("'both'", false)]
+    [InlineData("'", false)]
+    [InlineData("''", false)]
+    [InlineData("Jane's", true)]
+    [InlineData("a'b", true)]
+    [InlineData("a''b", true)]
+    public void Sheet_name_cant_start_or_end_with_an_apostrophe(string name, bool isValid)
+    {
+        Assert.Equal(isValid, NameUtils.IsSheetNameValid(name));
+    }
+
+    /// <summary>
     /// Excel refuses a sheet name containing any of these, so the data files leave them
     /// out entirely rather than record an answer that could never be exercised.
     /// </summary>

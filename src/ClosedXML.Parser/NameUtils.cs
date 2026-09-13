@@ -158,9 +158,18 @@ public static class NameUtils
     /// Is the name of a sheet valid?
     /// </summary>
     /// <param name="sheetName">Name of the sheet.</param>
+    /// <remarks>
+    /// A name may not start or end with an apostrophe, which Excel refuses and the library has its
+    /// own reason to refuse: a sheet prefix is quoted with apostrophes, so one at either end has
+    /// nowhere to go. An apostrophe anywhere else is ordinary and is doubled inside the quotes, so
+    /// <c>Jane's</c> is a name and <c>'Jane</c> is not.
+    /// </remarks>
     public static bool IsSheetNameValid(ReadOnlySpan<char> sheetName)
     {
         if (sheetName.Length is 0 or > 31)
+            return false;
+
+        if (sheetName[0] == '\'' || sheetName[sheetName.Length - 1] == '\'')
             return false;
 
         return sheetName.IndexOfAny(InvalidSheetChars) == -1;
