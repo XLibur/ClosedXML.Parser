@@ -23,14 +23,10 @@ internal static class StringBuilderExtensions
     /// </remarks>
     public static StringBuilder AppendInvariant(this StringBuilder sb, int value)
     {
-#if NETSTANDARD2_0
-        return sb.Append(value.ToString(CultureInfo.InvariantCulture));
-#else
         Span<char> buffer = stackalloc char[MaxInt32Length];
         return value.TryFormat(buffer, out var length, default, CultureInfo.InvariantCulture)
             ? sb.Append(buffer.Slice(0, length))
             : sb.Append(value.ToString(CultureInfo.InvariantCulture));
-#endif
     }
 
     /// <summary>
