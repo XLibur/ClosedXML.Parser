@@ -115,3 +115,16 @@ A ref error that ate the reference after it, `#REF!A1` or `#REF!#REF!`. Excel ca
 and saves a reference whose sheet was deleted as a plain `#REF!`, so a formula modification writes
 it as `#REF!` even though nothing changed it. It is the one exception to the rule above.
 _Avoid_: deleted reference
+
+## Adding to IAstFactory
+
+The library targets `net8.0`, which has default interface methods, so **a new member of
+`IAstFactory` ships with a default implementation and is not a breaking change**. The default
+has to answer the way the library answered before the member existed, so an implementer that
+never hears of it keeps getting what it always got.
+
+This was not true while the library targeted `netstandard2.0`, which has no default interface
+methods. `SheetErrorNode`, `ExternalDynamicDataExchange` and `DynamicDataExchange` each went out
+as a breaking change to every implementer for that reason alone. The existing members are left as
+they are: giving one a default now would say the library has an answer of its own for a node only
+the caller can build.
