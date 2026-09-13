@@ -10,14 +10,19 @@ public class ModContext
 {
     internal ModContext(string formula, string sheet, int row, int col, bool isA1, FormulaModifier modifier)
     {
-        if (string.IsNullOrWhiteSpace(formula))
-            throw new ArgumentException(nameof(formula));
+        // A formula that is empty or nothing but whitespace is refused, but by the parser and as a
+        // ParsingException, which is what FormulaConverter documents and what every other unparseable
+        // text gets. Refusing it here threw an ArgumentException naming a parameter the caller never
+        // passed, so the same input came back as two different exception types depending on which
+        // entry point read it.
+        if (formula is null)
+            throw new ArgumentNullException(nameof(formula));
 
         if (row is < 1 or > RowCol.MaxRow)
             throw new ArgumentOutOfRangeException(nameof(row));
 
         if (col is < 1 or > RowCol.MaxCol)
-            throw new ArgumentOutOfRangeException(nameof(row));
+            throw new ArgumentOutOfRangeException(nameof(col));
 
         Formula = formula;
         Sheet = sheet;
