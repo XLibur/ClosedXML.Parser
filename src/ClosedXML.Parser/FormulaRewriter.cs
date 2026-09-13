@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace ClosedXML.Parser;
@@ -100,7 +99,7 @@ public partial class FormulaModifier
             if (AllOriginal(elements))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var sb = new StringBuilder(2 + elements.Sum(x => x.Length) + elements.Count);
+            var sb = new StringBuilder(2 + TotalLength(elements) + elements.Count);
             sb.AppendStartFragment(ctx, range, elements[0]);
             var i = 0;
             sb.Append(elements[i++].AsSpan());
@@ -291,7 +290,7 @@ public partial class FormulaModifier
             if (!nameChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var sb = new StringBuilder(modifiedFunction.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
+            var sb = new StringBuilder(modifiedFunction.Length + 2 + TotalLength(arguments) + arguments.Count);
             if (nameChanged)
                 sb.Append(modifiedFunction);
             else
@@ -311,7 +310,7 @@ public partial class FormulaModifier
             if (!sheetChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var sb = new StringBuilder(sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count);
+            var sb = new StringBuilder(sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + TotalLength(arguments) + arguments.Count);
             if (sheetChanged)
                 sb.AppendPrefix(SheetPrefix.Sheet(modifiedSheet)).Append(functionName);
             else
@@ -327,7 +326,7 @@ public partial class FormulaModifier
             if (AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var nodeText = new StringBuilder(BOOK_PREFIX_LEN + sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
+            var nodeText = new StringBuilder(BOOK_PREFIX_LEN + sheetName.Length + QUOTE_RESERVE + SHEET_SEPARATOR_LEN + functionName.Length + 2 + TotalLength(arguments) + arguments.Count)
                 .AppendOriginalCallee(ctx, range, arguments)
                 .AppendArguments(ctx, range, arguments)
                 .ToString();
@@ -340,7 +339,7 @@ public partial class FormulaModifier
             if (AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var nodeText = new StringBuilder(BOOK_PREFIX_LEN + functionName.Length + 2 + arguments.Sum(static x => x.Length) + arguments.Count)
+            var nodeText = new StringBuilder(BOOK_PREFIX_LEN + functionName.Length + 2 + TotalLength(arguments) + arguments.Count)
                 .AppendOriginalCallee(ctx, range, arguments)
                 .AppendArguments(ctx, range, arguments)
                 .ToString();
@@ -357,7 +356,7 @@ public partial class FormulaModifier
             if (!cellChanged && AllOriginal(arguments))
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            var sb = new StringBuilder(MAX_R1_C1_LEN + SHEET_SEPARATOR_LEN + arguments.Sum(static x => x.Length));
+            var sb = new StringBuilder(MAX_R1_C1_LEN + SHEET_SEPARATOR_LEN + TotalLength(arguments));
             if (cellChanged)
                 sb.AppendRef(modifiedCell.Value);
             else
@@ -493,6 +492,22 @@ public partial class FormulaModifier
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// How many characters the nodes hold together, to size the builder that writes them.
+        /// </summary>
+        /// <remarks>
+        /// Indexed rather than summed with LINQ: the list is an interface, so an enumerator over it
+        /// is boxed, and this runs once per node written.
+        /// </remarks>
+        private static int TotalLength(IReadOnlyList<TransformedSymbol> nodes)
+        {
+            var total = 0;
+            for (var i = 0; i < nodes.Count; ++i)
+                total += nodes[i].Length;
+
+            return total;
         }
 
         private static string GetIntraTableReference(StructuredReferenceArea area, string? firstColumn, string? lastColumn)

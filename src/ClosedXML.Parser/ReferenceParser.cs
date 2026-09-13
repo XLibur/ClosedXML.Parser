@@ -29,7 +29,7 @@ public static class ReferenceParser
     public static bool TryParseA1(string text, out string? sheetName, out ReferenceArea area)
     {
         if (text is null)
-            throw new ArgumentNullException();
+            throw new ArgumentNullException(nameof(text));
 
         sheetName = null;
         var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
@@ -59,7 +59,7 @@ public static class ReferenceParser
     public static bool TryParseA1(string text, out ReferenceArea area)
     {
         if (text is null)
-            throw new ArgumentNullException();
+            throw new ArgumentNullException(nameof(text));
 
         var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
         return TryParse(tokens, text, TokenParser.A1Style, out area);

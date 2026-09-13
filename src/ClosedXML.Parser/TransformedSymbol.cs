@@ -32,7 +32,7 @@ internal readonly struct TransformedSymbol
     /// <summary>
     /// Length of the transformed symbol.
     /// </summary>
-    internal int Length => _transformedText?.Length ?? _range.End - _range.Start;
+    internal int Length => _transformedText?.Length ?? _range.Length;
 
     /// <summary>
     /// Is the symbol the text of the original formula, i.e. was nothing in it changed? A node whose
@@ -70,7 +70,7 @@ internal readonly struct TransformedSymbol
         if (_transformedText is not null)
             return _transformedText.AsSpan();
 
-        return _formulaText.AsSpan(_range.Start, _range.End - _range.Start);
+        return _formulaText.AsSpan(_range.Start, _range.Length);
     }
 
     /// <summary>
@@ -79,8 +79,10 @@ internal readonly struct TransformedSymbol
     /// <param name="append">Text to append at the end of the symbol text.</param>
     public string ToString(ReadOnlySpan<char> append)
     {
-        if (append.Length == 0 && _transformedText is not null)
-            return _transformedText;
+        // Nothing to append is the common case, and a symbol nothing changed is the common symbol,
+        // so neither needs a builder: the text is either the replacement or a slice of the formula.
+        if (append.Length == 0)
+            return _transformedText ?? _formulaText.Substring(_range.Start, _range.Length);
 
         var text = AsSpan();
         return new StringBuilder(text.Length + append.Length)

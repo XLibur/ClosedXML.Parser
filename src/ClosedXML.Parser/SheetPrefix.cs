@@ -277,7 +277,9 @@ internal readonly record struct SheetPrefix
 
     private static string GetEscapedSheetName(ref ReadOnlySpan<char> input, char endChar)
     {
-        Span<char> buffer = stackalloc char[input.Length];
+        Span<char> buffer = input.Length <= TokenParser.MaxStackAllocChars
+            ? stackalloc char[TokenParser.MaxStackAllocChars]
+            : new char[input.Length];
         var bufferIdx = 0;
         var inputIdx = 0;
         do
@@ -294,7 +296,9 @@ internal readonly record struct SheetPrefix
 
     private static string GetEscapedSheetName(ReadOnlySpan<char> input)
     {
-        Span<char> buffer = stackalloc char[input.Length];
+        Span<char> buffer = input.Length <= TokenParser.MaxStackAllocChars
+            ? stackalloc char[TokenParser.MaxStackAllocChars]
+            : new char[input.Length];
         var bufferIdx = 0;
         var inputIdx = 0;
         do

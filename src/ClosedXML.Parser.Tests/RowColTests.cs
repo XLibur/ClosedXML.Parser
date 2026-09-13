@@ -38,4 +38,48 @@ public class RowColTests
         var refA1 = ReferenceParser.ParseA1(a1).First;
         Assert.Equal(refA1, refR1C1.ToA1(row, col));
     }
+
+    /// <summary>
+    /// A column above the <c>XFD</c> of a sheet is still written out. The constructor takes any
+    /// <see cref="int"/> as a column, so a caller can hold one no sheet has, and writing it used
+    /// to be the only thing that said so - by producing letters, not by refusing.
+    /// </summary>
+    /// <remarks>
+    /// <c>ZZZ</c> is column 18278, the last one three letters spell, and <c>XFD</c> is 16384, so
+    /// the three columns between them are out of a sheet and still three letters long. The buffer
+    /// the letters are written through holds seven, which is what <see cref="int.MaxValue"/>
+    /// spells.
+    /// </remarks>
+    [Theory]
+    [InlineData(1, "A")]
+    [InlineData(16384, "XFD")]
+    [InlineData(16385, "XFE")]
+    [InlineData(18278, "ZZZ")]
+    [InlineData(18279, "AAAA")]
+    [InlineData(475254, "ZZZZ")]
+    [InlineData(475255, "AAAAA")]
+    [InlineData(int.MaxValue, "FXSHRXW")]
+    public void A_column_above_the_sheet_is_still_written(int columnValue, string letters)
+    {
+        var rowCol = new RowCol(Relative, 1, Relative, columnValue, A1);
+
+        Assert.Equal(letters + "1", rowCol.GetDisplayStringA1());
+    }
+
+    /// <summary>
+    /// A relative column converted with an anchor is written even when it lands above a sheet.
+    /// <see cref="RowCol.ToA1"/> subtracts one sheet width rather than taking a modulo, which its
+    /// comment says is enough for a reference the grammar produced, so an offset built by hand
+    /// stays above the sheet and has to be written rather than refused.
+    /// </summary>
+    [Fact]
+    public void A_relative_column_converted_above_the_sheet_is_still_written()
+    {
+        var relative = new RowCol(Relative, 1, Relative, 1_000_000, R1C1);
+
+        var converted = relative.ToA1(1, 1);
+
+        Assert.Equal(983_617, converted.ColumnValue);
+        Assert.Equal("BCYAK2", converted.GetDisplayStringA1());
+    }
 }
