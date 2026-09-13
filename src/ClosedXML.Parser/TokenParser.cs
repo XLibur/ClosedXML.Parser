@@ -570,22 +570,6 @@ internal static class TokenParser
     }
 
     /// <summary>
-    /// Demand that an item of an inner reference starts at <paramref name="i"/>, i.e. that the
-    /// bracket or the comma before it is followed by something other than the end of the token.
-    /// </summary>
-    /// <remarks>
-    /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
-    /// column range, a simple column name has to start and end with a non-space, and neither can be
-    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
-    /// accepts it as a whole token, so the refusal has to happen when the token is read.
-    /// <para>
-    /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
-    /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.
-    /// The check covers the character after <paramref name="i"/> as well, because every caller peeks
-    /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
-    /// </para>
-    /// </remarks>
-    /// <summary>
     /// Does the item of an inner reference at <paramref name="i"/> start a keyword, i.e. is it
     /// <c>[#</c> rather than a column name?
     /// </summary>
@@ -603,6 +587,22 @@ internal static class TokenParser
         return input[i] == '[' && input[i + 1] == '#';
     }
 
+    /// <summary>
+    /// Demand that an item of an inner reference starts at <paramref name="i"/>, i.e. that the
+    /// bracket or the comma before it is followed by something other than the end of the token.
+    /// </summary>
+    /// <remarks>
+    /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
+    /// column range, a simple column name has to start and end with a non-space, and neither can be
+    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
+    /// accepts it as a whole token, so the refusal has to happen when the token is read.
+    /// <para>
+    /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
+    /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.
+    /// The check covers the character after <paramref name="i"/> as well, because every caller peeks
+    /// at it and a token ending anywhere but on its closing bracket is malformed however it got here.
+    /// </para>
+    /// </remarks>
     private static void RequireItem(ReadOnlySpan<char> input, int i, Token token)
     {
         if (i + 1 >= input.Length || input[i] == ']')
@@ -714,9 +714,13 @@ internal static class TokenParser
 
     private static bool IsLetter(char c) => (c is >= 'A' and <= 'Z') || (c is >= 'a' and <= 'z');
 
+    /// <summary>
+    /// The exception for a token the lexer should never have produced. Returned rather than
+    /// thrown, so the <c>throw</c> stands at the call site and the compiler can see the path ends.
+    /// </summary>
     private static Exception Bug()
     {
-        throw new InvalidOperationException("Bug in token parser. Token doesn't have expected format.");
+        return new InvalidOperationException("Bug in token parser. Token doesn't have expected format.");
     }
 
     private sealed class A1ReferenceStyle : IReferenceStyle
