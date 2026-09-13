@@ -52,6 +52,15 @@ public class IntraTableReferenceTokenTests
             yield return new object?[] { "[ '[]", StructuredReferenceArea.None, "[", null };
             yield return new object?[] { "[ '']", StructuredReferenceArea.None, "'", null };
             yield return new object?[] { "[[#Data], '#]", StructuredReferenceArea.Data, "#", null };
+
+            // A colon is an ordinary column character, so it separates a range only when there is a
+            // name on both sides of it. The two sides are each a COLUMN and a COLUMN can't be empty,
+            // so a colon with nothing on one side belongs to the name.
+            yield return new object?[] { "[:b]", StructuredReferenceArea.None, ":b", null };
+            yield return new object?[] { "[a:]", StructuredReferenceArea.None, "a:", null };
+            yield return new object?[] { "[:]", StructuredReferenceArea.None, ":", null };
+            // One separator, two columns: the second name runs to the bracket, colons and all.
+            yield return new object?[] { "[a:b:c]", StructuredReferenceArea.None, "a", "b:c" };
             yield return new object?[] { "[[#Headers],[#Data], '#]", StructuredReferenceArea.Headers | StructuredReferenceArea.Data, "#", null };
 
             // INTRA_TABLE_REFERENCE : SPACED_LBRACKET INNER_REFERENCE SPACED_RBRACKET

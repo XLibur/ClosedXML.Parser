@@ -35,6 +35,17 @@ or Fixed.
   tells the two apart, and both places that look for a keyword ask for it now. `['#]` and `[['#]]`
   were already read correctly; it was only the item after a space or a comma that was not.
 
+- Read a colon with nothing on one side of it as part of a column name rather than as the separator
+  of a range, so `[:b]` is a column called `:b`. A colon is an ordinary column character, and the
+  two sides of a range are each a column, which cannot be empty — so that is the only reading the
+  grammar leaves. Splitting it invented a column with no name, and a column with no name has no
+  spelling in the bracketed form a display string is written in: `[[]:[b]]` is not a structured
+  reference, so the reference did not survive being written out.
+
+- Read the last column of a simple range to the closing bracket, so `[a:b:c]` is the columns `a` to
+  `b:c`. A range has one separator and two columns; stopping the second name at a colon as well cut
+  it short at `b` and dropped the rest without a word.
+
 ### Ast nodes and display strings
 
 #### Fixed

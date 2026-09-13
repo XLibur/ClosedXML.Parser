@@ -212,11 +212,31 @@ internal static class TokenParser
             }
 
             // Read simple column
+            var start = i;
             i = GetStructuredName(input, i, out firstColumn);
             if (i < input.Length && input[i] == ':')
-                GetStructuredName(input, i + 1, out lastColumn);
+            {
+                // A range has one separator and two columns, so the second name runs to the closing
+                // bracket. Stopping it at a colon as well cut `[a:b:c]` down to `a` and `b` and
+                // dropped the rest of the name without a word.
+                GetStructuredName(input, i + 1, out lastColumn, stopAtRange: false);
+
+                // A colon with nothing on one side of it is a character of the name, not a
+                // separator. The two sides of a range are each a COLUMN and a COLUMN is a simple
+                // column name, which can't be empty, so `[:b]` has only one reading left: a column
+                // called `:b`. Splitting it invented an empty column, and an empty column has no
+                // spelling in the bracketed form a display string is written in — `[[]:[b]]` is not
+                // a structured reference at all, so the name never survived being written out.
+                if (firstColumn.Length == 0 || lastColumn.Length == 0)
+                {
+                    GetStructuredName(input, start, out firstColumn, stopAtRange: false);
+                    lastColumn = null;
+                }
+            }
             else
+            {
                 lastColumn = null;
+            }
 
             return;
         }
@@ -605,13 +625,17 @@ internal static class TokenParser
     /// <param name="input">Input span.</param>
     /// <param name="startIdx">First index of expected name. It will either contain a bracket or first letter of column name.</param>
     /// <param name="columnName">Parsed name.</param>
-    private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName)
+    /// <param name="stopAtRange">
+    /// Whether a colon ends the name. It does wherever a range can follow, which is everywhere but
+    /// the re-read of a simple column whose colon turned out to belong to the name itself.
+    /// </param>
+    private static int GetStructuredName(ReadOnlySpan<char> input, int startIdx, out string columnName, bool stopAtRange = true)
     {
         Span<char> buffer = stackalloc char[input.Length];
         var bufferIdx = 0;
         var i = startIdx + (input[startIdx] == '[' ? 1 : 0);
         var c = input[i];
-        for (; c is not ']' and not ':'; c = input[++i])
+        for (; c is not ']' && (!stopAtRange || c is not ':'); c = input[++i])
         {
             if (c == '\'')
                 c = input[++i];
