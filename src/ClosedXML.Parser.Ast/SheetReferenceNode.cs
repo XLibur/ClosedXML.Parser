@@ -4,6 +4,6 @@ public record SheetReferenceNode(string Sheet, ReferenceArea Reference) : AstNod
 {
     public override string GetDisplayString(ReferenceStyle style)
     {
-        return $"{Sheet}!{Reference.GetDisplayString(style)}";
+        return $"{SheetPrefixWriter.Sheet(Sheet)}{Reference.GetDisplayString(style)}";
     }
 }
