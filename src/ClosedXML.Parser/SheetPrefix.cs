@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using ClosedXML.Parser.Rolex;
@@ -212,9 +213,12 @@ internal readonly record struct SheetPrefix
         }
 
         // A quote covers the whole prefix, both sheets and the book index, so either sheet needing
-        // one quotes the lot.
+        // one quotes the lot. The first sheet of a bare 3D reference has a rule of its own on top,
+        // because nothing before it says a sheet prefix has started.
         var lastSheet = LastSheet!;
-        if (!NameUtils.ShouldQuote(firstSheet.AsSpan()) && !NameUtils.ShouldQuote(lastSheet.AsSpan()))
+        if (!NameUtils.ShouldQuote(firstSheet.AsSpan()) &&
+            !NameUtils.ShouldQuote(lastSheet.AsSpan()) &&
+            (BookIndex is not null || ReadsBackAsFirstSheet(firstSheet)))
         {
             if (BookIndex is not null)
                 sb.AppendBookIndex(BookIndex.Value);
@@ -246,6 +250,29 @@ internal readonly record struct SheetPrefix
             return sb.Append(prefix);
 
         return sb.Append('\'').AppendEscapedSheetName(link).Append('\'').AppendReferenceSeparator();
+    }
+
+    /// <summary>
+    /// Can <paramref name="firstSheet"/> stand bare in the first position of a 3D reference?
+    /// </summary>
+    /// <remarks>
+    /// A bare <c>first:last!</c> reads back as <c>NAME COLON SINGLE_SHEET_PREFIX</c>, so the first
+    /// sheet has to lex as a name. <see cref="NameUtils.ShouldQuote"/> doesn't ask that, because it
+    /// answers for a name standing on its own, where the <c>!</c> of <c>PWD1!A1</c> settles it. Here
+    /// there is no <c>!</c> yet and a name that is also a cell (<c>PWD1</c>, <c>LOG10</c> in A1,
+    /// <c>R1C1</c> in R1C1) lexes as the cell, losing the prefix. The prefix doesn't know which
+    /// reference style it is written for, so the name has to be a name in both.
+    /// </remarks>
+    private static bool ReadsBackAsFirstSheet(string firstSheet)
+    {
+        return IsWholeName(RolexLexer.GetTokensA1(firstSheet.AsSpan()), firstSheet.Length) &&
+               IsWholeName(RolexLexer.GetTokensR1C1(firstSheet.AsSpan()), firstSheet.Length);
+    }
+
+    private static bool IsWholeName(List<Token> tokens, int length)
+    {
+        // The lexer always ends with an EOF token, so a single name is two tokens.
+        return tokens.Count == 2 && tokens[0].SymbolId == Token.NAME && tokens[0].Length == length;
     }
 
     /// <summary>

@@ -117,6 +117,20 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Quote a 3D reference whose first sheet is also a cell, e.g. `'PWD1:Last'!A1`. The bare form was
+  written whenever neither sheet name needed quotes, but a bare `first:last!` is read as a name, a
+  colon and a single sheet prefix, and `PWD1` (column `PWD`, row 1) lexes as a cell, not a name. So
+  `PWD1:Last!A1` didn't parse back: the library couldn't read what it had just written.
+  `NameUtils.ShouldQuote` answers for a name standing on its own, where the `!` of `PWD1!A1` settles
+  it, and in the first position of a 3D prefix there is no `!` yet. The first sheet is now quoted
+  unless the lexer reads it as a name. Nothing else changes: a book prefix already tells the lexer a
+  sheet prefix has started, so `[3]PWD1:Last!A1` stays bare, and a cell-like last sheet was never in
+  doubt, so `First:PWD1!A1` does too. A prefix is written without knowing the reference style of the
+  formula it goes into, so the name has to be a name in both styles: a sheet called `R1C1` or `C` is
+  now quoted as the first sheet of a 3D reference in an A1 formula as well, where it would have read
+  back. Written output changes for these names, but no formula of the Enron, EUSES or contributions
+  data sets has such a sheet, so their recorded outputs are unchanged. The check costs a lex of the
+  first sheet name in each style, and only for a 3D prefix that would otherwise be written bare.
 - Quote a sheet name that needs quotes in the display string of an Ast node. `SheetNameNode` and
   `SheetErrorNode` were the only nodes that did, so a sheet called `My Sheet` came out bare from the
   other seven: `My Sheet!A1` from `SheetReferenceNode`, `[1]My Sheet!A1` from

@@ -34,14 +34,12 @@ public class SheetPrefixTests
     };
 
     /// <summary>
-    /// Names that are a cell as well as a sheet, e.g. <c>PWD1</c> is the cell of column PWD, row 1.
+    /// Lex a formula in one reference style, i.e. <see cref="RolexLexer.GetTokensA1"/> or
+    /// <see cref="RolexLexer.GetTokensR1C1"/>.
     /// </summary>
-    private static readonly string[] CellLikeSheetNames = { "PWD1", "LOG10" };
+    private delegate List<Token> Lex(ReadOnlySpan<char> formula);
 
     public static TheoryData<string> AwkwardSheetNames => ToTheoryData(SheetNames);
-
-    public static TheoryData<string> AwkwardSheetNamesThatAreNotCells =>
-        ToTheoryData(SheetNames.Where(name => !CellLikeSheetNames.Contains(name)));
 
     [Theory]
     [MemberData(nameof(AwkwardSheetNames))]
@@ -58,18 +56,47 @@ public class SheetPrefixTests
     }
 
     [Theory]
-    [MemberData(nameof(AwkwardSheetNamesThatAreNotCells))]
+    [MemberData(nameof(AwkwardSheetNames))]
     public void A_written_3D_reference_reads_back_as_the_same_first_sheet(string sheet)
     {
         AssertReadsBack(SheetPrefix.Range(sheet, "Last"));
     }
 
-    [Theory(Skip = "The bare prefix lexes as a cell, so it doesn't read back. See issue #31.")]
+    /// <summary>
+    /// The prefix is written without knowing the reference style of the formula it goes into, so the
+    /// first sheet of a 3D reference must read back in both.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(AwkwardSheetNames))]
+    public void A_written_3D_reference_reads_back_as_the_same_first_sheet_in_R1C1(string sheet)
+    {
+        AssertReadsBack(SheetPrefix.Range(sheet, "Last"), RolexLexer.GetTokensR1C1);
+    }
+
+    [Theory]
+    [InlineData("PWD1", "Last")]
+    [InlineData("LOG10", "Last")]
+    [InlineData("R1C1", "Last")]
+    [InlineData("PWD1", "PWD1")]
+    [InlineData("PWD1", "My Last")]
+    public void A_3D_reference_quotes_a_first_sheet_that_is_also_a_cell(string first, string last)
+    {
+        AssertReadsBack(SheetPrefix.Range(first, last));
+        AssertReadsBack(SheetPrefix.Range(first, last), RolexLexer.GetTokensR1C1);
+        Assert.StartsWith("'", Write(SheetPrefix.Range(first, last)));
+    }
+
+    /// <summary>
+    /// A book prefix is enough to tell the lexer a sheet prefix has started, so the first sheet reads
+    /// back bare even when it is also a cell.
+    /// </summary>
+    [Theory]
     [InlineData("PWD1")]
     [InlineData("LOG10")]
-    public void A_written_3D_reference_reads_back_when_its_first_sheet_is_also_a_cell(string sheet)
+    [InlineData("R1C1")]
+    public void A_3D_reference_of_another_workbook_keeps_a_cell_like_first_sheet_bare(string sheet)
     {
-        AssertReadsBack(SheetPrefix.Range(sheet, "Last"));
+        Assert.Equal($"[3]{sheet}:Last!", Write(SheetPrefix.Range(sheet, "Last", 3)));
     }
 
     [Theory]
@@ -94,7 +121,7 @@ public class SheetPrefixTests
     {
         var prefix = SheetPrefix.DdeLink(application, topic);
 
-        var readBack = ReadBack(prefix);
+        var readBack = ReadBack(prefix, RolexLexer.GetTokensA1);
 
         Assert.True(readBack.TryGetDdeLink(out var readApplication, out var readTopic));
         Assert.Equal(application, readApplication);
@@ -151,19 +178,24 @@ public class SheetPrefixTests
 
     private static void AssertReadsBack(SheetPrefix prefix)
     {
-        Assert.Equal(prefix, ReadBack(prefix));
+        AssertReadsBack(prefix, RolexLexer.GetTokensA1);
+    }
+
+    private static void AssertReadsBack(SheetPrefix prefix, Lex lex)
+    {
+        Assert.Equal(prefix, ReadBack(prefix, lex));
     }
 
     /// <summary>
     /// Lex a written prefix and read it back the way <c>FormulaParser</c> does. A 3D reference has
-    /// two written forms: one <c>SHEET_RANGE_PREFIX</c> token, and, when the first sheet doesn't
-    /// look like a column, the <c>NAME COLON SINGLE_SHEET_PREFIX</c> triple.
+    /// two written forms: one <c>SHEET_RANGE_PREFIX</c> token, and, when the first sheet is a name,
+    /// the <c>NAME COLON SINGLE_SHEET_PREFIX</c> triple.
     /// </summary>
-    private static SheetPrefix ReadBack(SheetPrefix prefix)
+    private static SheetPrefix ReadBack(SheetPrefix prefix, Lex lex)
     {
         var text = Write(prefix);
         var span = text.AsSpan();
-        var tokens = RolexLexer.GetTokensA1(span);
+        var tokens = lex(span);
         var lastIndex = tokens.Count - 1;
         Assert.Equal(Token.EofSymbolId, tokens[lastIndex].SymbolId);
         Assert.Equal(text.Length, tokens[lastIndex].StartIndex);
