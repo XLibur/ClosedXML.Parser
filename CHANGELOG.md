@@ -14,22 +14,6 @@ or Fixed.
 
 ## Unreleased
 
-### Summary
-
-XLibur.ClosedXML.Parser 3.1.0 is a fix release, and most of it comes out of two new test tools: a
-coverage-guided fuzzing harness driven by libFuzzer, and a differential sweep of the two lexers over
-every short input from a bracket-and-punctuation alphabet. Structured references take the largest
-share. Three items that reached the parser as an `IndexOutOfRangeException` or a
-`NotSupportedException` are now read or refused properly, `[:b]` is a column called `:b` rather than
-a range with a nameless side, `[a:b:c]` keeps the whole of its second column name, and a structured
-reference is written the way the parser reads it: a range of columns keeps its colon, an ordinary
-`Table1[Column]` is no longer doubled, and the four characters the grammar escapes are escaped. The
-library also holds a sheet name to one rule everywhere. The formula parsers, `ReferenceParser` and a
-`FormulaModifier` rename all refuse a name no workbook could hold, including a name that starts or
-ends with an apostrophe, instead of building a reference that has no spelling to write it in. An
-empty formula now raises the `ParsingException` all four `FormulaConverter` methods document.
-## v3.1.0 - 2026-09-13
-
 ### Formula parsers
 
 #### Added
@@ -45,6 +29,34 @@ empty formula now raises the `ParsingException` all four `FormulaConverter` meth
   rename is, wherever in the pair they are answered: a sheet name no workbook could hold raises an
   `InvalidOperationException`, and so does a range that names no sheets, which is how a `default`
   one reads.
+
+#### Fixed
+
+- Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of
+  `#REF!#REF!`. A sheet error, `Sheet1!#REF!`, names a sheet whose area is gone; delete that sheet
+  too and nothing is left to name, which is why Excel saves such a reference as a plain `#REF!`.
+  The rewriter instead wrote the prefix of a deleted sheet and then the error behind it, spelling
+  `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
+  Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
+
+## v3.1.0 - 2026-09-13
+
+### Summary
+
+XLibur.ClosedXML.Parser 3.1.0 is a fix release, and most of it comes out of two new test tools: a
+coverage-guided fuzzing harness driven by libFuzzer, and a differential sweep of the two lexers over
+every short input from a bracket-and-punctuation alphabet. Structured references take the largest
+share. Three items that reached the parser as an `IndexOutOfRangeException` or a
+`NotSupportedException` are now read or refused properly, `[:b]` is a column called `:b` rather than
+a range with a nameless side, `[a:b:c]` keeps the whole of its second column name, and a structured
+reference is written the way the parser reads it: a range of columns keeps its colon, an ordinary
+`Table1[Column]` is no longer doubled, and the four characters the grammar escapes are escaped. The
+library also holds a sheet name to one rule everywhere. The formula parsers, `ReferenceParser` and a
+`FormulaModifier` rename all refuse a name no workbook could hold, including a name that starts or
+ends with an apostrophe, instead of building a reference that has no spelling to write it in. An
+empty formula now raises the `ParsingException` all four `FormulaConverter` methods document.
+
+### Formula parsers
 
 #### Changed
 
@@ -71,12 +83,6 @@ empty formula now raises the `ParsingException` all four `FormulaConverter` meth
 
 #### Fixed
 
-- Write a plain `#REF!` when a formula modification deletes the sheet of a sheet error, instead of
-  `#REF!#REF!`. A sheet error, `Sheet1!#REF!`, names a sheet whose area is gone; delete that sheet
-  too and nothing is left to name, which is why Excel saves such a reference as a plain `#REF!`.
-  The rewriter instead wrote the prefix of a deleted sheet and then the error behind it, spelling
-  `#REF!#REF!` — the very form it already rewrites back to `#REF!` wherever it reads one, because
-  Excel cannot parse it. A rename is untouched: `Sheet1!#REF!` still becomes `Data!#REF!`.
 - Refuse a formula that nests deeper than 256 levels, instead of taking the whole process down with
   a `StackOverflowException`. The parser descends by recursion and counted nothing, so a formula
   that nested deeply enough ran the stack out — and a stack overflow cannot be caught, so a host
