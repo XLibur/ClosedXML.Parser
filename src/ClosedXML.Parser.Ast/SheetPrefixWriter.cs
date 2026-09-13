@@ -37,8 +37,15 @@ internal static class SheetPrefixWriter
     {
         var book = Book(workbookIndex);
 
+        // The first sheet of a bare 3D reference stands where nothing has said a sheet prefix has
+        // started, so a cell-like name has to be quoted there as well. A book prefix has said it,
+        // so the name behind one is judged like any other.
+        var quoteFirstSheet = workbookIndex is null
+            ? NameUtils.ShouldQuoteAsFirstSheet(firstSheet)
+            : NameUtils.ShouldQuote(firstSheet);
+
         // One quote covers both sheets, so either of them needing one quotes the pair.
-        return NameUtils.ShouldQuote(firstSheet) || NameUtils.ShouldQuote(lastSheet)
+        return quoteFirstSheet || NameUtils.ShouldQuote(lastSheet)
             ? $"'{book}{Escape(firstSheet)}:{Escape(lastSheet)}'!"
             : $"{book}{firstSheet}:{lastSheet}!";
     }

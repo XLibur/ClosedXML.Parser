@@ -12,6 +12,14 @@ under Unreleased with each change.
 
 ### Added
 
+- `NameUtils.ShouldQuoteAsFirstSheet`, which answers whether a name needs quotes in the first
+  position of a 3D reference. `ShouldQuote` answers for a name standing on its own and
+  deliberately leaves a name shaped like a reference bare, because the `!` of `PWD1!A1` settles
+  it. The first sheet of a bare `first:last!` has no `!` in front of it yet, so a cell-like name
+  lexes as the cell and takes the prefix with it. The two callers that write a sheet prefix, one
+  for a formula and one for the display string of an Ast node, ask this instead of keeping the
+  rule themselves. A caller writing a 3D prefix of its own needs the same answer and had no way
+  to get it.
 - `FormulaConverter.ModifyR1C1`, the R1C1 counterpart of `ModifyA1`. `ModContext.IsA1` tells a
   modifier the reference style of the formula, and a reference it gets is in that style.
 - `ReferenceParser.TryParseR1C1`. Every public method of `ReferenceParser` lexed with the
@@ -117,6 +125,15 @@ under Unreleased with each change.
 
 ### Fixed
 
+- Quote a first sheet that is also a cell in the display string of a 3D reference, e.g.
+  `'PWD1:Dec'!A1`. A written formula has quoted it since the fix for
+  [#31](https://github.com/XLibur/ClosedXML.Parser/issues/31), but `Reference3DNode` wrote it bare,
+  and a bare `PWD1:Dec!A1` reads back as a range of the cell `PWD1` and the reference `Dec!A1` — a
+  different node, silently, without an error to show for it. The two writers each held a copy of the
+  rule, so fixing one left the other behind. The condition lives in `NameUtils` now and both ask it.
+  Nothing else changes: a cell-like last sheet was never in doubt, so `Jan:PWD1!A1` stays bare, and
+  a book prefix already says a sheet prefix has started, so `[2]PWD1:Dec!A1` does too.
+  [#40](https://github.com/XLibur/ClosedXML.Parser/issues/40)
 - Parse a space intersection after an expression in braces, e.g. `(A1) B2`. The lexer puts the
   whitespace around an operator into its token, so the `)` of `(A1) B2` is lexed as `) ` and there is
   no `SPACE` token left for the intersection operator. Both parsers looped on a `SPACE` token, so
@@ -154,10 +171,7 @@ under Unreleased with each change.
   an apostrophe inside the name, and let the quote wrap the whole prefix, book index included,
   `'[2]Jane''s'!A1`. Either sheet of a 3D reference needing quotes quotes the pair,
   `'My Jan:Dec'!A1`. A name that needs no quotes still stays bare. All nine nodes that carry a sheet
-  write their prefix in one place now, `SheetPrefixWriter`, instead of each building its own. A
-  first sheet of a 3D reference that is also a cell, e.g. `PWD1:Dec!A1`, still comes out unquoted;
-  that is [#31](https://github.com/XLibur/ClosedXML.Parser/issues/31), and a written formula has it
-  too.
+  write their prefix in one place now, `SheetPrefixWriter`, instead of each building its own.
   [#34](https://github.com/XLibur/ClosedXML.Parser/issues/34)
 - Keep the range of an expression in braces that turns out to be a reference, e.g. `(A1):B2`. The
   parser reads `(A1)` as a value expression, and when the `:` shows it is a reference expression, it
