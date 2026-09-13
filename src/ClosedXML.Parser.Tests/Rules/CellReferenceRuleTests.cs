@@ -90,7 +90,7 @@ public class CellReferenceRuleTests
             yield return new object[]
             {
                 "Sheet5!#REF!",
-                new ValueNode("Error", "#REF!")
+                new SheetErrorNode(null, "Sheet5", "#REF!")
             };
         }
     }

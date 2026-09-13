@@ -125,39 +125,29 @@ public class FormulaModifier
             if (range.Length == error.Length)
                 return TransformedSymbol.CopyOriginal(ctx.Formula, range);
 
-            // Deal with `Sheet!#REF!`, `!#REF!`, `#REF!A1` and `#REF!#REF!`
+            // `#REF!A1` and `#REF!#REF!` are an invalid formula that Excel can't parse. It is displayed,
+            // but likely only because it is a serialization of internal structures. When a sheet is
+            // deleted, the result is `#REF!`, which is how it is actually saved in the file.
             var symbol = ctx.Formula.AsSpan().Slice(range.Start, range.Length);
-            var sheetIsRefError = symbol.StartsWith(REF_ERROR.AsSpan(), StringComparison.OrdinalIgnoreCase);
-
-            if (sheetIsRefError)
-            {
-                // #REF!A1 is invalid formula that can't be parsed by Excel. It is displayed, but
-                // likely only because it is a serialization of internal structures. When sheet is
-                // deleted, the result is #REF!, which is how it is actually saved in the file.
+            if (symbol.StartsWith(REF_ERROR.AsSpan(), StringComparison.OrdinalIgnoreCase))
                 return TransformedSymbol.ToText(ctx.Formula, range, REF_ERROR);
-            }
 
-            // A bang reference to a deleted cell has no sheet to modify.
-            if (symbol[0] == '!')
-                return TransformedSymbol.CopyOriginal(ctx.Formula, range);
+            // A bang reference to a deleted cell, `!#REF!`, has no sheet to modify.
+            return TransformedSymbol.CopyOriginal(ctx.Formula, range);
+        }
 
-            // Sheet!#REF! is a valid formula per grammar and Excel, though it displeases me. The symbol
-            // is a sheet prefix token followed by the error token, so read the sheet the way the parser does.
-            var errorText = symbol.Slice(symbol.Length - error.Length);
-            var sheetPrefixToken = new Token(Token.SINGLE_SHEET_PREFIX, range.Start, range.Length - error.Length);
-            var sheetPrefix = SheetPrefix.ReadSingle(ctx.Formula.AsSpan(), sheetPrefixToken);
-            var nodeText = new StringBuilder();
-            if (sheetPrefix.BookIndex is null)
+        public TransformedSymbol SheetErrorNode(ModContext ctx, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error)
+        {
+            // A sheet of another workbook isn't modified.
+            var prefix = SheetPrefix.Sheet(sheet, workbookIndex);
+            if (workbookIndex is null)
             {
-                var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheetPrefix.FirstSheet!);
-                nodeText.AppendPrefix(modifiedSheet is null ? SheetPrefix.Deleted : SheetPrefix.Sheet(modifiedSheet));
-            }
-            else
-            {
-                nodeText.AppendPrefix(sheetPrefix); // A sheet of another workbook isn't modified.
+                var modifiedSheet = ctx.Modifier.ModifySheet(ctx, sheet);
+                prefix = modifiedSheet is null ? SheetPrefix.Deleted : SheetPrefix.Sheet(modifiedSheet);
             }
 
-            return TransformedSymbol.ToText(ctx.Formula, range, nodeText.Append(errorText).ToString());
+            var nodeText = prefix.Append(new StringBuilder()).Append(error).ToString();
+            return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
         public TransformedSymbol NumberNode(ModContext ctx, SymbolRange range, double value)

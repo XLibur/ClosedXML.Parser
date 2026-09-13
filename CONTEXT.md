@@ -58,6 +58,12 @@ A reference addressing a table by name and its parts by column or region rather 
 cell (`Table1[Column]`).
 _Avoid_: table reference, intra-table reference
 
+**Sheet error**:
+A reference whose area is gone but whose sheet is not, written `Sheet1!#REF!`. The sheet is still
+named, so a formula modification renames it like the sheet of any other reference. A reference whose
+sheet itself was deleted is a plain `#REF!` instead.
+_Avoid_: ref error (for this one), deleted reference
+
 **Cell function**:
 A call that uses a cell reference as the function being called (`R7C3(TRUE)`), rather
 than a function name. A macro-sheet construct, and written in the formula's reference

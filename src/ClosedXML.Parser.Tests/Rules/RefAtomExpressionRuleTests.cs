@@ -17,11 +17,20 @@ public class RefAtomExpressionRuleTests
     [InlineData("#REF!$7:$15")]
     [InlineData("#REF!B:AG")]
     [InlineData("#REF!$ABC:$ADD")]
-    [InlineData("Sheet!#REF!")]
     [InlineData("#REF!#REF!")]
     public void Ref_error_with_reference(string refError)
     {
         VerifyNode(refError, new ValueNode("Error", "#REF!"));
+    }
+
+    [Theory]
+    [InlineData("Sheet!#REF!", null, "Sheet")]
+    [InlineData("'My Sheet'!#REF!", null, "My Sheet")]
+    [InlineData("[1]Sheet!#REF!", 1, "Sheet")]
+    [InlineData("'[2]Jane''s'!#REF!", 2, "Jane's")]
+    public void Ref_error_keeps_the_sheet_it_is_qualified_with(string refError, int? workbookIndex, string sheet)
+    {
+        VerifyNode(refError, new SheetErrorNode(workbookIndex, sheet, "#REF!"));
     }
 
     [Fact]

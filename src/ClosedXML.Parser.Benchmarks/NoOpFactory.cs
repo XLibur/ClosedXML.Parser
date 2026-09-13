@@ -30,6 +30,8 @@ internal sealed class NoOpFactory : IAstFactory<object, object, object?>
 
     public object ErrorNode(object? context, SymbolRange range, ReadOnlySpan<char> error) => s_node;
 
+    public object SheetErrorNode(object? context, SymbolRange range, int? workbookIndex, string sheet, ReadOnlySpan<char> error) => s_node;
+
     public object NumberNode(object? context, SymbolRange range, double value) => s_node;
 
     public object TextNode(object? context, SymbolRange range, string text) => s_node;
