@@ -17,6 +17,15 @@ or Fixed.
 
 #### Changed
 
+- Allocate less on the paths that change nothing. A modification that leaves a part of a formula
+  alone is the common outcome, and three places allocated anyway: a part nothing changed was copied
+  out of the formula through a `StringBuilder` rather than sliced from it, six builders were sized
+  with a LINQ `Sum` over an interface list, which boxes an enumerator each time, and the letters of
+  an A1 column were built by prepending to a string, one allocation a letter, before being handed
+  to a builder the caller already held. Measured over the enron and euses data sets, a sheet rename
+  allocates about a quarter less — 678 B to 496 B and 772 B to 575 B a formula — and a conversion
+  between reference styles 3 to 8 per cent less. Run times are unchanged.
+
 - Refuse a sheet name no workbook could hold, so `€?:D!A1` and `a?:D!A1` are parse errors rather
   than 3D references. `NameUtils.IsSheetNameValid` already said such a name is illegal, and the
   parser assembled a `Reference3DNode` from it anyway — a node with no spelling in the language:
@@ -30,6 +39,32 @@ or Fixed.
   differently.
 
 #### Fixed
+
+- Refuse a formula that nests deeper than 256 levels, instead of taking the whole process down with
+  a `StackOverflowException`. The parser descends by recursion and counted nothing, so a formula
+  that nested deeply enough ran the stack out — and a stack overflow cannot be caught, so a host
+  reading an untrusted workbook died where it should have rejected one formula. Braces cost about
+  seven stack frames a level and ran out first, at 378 of them: a formula of 757 characters, well
+  inside the 8192 a cell can hold. A chain of unary operators and a chain of arguments reach the
+  same end by their own paths, at their own depths. Excel accepts at most 64 levels of nested
+  functions, so the limit refuses only formulas no workbook holds, and a formula past it now raises
+  a `ParsingException` like any other the parser will not read.
+
+- Read a name, a text or a column name of any length, instead of taking the whole process down with
+  a `StackOverflowException`. A scratch buffer was taken from the stack and sized from the token it
+  copies, and the grammar puts no length limit on any of the three, so a long enough one ran the
+  stack out the same uncatchable way — around a million characters, or half that on a thread pool
+  thread, which has a smaller stack. Past 256 characters the buffer now comes from the heap, which
+  costs nothing next to the string built from it. The three buffers that copy an error token are
+  bounded by the grammar to about twenty characters and keep the stack, as their comments say.
+
+- Name the argument in the exceptions two guards raise. `Token.GetSymbolName` built its
+  `ArgumentOutOfRangeException` with the overload that takes a parameter name rather than a
+  message, so an unknown symbol read as `Specified argument was out of the range of valid values.
+  (Parameter 'Invalid symbol 5.')`. It sits on the path that reports an unexpected token, so it
+  degraded every such diagnostic. Two of `ReferenceParser`'s six entry points threw
+  `ArgumentNullException` with no argument name at all, three lines from four that pass one,
+  leaving a caller that reads `ParamName` with nothing to read.
 
 - Refuse a structured reference with an item that holds nothing but whitespace, `[ ]` or
   `[[#Data], ]`, instead of raising an `IndexOutOfRangeException` from inside the token parser.
