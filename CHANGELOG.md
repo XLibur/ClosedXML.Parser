@@ -9,6 +9,7 @@ or Fixed.
 ## Contents
 
 - [Unreleased](#unreleased)
+- [v3.1.0](#v310---2026-09-13)
 - [v3.0.0](#v300---2026-09-13)
 
 ## Unreleased
@@ -27,6 +28,7 @@ library also holds a sheet name to one rule everywhere. The formula parsers, `Re
 `FormulaModifier` rename all refuse a name no workbook could hold, including a name that starts or
 ends with an apostrophe, instead of building a reference that has no spelling to write it in. An
 empty formula now raises the `ParsingException` all four `FormulaConverter` methods document.
+## v3.1.0 - 2026-09-13
 
 ### Formula parsers
 
