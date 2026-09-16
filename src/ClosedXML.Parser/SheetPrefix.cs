@@ -101,7 +101,7 @@ internal readonly record struct SheetPrefix
         input = ExtractWorkbookIndex(input, out var bookIndex);
 
         // The ending '! have been stripped from escape
-        var sheet = isEscaped ? GetEscapedSheetName(input) : input.ToString();
+        var sheet = isEscaped ? TokenParser.UnescapeTicks(input) : input.ToString();
         return Sheet(sheet, bookIndex);
     }
 
@@ -142,7 +142,7 @@ internal readonly record struct SheetPrefix
 
         // Parse SHEET_NAME_SPECIAL which can contain escaped tick (') as double tick
         var firstSheet = GetEscapedSheetName(ref input, ':'); // Even escaped sheet name can't contain :
-        return Range(firstSheet, GetEscapedSheetName(input), bookIndex);
+        return Range(firstSheet, TokenParser.UnescapeTicks(input), bookIndex);
     }
 
     /// <summary>
@@ -274,40 +274,21 @@ internal readonly record struct SheetPrefix
         return input.Slice(i + 1);
     }
 
+    /// <summary>
+    /// Read the sheet name that ends at <paramref name="endChar"/> and leave <paramref name="input"/>
+    /// standing after it, which is where the second name of a sheet range starts.
+    /// </summary>
+    /// <remarks>
+    /// Finding the end is the whole of the job here: a sheet name may hold neither a colon nor a
+    /// lone tick, so the first colon in the text is the separator and nothing before it can be
+    /// mistaken for one. Unescaping the name it found is <see cref="TokenParser.UnescapeTicks"/>'s
+    /// job, so the two sheets of a range are read the way every other quoted name is.
+    /// </remarks>
     private static string GetEscapedSheetName(ref ReadOnlySpan<char> input, char endChar)
     {
-        Span<char> buffer = input.Length <= TokenParser.MaxStackAllocChars
-            ? stackalloc char[TokenParser.MaxStackAllocChars]
-            : new char[input.Length];
-        var bufferIdx = 0;
-        var inputIdx = 0;
-        do
-        {
-            if (input[inputIdx] == '\'')
-                inputIdx++;
-
-            buffer[bufferIdx++] = input[inputIdx++];
-        } while (input[inputIdx] != endChar);
-
-        input = input.Slice(inputIdx + 1);
-        return buffer.Slice(0, bufferIdx).ToString();
-    }
-
-    private static string GetEscapedSheetName(ReadOnlySpan<char> input)
-    {
-        Span<char> buffer = input.Length <= TokenParser.MaxStackAllocChars
-            ? stackalloc char[TokenParser.MaxStackAllocChars]
-            : new char[input.Length];
-        var bufferIdx = 0;
-        var inputIdx = 0;
-        do
-        {
-            if (input[inputIdx] == '\'')
-                inputIdx++;
-
-            buffer[bufferIdx++] = input[inputIdx++];
-        } while (input.Length > inputIdx);
-
-        return buffer.Slice(0, bufferIdx).ToString();
+        var endIdx = input.IndexOf(endChar);
+        var name = TokenParser.UnescapeTicks(input.Slice(0, endIdx));
+        input = input.Slice(endIdx + 1);
+        return name;
     }
 }

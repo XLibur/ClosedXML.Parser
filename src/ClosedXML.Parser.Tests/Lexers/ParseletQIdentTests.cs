@@ -76,6 +76,8 @@ public class ParseletQIdentTests
     [InlineData("'Jan 1:Dec 31'!")]
     [InlineData("'Jan 1:Dec 31'!name")] // there is no such thing as a 3D name
     [InlineData("'a:b:c'!A1")] // a sheet name cannot contain a colon, so this is not a range
+    [InlineData("''!A1")] // the quotes hold nothing, so they name no sheet
+    [InlineData("'a:'!A1")] // and neither does either end of a range
     public void Invalid_references_starting_with_quoted_ident_throw_parsing_exception(string formula)
     {
         Assert.Throws<ParsingException>(() => Parse(formula));
