@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 /// <summary>
 /// Structure reference is basically a set of cells in an area of an intersection between a range of columns

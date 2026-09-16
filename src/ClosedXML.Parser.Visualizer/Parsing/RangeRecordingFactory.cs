@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Visualizer.Parsing;
+namespace XLibur.Parser.Visualizer.Parsing;
 
 /// <summary>
 /// Creates the nodes with <see cref="F"/> and records the range of the formula text that each

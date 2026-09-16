@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Pratt;
+﻿namespace XLibur.Parser.Pratt;
 
 /// <summary>
 /// Values of binding power for operators in an expression. Higher number = higher binding power.

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A symbol that represents a transformed symbol value. Should be used during AST transformation.

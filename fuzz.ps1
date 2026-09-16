@@ -3,7 +3,7 @@
     Fuzz ClosedXML.Parser, or replay saved inputs through the same oracle.
 
 .DESCRIPTION
-    Publishes ClosedXML.Parser.Fuzz, instruments ClosedXML.Parser.dll and ClosedXML.Parser.Ast.dll
+    Publishes ClosedXML.Parser.Fuzz, instruments XLibur.ClosedXML.Parser.dll and ClosedXML.Parser.Ast.dll
     with SharpFuzz, and runs libFuzzer over a corpus. Seeds come from the committed corpus under
     src/ClosedXML.Parser.Fuzz/corpus/<target>, so a fresh clone starts where the last person started.
 
@@ -174,7 +174,7 @@ same oracle without libFuzzer.
     # Both assemblies, because the properties the targets check span the two: the parser reads a
     # formula, the AST project writes it back out. Instrumenting only the parser would leave every
     # display writer invisible to the coverage feedback.
-    Invoke-Native $tool @((Join-Path $publishRoot 'ClosedXML.Parser.dll'))
+    Invoke-Native $tool @((Join-Path $publishRoot 'XLibur.ClosedXML.Parser.dll'))
     Invoke-Native $tool @((Join-Path $publishRoot 'ClosedXML.Parser.Ast.dll'))
 
     # Seed from the committed corpus, so a fresh clone starts where the last person started.

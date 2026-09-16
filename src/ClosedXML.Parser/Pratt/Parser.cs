@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Pratt;
+﻿namespace XLibur.Parser.Pratt;
 
 /// <summary>
 /// Pratt parser.

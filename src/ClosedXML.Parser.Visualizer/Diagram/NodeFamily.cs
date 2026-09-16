@@ -1,6 +1,6 @@
 using System.Collections.Frozen;
 
-namespace ClosedXML.Parser.Visualizer.Diagram;
+namespace XLibur.Parser.Visualizer.Diagram;
 
 /// <summary>
 /// A group of node types that the diagram shows in one colour.

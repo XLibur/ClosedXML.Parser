@@ -1,6 +1,6 @@
-﻿using ClosedXML.Parser.Rolex;
+﻿using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// ANTLR parser is the source of truth. This test class checks that ANTLR output and Rolex/RDP have same output.

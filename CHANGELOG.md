@@ -15,6 +15,23 @@ or Fixed.
 
 ## Unreleased
 
+### Packaging and tooling
+
+#### Changed
+
+- **Breaking:** the assembly is named `XLibur.ClosedXML.Parser` and the namespace is
+  `XLibur.Parser`, where both were `ClosedXML.Parser` before. The old assembly had the same name and
+  strong-name key as the upstream `ClosedXML.Parser`, and the runtime loads one assembly for each
+  name, so an application that referenced both ClosedXML and XLibur loaded only one of the two
+  parsers. The other library then failed at runtime: ClosedXML threw a `TypeLoadException` because
+  its `AstFactory` did not implement `SheetErrorNode`. The two assemblies now load side by side. The
+  namespace changed as well, so a project that references both parsers directly can use the types
+  of each without an `extern alias`. A consumer replaces `using ClosedXML.Parser` with
+  `using XLibur.Parser` and rebuilds. A library built against an earlier version, such as XLibur
+  0.600.0, must be rebuilt before it can use this one ([#59](https://github.com/XLibur/ClosedXML.Parser/issues/59)).
+  The new `ClosedXML.Parser.SideBySide.Tests` project loads ClosedXML and XLibur in one process to
+  keep the two apart.
+
 ## v4.0.0 - 2026-09-13
 
 ### Formula parsers

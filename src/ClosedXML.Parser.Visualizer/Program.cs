@@ -1,4 +1,4 @@
-using ClosedXML.Parser.Visualizer.Pages;
+using XLibur.Parser.Visualizer.Pages;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

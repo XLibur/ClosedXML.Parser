@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// The sheet prefix of a reference, i.e. the part naming the sheet a reference points into, up to

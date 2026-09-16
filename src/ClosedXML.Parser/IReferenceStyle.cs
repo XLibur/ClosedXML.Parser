@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Reads a formula written in one <see cref="ReferenceStyle"/>. An adapter binds the lexer

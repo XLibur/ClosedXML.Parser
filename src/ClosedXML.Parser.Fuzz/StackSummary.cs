@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Fuzz;
+namespace XLibur.Parser.Fuzz;
 
 /// <summary>
 /// Reduces a stack trace to the one frame worth reading.
@@ -31,11 +31,11 @@ internal static class StackSummary
         if (frames.Length == 0)
             return "(no stack)";
 
-        // The harness lives in ClosedXML.Parser.Fuzz, so a frame of its own would match a bare
-        // "ClosedXML.Parser." test. Prefer a library frame, and only then anything at all.
+        // The harness lives in XLibur.Parser.Fuzz, so a frame of its own would match a bare
+        // "XLibur.Parser." test. Prefer a library frame, and only then anything at all.
         var library = Array.Find(frames, f =>
-            f.Contains("ClosedXML.Parser.", StringComparison.Ordinal) &&
-            !f.Contains("ClosedXML.Parser.Fuzz.", StringComparison.Ordinal));
+            f.Contains("XLibur.Parser.", StringComparison.Ordinal) &&
+            !f.Contains("XLibur.Parser.Fuzz.", StringComparison.Ordinal));
 
         return library ?? frames[0];
     }

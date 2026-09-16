@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Extension methods for building formulas.

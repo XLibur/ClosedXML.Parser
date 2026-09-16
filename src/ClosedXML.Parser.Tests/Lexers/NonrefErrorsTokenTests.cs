@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Tests.Lexers;
+namespace XLibur.Parser.Tests.Lexers;
 
 public class NonrefErrorsTokenTests
 {

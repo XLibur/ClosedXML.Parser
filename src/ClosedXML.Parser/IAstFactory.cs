@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A factory used to create an AST through <see cref="FormulaParser{TScalarValue,TNode,TContext}"/>.

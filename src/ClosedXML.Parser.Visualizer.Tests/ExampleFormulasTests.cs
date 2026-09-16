@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Visualizer.Parsing;
+using XLibur.Parser.Visualizer.Parsing;
 
-namespace ClosedXML.Parser.Visualizer.Tests;
+namespace XLibur.Parser.Visualizer.Tests;
 
 public class ExampleFormulasTests
 {

@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 using JetBrains.Annotations;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A parser of Excel formulas, with main purpose of creating an abstract syntax tree.

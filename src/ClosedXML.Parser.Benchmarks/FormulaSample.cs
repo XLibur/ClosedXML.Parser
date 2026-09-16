@@ -4,7 +4,7 @@ using System.Reflection;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// A data set of formulas from real workbooks. The data set tests check that each of its

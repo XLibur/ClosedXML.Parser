@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 /// <summary>
 /// Binary operations that can occur in the formula.

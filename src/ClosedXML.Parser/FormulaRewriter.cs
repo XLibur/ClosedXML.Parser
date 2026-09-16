@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 public partial class FormulaModifier
 {

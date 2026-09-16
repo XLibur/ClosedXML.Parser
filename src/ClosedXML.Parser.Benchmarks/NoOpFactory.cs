@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// A factory that builds no tree: each method returns the same node. A parse with this factory

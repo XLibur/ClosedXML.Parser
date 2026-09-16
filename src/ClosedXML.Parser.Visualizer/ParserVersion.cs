@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace ClosedXML.Parser.Visualizer;
+namespace XLibur.Parser.Visualizer;
 
 /// <summary>
 /// The version of the parser assembly, for the footer. The site is deployed from each push to

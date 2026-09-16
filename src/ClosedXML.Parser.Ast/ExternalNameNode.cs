@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public record ExternalNameNode(int WorkbookIndex, string Name) : AstNode
 {

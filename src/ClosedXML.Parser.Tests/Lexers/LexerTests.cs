@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using ClosedXML.Parser.Pratt;
+using XLibur.Parser.Pratt;
 
-namespace ClosedXML.Parser.Tests.Lexers;
+namespace XLibur.Parser.Tests.Lexers;
 
 public class LexerTests
 {

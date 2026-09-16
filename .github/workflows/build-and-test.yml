@@ -66,6 +66,14 @@ jobs:
           --no-build
           --logger "trx;LogFileName=test-results.trx"
 
+      # ClosedXML and XLibur in one process, each loading its own parser (issue #59).
+      - name: Test the parser alongside upstream
+        run: >
+          dotnet test src/ClosedXML.Parser.SideBySide.Tests/ClosedXML.Parser.SideBySide.Tests.csproj
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=side-by-side-test-results.trx"
+
       - name: Test the visualizer
         run: >
           dotnet test src/ClosedXML.Parser.Visualizer.Tests/ClosedXML.Parser.Visualizer.Tests.csproj

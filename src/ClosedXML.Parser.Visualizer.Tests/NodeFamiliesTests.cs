@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Visualizer.Diagram;
+using XLibur.Parser.Visualizer.Diagram;
 
-namespace ClosedXML.Parser.Visualizer.Tests;
+namespace XLibur.Parser.Visualizer.Tests;
 
 public class NodeFamiliesTests
 {

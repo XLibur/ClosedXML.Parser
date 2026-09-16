@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Tests.Lexers;
+﻿namespace XLibur.Parser.Tests.Lexers;
 
 // Tests of parsing SHEET_RANGE_PREFIX
 public class SheetRangePrefixTokenTests

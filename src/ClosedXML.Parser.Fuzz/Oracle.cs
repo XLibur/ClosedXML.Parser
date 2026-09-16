@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Fuzz;
+namespace XLibur.Parser.Fuzz;
 
 /// <summary>
 /// Decides whether what a target just did was acceptable.

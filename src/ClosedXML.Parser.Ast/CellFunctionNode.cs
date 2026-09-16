@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public record CellFunctionNode(RowCol RowCol) : AstNode
 {

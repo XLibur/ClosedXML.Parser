@@ -1,6 +1,6 @@
-﻿using static ClosedXML.Parser.ReferenceAxisType;
+﻿using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser.Tests.Lexers;
+namespace XLibur.Parser.Tests.Lexers;
 
 /// <summary>
 /// Test of a parsing of a token <c>A1_CELL</c>.

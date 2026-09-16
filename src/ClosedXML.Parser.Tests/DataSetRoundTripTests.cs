@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// Run every formula of the data sets through <see cref="FormulaConverter"/> and compare the output with the

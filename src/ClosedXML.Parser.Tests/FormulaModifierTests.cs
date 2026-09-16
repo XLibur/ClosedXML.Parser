@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// Formula modification through its public interface, a <see cref="FormulaModifier"/> passed to

@@ -1,6 +1,6 @@
-using ParserToken = ClosedXML.Parser.Token;
-using TokenParser = ClosedXML.Parser.TokenParser;
-using SheetPrefix = ClosedXML.Parser.SheetPrefix;
+using ParserToken = XLibur.Parser.Token;
+using TokenParser = XLibur.Parser.TokenParser;
+using SheetPrefix = XLibur.Parser.SheetPrefix;
 
 /// <summary>
 /// Semantic predicates of <c>FormulaParser.g4</c>. They read a token through the <c>TokenParser</c> of the

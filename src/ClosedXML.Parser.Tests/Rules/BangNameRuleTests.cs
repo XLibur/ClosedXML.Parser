@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests.Rules;
+namespace XLibur.Parser.Tests.Rules;
 
 /// <summary>
 /// A bang name, e.g. <c>!SomeName</c>. [MS-XLSX] 2.2.2.1 forbids it in a cell formula, but the formula

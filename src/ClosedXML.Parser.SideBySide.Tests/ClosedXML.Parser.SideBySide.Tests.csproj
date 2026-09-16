@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    One application referencing both ClosedXML and XLibur. ClosedXML brings the upstream
+    ClosedXML.Parser assembly; XLibur brings this fork. When the two parsers shared an assembly
+    identity, only one of them could load and the other library failed at runtime (issue #59).
+
+    The parser comes from this repository rather than from nuget.org, so a change that makes its
+    identity clash with upstream again fails here before it ships. The project reference takes
+    the place of the XLibur.ClosedXML.Parser package that XLibur depends on.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>XLibur.Parser.SideBySide.Tests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="XLibur.Bundle" Version="0.600.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClosedXML.Parser\ClosedXML.Parser.csproj" />
+  </ItemGroup>
+
+</Project>

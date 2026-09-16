@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace ClosedXML.Parser.Rolex;
+namespace XLibur.Parser.Rolex;
 
 /// <summary>
 /// A class required by a Rolex tool. Never used.

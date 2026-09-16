@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 /// <summary>
 /// The type of content stored in a row or column number of a reference.

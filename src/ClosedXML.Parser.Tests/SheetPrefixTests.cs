@@ -1,7 +1,7 @@
 using System.Text;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The sheet prefix of a reference, read from a token and written back. The round trip is the

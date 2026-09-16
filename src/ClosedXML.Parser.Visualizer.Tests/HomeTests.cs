@@ -1,10 +1,10 @@
 using Bunit;
 using Bunit.TestDoubles;
-using ClosedXML.Parser.Visualizer.Components;
-using ClosedXML.Parser.Visualizer.Pages;
+using XLibur.Parser.Visualizer.Components;
+using XLibur.Parser.Visualizer.Pages;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ClosedXML.Parser.Visualizer.Tests;
+namespace XLibur.Parser.Visualizer.Tests;
 
 public class HomeTests : BunitContext
 {

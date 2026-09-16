@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Writes the sheet prefix of a display string, i.e. the part naming the sheet a node points into,

@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace ClosedXML.Parser.Visualizer.Diagram;
+namespace XLibur.Parser.Visualizer.Diagram;
 
 /// <summary>
 /// Turns a formula tree into a Mermaid flowchart.

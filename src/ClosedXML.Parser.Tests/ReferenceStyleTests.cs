@@ -1,8 +1,8 @@
 ﻿using System;
-using ClosedXML.Parser.Rolex;
-using static ClosedXML.Parser.ReferenceAxisType;
+using XLibur.Parser.Rolex;
+using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// A reference style is the one module that decides how a formula is lexed and how its

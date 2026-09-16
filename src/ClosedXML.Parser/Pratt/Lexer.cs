@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Xml;
 
-namespace ClosedXML.Parser.Pratt;
+namespace XLibur.Parser.Pratt;
 
 /// <summary>
 /// A lexer for pratt parser.

@@ -18,7 +18,7 @@ The grammar published in the specification cannot be used directly by a parser g
 
 Install the `XLibur.ClosedXML.Parser` NuGet package.
 
-The package targets .NET 8 and requires .NET 8 or later. It has no external package dependencies.
+The package targets .NET 8 and requires .NET 8 or later. It has no external package dependencies. The assembly is `XLibur.ClosedXML.Parser.dll` and the namespace is `XLibur.Parser`, so the package can be used in the same application as upstream ClosedXML and its `ClosedXML.Parser`.
 
 ### 1. Implement an AST factory
 
@@ -305,6 +305,10 @@ This helps ensure that the generated production lexer remains consistent with `F
 ### Visualizer
 
 `ClosedXML.Parser.Visualizer.Tests` contains tests for the browser-based AST visualizer.
+
+### Side by side with upstream
+
+`ClosedXML.Parser.SideBySide.Tests` loads ClosedXML and XLibur in one process, each with its own parser. It fails if the fork's assembly name clashes with upstream `ClosedXML.Parser` again.
 
 ## Debugging the grammar
 

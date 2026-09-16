@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public record DynamicDataExchangeNode(string Application, string Topic, string Item) : AstNode
 {

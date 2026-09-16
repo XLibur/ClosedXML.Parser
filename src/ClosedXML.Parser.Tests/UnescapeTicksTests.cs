@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The one reader of a doubled apostrophe, shared by the formula parsers, the sheet prefix and the

@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Pratt.Parselets;
+namespace XLibur.Parser.Pratt.Parselets;
 
 /// <summary>
 /// Parses a reference whose sheet prefix is quoted, e.g. <c>'New York'!A1</c>. The lexer

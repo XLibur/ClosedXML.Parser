@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Pratt.Parselets;
+﻿namespace XLibur.Parser.Pratt.Parselets;
 
 internal class BinaryOpParselet<TScalar, T, TContext> : IParselet<T, TContext>
 {

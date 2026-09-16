@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 internal static class References
 {

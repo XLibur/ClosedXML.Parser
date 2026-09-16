@@ -1,7 +1,7 @@
 using BenchmarkDotNet.Attributes;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// Lex and parse single formulas of typical shapes, to find the constructs that cost the most.

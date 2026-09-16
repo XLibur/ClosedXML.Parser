@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A ref error qualified with a sheet, e.g. <c>Sheet1!#REF!</c>. The area is gone, the sheet is not.

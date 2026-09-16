@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace ClosedXML.Parser.Visualizer.Parsing;
+namespace XLibur.Parser.Visualizer.Parsing;
 
 /// <summary>
 /// Reads the position of an error from the message of a <see cref="ParsingException"/>. The

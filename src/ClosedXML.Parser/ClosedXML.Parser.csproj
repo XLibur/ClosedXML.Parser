@@ -6,9 +6,14 @@
     <Nullable>enable</Nullable>
     <Authors>Jan Havlíček, XLibur Contributors</Authors>
     <!--
-      The namespace stays ClosedXML.Parser; only the package id carries the XLibur prefix,
-      so the fork is distinguishable from the upstream ClosedXML.Parser package on nuget.org.
+      The assembly, the package and the namespace all differ from upstream ClosedXML.Parser.
+      An assembly named ClosedXML.Parser would share its identity with the upstream one, and
+      the runtime loads only one assembly per name, so an application referencing both
+      ClosedXML and XLibur could not load both parsers. The namespace differs so a project
+      referencing both parsers directly needs no extern alias to tell their types apart.
     -->
+    <AssemblyName>XLibur.ClosedXML.Parser</AssemblyName>
+    <RootNamespace>XLibur.Parser</RootNamespace>
     <PackageId>XLibur.ClosedXML.Parser</PackageId>
     <PackageTags>ClosedXML;XLibur;parser;formula;xlsx</PackageTags>
     <Description>

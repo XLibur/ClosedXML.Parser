@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public readonly record struct ScalarValue(string Type, object Value)
 {

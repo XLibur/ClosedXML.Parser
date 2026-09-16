@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 /// <summary>
 /// Style of referencing areas in a worksheet.

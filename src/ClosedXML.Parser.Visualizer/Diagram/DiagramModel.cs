@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Visualizer.Diagram;
+namespace XLibur.Parser.Visualizer.Diagram;
 
 /// <summary>
 /// A node of the diagram.

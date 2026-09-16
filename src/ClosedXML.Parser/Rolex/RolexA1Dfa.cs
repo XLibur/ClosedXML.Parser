@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ClosedXML.Parser.Rolex {
+namespace XLibur.Parser.Rolex {
     using System.Collections.Generic;
     
     internal class RolexA1Dfa : TableTokenizer {

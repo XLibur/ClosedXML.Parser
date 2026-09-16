@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The specifier an Ast node writes into its display string, e.g. <c>Table1[[#Data],[A]:[B]]</c>.

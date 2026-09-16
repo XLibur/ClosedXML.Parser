@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Writes the specifier of a structured reference, i.e. everything from the first bracket after the

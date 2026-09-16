@@ -1,8 +1,8 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// Lex and parse the formulas of a data set sample, in each reference style. The lexer is the
