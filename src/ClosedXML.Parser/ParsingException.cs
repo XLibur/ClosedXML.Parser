@@ -1,6 +1,6 @@
-﻿using ClosedXML.Parser.Pratt;
+﻿using XLibur.Parser.Pratt;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Indicates an error during parsing. In most cases, unexpected token.

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace ClosedXML.Parser.Pratt.Parselets;
+namespace XLibur.Parser.Pratt.Parselets;
 
 /// <summary>
 /// Get a number node from a <see cref="TokenType.Number"/> token.

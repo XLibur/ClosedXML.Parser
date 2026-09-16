@@ -1,7 +1,7 @@
 using System.Reflection;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The recursive descent parser, the Rolex lexer and the ANTLR lexer have to agree on the ID of each token.

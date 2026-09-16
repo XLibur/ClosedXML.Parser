@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// What <see cref="FormulaConverter"/> throws when it will not do the job. Every one of its methods

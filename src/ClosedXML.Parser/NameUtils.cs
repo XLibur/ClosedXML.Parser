@@ -1,9 +1,9 @@
 ﻿using System.Buffers;
 using System.Collections;
 using System.Text;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A class for checking whether an identifier in a formula requires quotes or

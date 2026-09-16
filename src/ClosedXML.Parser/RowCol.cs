@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using static ClosedXML.Parser.ReferenceAxisType;
+using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// <para>

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using System.Globalization;
 using System.Text;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 internal static class DataSets
 {

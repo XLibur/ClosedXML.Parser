@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public record ExternalSheetReferenceNode(int WorkbookIndex, string Sheet, ReferenceArea Reference) : AstNode
 {

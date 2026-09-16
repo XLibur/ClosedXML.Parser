@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace ClosedXML.Parser.Tests.Lexers;
+namespace XLibur.Parser.Tests.Lexers;
 
 public class IntraTableReferenceTokenTests
 {

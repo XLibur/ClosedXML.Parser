@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 public class FunctionTests
 {

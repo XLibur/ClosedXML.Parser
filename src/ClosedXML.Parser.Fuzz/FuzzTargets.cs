@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ClosedXML.Parser.Fuzz;
+namespace XLibur.Parser.Fuzz;
 
 /// <summary>The targets a fuzzing run can drive, and what each of them counts as acceptable.</summary>
 internal static class FuzzTargets

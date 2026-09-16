@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// Check sheet names. A writer of formula text asks <see cref="NameUtils.ShouldQuote"/> for each

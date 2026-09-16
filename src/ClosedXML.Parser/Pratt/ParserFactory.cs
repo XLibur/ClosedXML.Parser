@@ -1,6 +1,6 @@
-﻿using ClosedXML.Parser.Pratt.Parselets;
+﻿using XLibur.Parser.Pratt.Parselets;
 
-namespace ClosedXML.Parser.Pratt;
+namespace XLibur.Parser.Pratt;
 
 /// <summary>
 /// Builds the Pratt parser, an unfinished second parser that nothing in the library uses.

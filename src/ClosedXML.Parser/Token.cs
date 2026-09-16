@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using ClosedXML.Parser.Rolex;
+using XLibur.Parser.Rolex;
 
 // ReSharper disable InconsistentNaming
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// A token for a formula input.

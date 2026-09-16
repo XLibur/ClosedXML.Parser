@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// Convert and modify the formulas of a data set sample. Each of these parses the formula with a

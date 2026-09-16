@@ -1,6 +1,6 @@
 using Antlr2Rolex;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The Rolex grammars are generated from the ANTLR lexer grammar, which is the source of truth.

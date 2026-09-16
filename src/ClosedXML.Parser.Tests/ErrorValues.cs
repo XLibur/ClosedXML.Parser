@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// Error values Excel added after [MS-XLSX] was written. Its grammar lists only the ones up to

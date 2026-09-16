@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 public record ArrayNode(int Rows, int Columns, IReadOnlyList<ScalarValue> Elements) : AstNode
 {

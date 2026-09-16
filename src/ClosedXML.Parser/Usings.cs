@@ -1,1 +1,1 @@
-global using static ClosedXML.Parser.ReferenceStyle;
+global using static XLibur.Parser.ReferenceStyle;

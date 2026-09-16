@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Visualizer;
+namespace XLibur.Parser.Visualizer;
 
 public sealed record ExampleFormula(string Label, string Formula, ReferenceStyle Style = ReferenceStyle.A1);
 

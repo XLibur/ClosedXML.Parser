@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Rolex;
+namespace XLibur.Parser.Rolex;
 
 internal struct DfaEntry
 {

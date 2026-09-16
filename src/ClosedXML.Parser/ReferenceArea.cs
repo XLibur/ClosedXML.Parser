@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Due to frequency of an area in formulas, the grammar has a token that represents

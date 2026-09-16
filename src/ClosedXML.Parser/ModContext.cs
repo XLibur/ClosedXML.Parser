@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Where a modified formula is. <see cref="FormulaConverter"/> passes it to every method of a

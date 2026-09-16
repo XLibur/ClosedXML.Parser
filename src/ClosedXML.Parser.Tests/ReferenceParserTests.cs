@@ -1,6 +1,6 @@
-﻿using static ClosedXML.Parser.ReferenceAxisType;
+﻿using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 public class ReferenceParserTests
 {

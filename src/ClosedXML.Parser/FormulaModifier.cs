@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Says how a formula changes when the workbook around it changes, e.g. when a sheet is renamed or deleted,

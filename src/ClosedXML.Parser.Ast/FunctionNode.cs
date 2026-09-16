@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser;
+﻿namespace XLibur.Parser;
 
 public record FunctionNode(string? Sheet, string Name) : AstNode
 {

@@ -29,7 +29,7 @@ status=0
 for style in A1 R1C1; do
     cp "$tables/Lexer$style.rl" "$work/"
     # Rolex names the class after the output file, so the file name is the class name.
-    (cd "$work" && "$rolex" "Lexer$style.rl" /noshared /output "Rolex${style}Dfa.cs" /namespace ClosedXML.Parser.Rolex > /dev/null)
+    (cd "$work" && "$rolex" "Lexer$style.rl" /noshared /output "Rolex${style}Dfa.cs" /namespace XLibur.Parser.Rolex > /dev/null)
 
     generated="$work/Rolex${style}Dfa.cs"
     committed="$tables/Rolex${style}Dfa.cs"

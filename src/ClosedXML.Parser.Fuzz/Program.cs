@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using SharpFuzz;
 
-namespace ClosedXML.Parser.Fuzz;
+namespace XLibur.Parser.Fuzz;
 
 /// <summary>
 /// Entry point for the fuzzing harness. Two modes:
@@ -41,7 +41,7 @@ internal static class Program
     /// <remarks>
     /// <para>
     /// <b>No code that runs before <see cref="Fuzzer.LibFuzzer"/> starts may touch
-    /// <c>ClosedXML.Parser</c> or <c>ClosedXML.Parser.Ast</c>.</b> SharpFuzz rewrites both to report
+    /// <c>XLibur.ClosedXML.Parser</c> or <c>ClosedXML.Parser.Ast</c>.</b> SharpFuzz rewrites both to report
     /// coverage into a trace buffer that <c>Fuzzer.LibFuzzer.Run</c> is what allocates; rewritten
     /// code running earlier dereferences a buffer that is not there and the process dies during
     /// startup with a <c>TypeInitializationException</c> wrapping a <c>NullReferenceException</c>.

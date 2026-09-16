@@ -12,7 +12,7 @@ Official source for the grammar is [MS-XLSX](https://learn.microsoft.com/en-us/o
 
 # How to use
 
-Install the `XLibur.ClosedXML.Parser` NuGet package. It targets .NET 8 and needs .NET 8 or later; the package has no dependencies.
+Install the `XLibur.ClosedXML.Parser` NuGet package. It targets .NET 8 and needs .NET 8 or later; the package has no dependencies. The assembly is `XLibur.ClosedXML.Parser.dll` and the namespace is `XLibur.Parser`, so the package can be used in the same application as upstream ClosedXML and its `ClosedXML.Parser`.
 
 * Implement the `IAstFactory<TScalarValue, TNode, TContext>` interface. The parser calls it for each node, with the range of the formula text that the node was parsed from. *src/ClosedXML.Parser.Ast/AstFactory.cs* is an example; the tests and the visualizer use it.
 * Call a parsing method. The parser passes the context to each method of the factory.
@@ -87,6 +87,7 @@ Use [vscode-antlr4](https://github.com/mike-lischke/vscode-antlr4/blob/master/do
 * Data set tests are in `DataSetTests.cs`. They parse each formula of the Enron, EUSES and contributions data sets. A formula listed in the `known-fails.csv` of its data set must fail, and every other formula must parse. There is no check of the output. Each data set is a directory in `data`, with its formulas in a one column CSV file, `formulas.csv`.
 * `AntlrCompatibilityTests.cs` checks that the Rolex lexer and the ANTLR lexer produce the same tokens for the data sets.
 * `ClosedXML.Parser.Visualizer.Tests` tests the visualizer.
+* `ClosedXML.Parser.SideBySide.Tests` loads ClosedXML and XLibur in one process, each with its own parser, so the fork's assembly name cannot clash with upstream again.
 
 ## Rolex
 

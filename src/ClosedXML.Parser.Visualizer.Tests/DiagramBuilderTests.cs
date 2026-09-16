@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using ClosedXML.Parser.Visualizer.Diagram;
-using ClosedXML.Parser.Visualizer.Parsing;
+using XLibur.Parser.Visualizer.Diagram;
+using XLibur.Parser.Visualizer.Parsing;
 
-namespace ClosedXML.Parser.Visualizer.Tests;
+namespace XLibur.Parser.Visualizer.Tests;
 
 public class DiagramBuilderTests
 {

@@ -10,7 +10,7 @@ Run it from the repository root:
 ./fuzz.ps1 -Target formula-a1 -MaxTotalTime 600
 ```
 
-`fuzz.ps1` publishes this project, instruments `ClosedXML.Parser.dll` and
+`fuzz.ps1` publishes this project, instruments `XLibur.ClosedXML.Parser.dll` and
 `ClosedXML.Parser.Ast.dll`, seeds a working corpus from `corpus/<target>`, and runs libFuzzer. Use
 `-Target all` for every target in turn.
 

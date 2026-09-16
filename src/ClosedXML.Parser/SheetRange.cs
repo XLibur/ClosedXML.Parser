@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// The sheets a 3D reference spans, i.e. the <c>first:last</c> of <c>first:last!A1</c>. The

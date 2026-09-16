@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Tests;
+﻿namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// Most of tests are taken care of by <see cref="FormulaConverterToR1C1Tests"/>.

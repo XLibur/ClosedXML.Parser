@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
 
-namespace ClosedXML.Parser.Benchmarks;
+namespace XLibur.Parser.Benchmarks;
 
 /// <summary>
 /// Parse single references and names, the way a caller reads a cell address or a defined name.

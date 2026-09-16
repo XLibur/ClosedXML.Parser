@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// The display string of a sheet error, e.g. <c>'[2]Jane''s'!#REF!</c>. A quote wraps the whole

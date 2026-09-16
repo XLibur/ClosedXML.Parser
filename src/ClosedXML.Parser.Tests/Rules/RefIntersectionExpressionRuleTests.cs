@@ -1,4 +1,4 @@
-﻿namespace ClosedXML.Parser.Tests.Rules;
+﻿namespace XLibur.Parser.Tests.Rules;
 
 public class RefIntersectionExpressionRuleTests
 {

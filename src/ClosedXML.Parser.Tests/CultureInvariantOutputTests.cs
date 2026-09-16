@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// R1C1 is a machine format, so the writer must emit the ASCII hyphen-minus for negative

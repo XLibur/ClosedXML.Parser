@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests.Rules;
+namespace XLibur.Parser.Tests.Rules;
 
 /// <summary>
 /// The implicit intersection operator <c>@</c> binds looser than the range and the intersection operators, so

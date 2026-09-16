@@ -1,6 +1,6 @@
-﻿using static ClosedXML.Parser.ReferenceAxisType;
+﻿using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser.Tests.Lexers;
+namespace XLibur.Parser.Tests.Lexers;
 
 /// <summary>
 /// A letter from an astral plane — one above the BMP, written as a surrogate pair — in the places

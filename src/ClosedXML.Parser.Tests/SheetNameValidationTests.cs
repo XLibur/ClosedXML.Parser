@@ -1,4 +1,4 @@
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 /// <summary>
 /// A reference can only name a sheet the workbook could hold. <see cref="NameUtils.IsSheetNameValid"/>

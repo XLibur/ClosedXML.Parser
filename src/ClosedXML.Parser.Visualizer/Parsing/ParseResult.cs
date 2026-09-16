@@ -1,6 +1,6 @@
-using ClosedXML.Parser.Visualizer.Diagram;
+using XLibur.Parser.Visualizer.Diagram;
 
-namespace ClosedXML.Parser.Visualizer.Parsing;
+namespace XLibur.Parser.Visualizer.Parsing;
 
 /// <summary>
 /// The outcome of parsing a formula: a <see cref="ParsedFormula"/> or a <see cref="FailedParse"/>.

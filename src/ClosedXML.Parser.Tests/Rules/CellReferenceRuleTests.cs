@@ -1,6 +1,6 @@
-﻿using static ClosedXML.Parser.ReferenceAxisType;
+﻿using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser.Tests.Rules;
+namespace XLibur.Parser.Tests.Rules;
 
 /// <summary>
 /// Test rule <c>cell_reference</c>.

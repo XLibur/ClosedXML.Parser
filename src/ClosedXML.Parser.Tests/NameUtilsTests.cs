@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using Xunit.Abstractions;
 
-namespace ClosedXML.Parser.Tests;
+namespace XLibur.Parser.Tests;
 
 public class NameUtilsTests
 {

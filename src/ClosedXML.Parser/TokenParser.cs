@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using ClosedXML.Parser.Rolex;
-using static ClosedXML.Parser.ReferenceAxisType;
+using XLibur.Parser.Rolex;
+using static XLibur.Parser.ReferenceAxisType;
 
-namespace ClosedXML.Parser;
+namespace XLibur.Parser;
 
 /// <summary>
 /// Reads the meaning out of the tokens of a formula. A caller hands over a token and the formula it was
