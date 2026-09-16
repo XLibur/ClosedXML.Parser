@@ -16,7 +16,7 @@ The grammar published in the specification cannot be used directly by a parser g
 
 ## Installation and usage
 
-Install the `XLibur.ClosedXML.Parser` NuGet package.
+Install the `XLibur.ClosedXML.Parser` NuGet package. To upgrade from an earlier major version, see [Upgrade.md](Upgrade.md).
 
 The package targets .NET 8 and requires .NET 8 or later. It has no external package dependencies. The assembly is `XLibur.ClosedXML.Parser.dll` and the namespace is `XLibur.Parser`, so the package can be used in the same application as upstream ClosedXML and its `ClosedXML.Parser`.
 
