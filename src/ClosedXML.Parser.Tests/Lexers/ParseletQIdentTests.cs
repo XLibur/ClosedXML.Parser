@@ -100,6 +100,9 @@ public class ParseletQIdentTests
     [InlineData("a'b'c")]
     [InlineData("1st quarter")]
     [InlineData("+")]
+    [InlineData("R5Z")] // Quoted for its shape (#62)
+    [InlineData("A1")]
+    [InlineData("RC")]
     public void Parses_back_the_reference_a_serializer_writes_for_a_quoted_name(string sheet)
     {
         // The two halves have to agree: whatever ShouldQuote decides to wrap in
@@ -108,6 +111,21 @@ public class ParseletQIdentTests
         var formula = "'" + sheet.Replace("'", "''") + "'!A1";
 
         var node = Assert.IsType<SheetReferenceNode>(Parse(formula));
+
+        Assert.Equal(sheet, node.Sheet);
+    }
+
+    [Theory]
+    [InlineData("R5Z")]
+    [InlineData("C05A")]
+    [InlineData("RC1X")]
+    public void Reads_a_bare_sheet_name_that_is_quoted_only_for_its_shape(string sheet)
+    {
+        // ShouldQuote quotes these now, but workbooks written before #62 store them bare, and
+        // the reader keeps asking about the characters alone.
+        Assert.True(NameUtils.ShouldQuote(sheet));
+
+        var node = Assert.IsType<SheetReferenceNode>(Parse(sheet + "!A1"));
 
         Assert.Equal(sheet, node.Sheet);
     }

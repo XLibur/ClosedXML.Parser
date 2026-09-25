@@ -16,6 +16,9 @@ public class FormulaModifierTests
     [InlineData("'Wk2'!C5")]
     [InlineData("592101500!D11")]
     [InlineData("'Jan:Dec'!A1")]
+    // Written before #62, a reference-shaped sheet name is bare, and it still reads.
+    [InlineData("R5Z!A1")]
+    [InlineData("A1!A1")]
     // An area of one cell isn't collapsed, because nothing changed it.
     [InlineData("'Org Chart'!D5:D5")]
     [InlineData("SUBTOTAL(9,G10:G10)")]
@@ -64,6 +67,13 @@ public class FormulaModifierTests
     [InlineData("Old!B7:$D$10", "Old", "New", "New!B7:$D$10")]
     [InlineData("Old!B7:$D$10", "Old", "New sheet", "'New sheet'!B7:$D$10")]
     [InlineData("'Old Mike''s sheet'!B7:$D$10", "Old Mike's sheet", "New Mike's sheet", "'New Mike''s sheet'!B7:$D$10")]
+    // A name that starts with an R1C1 reference has to be quoted, or Excel refuses the file (#62).
+    [InlineData("Old!B7:$D$10", "Old", "R5Z", "'R5Z'!B7:$D$10")]
+    [InlineData("Old!B7:$D$10", "Old", "C05A", "'C05A'!B7:$D$10")]
+    // A name that is a reference is quoted too, as Excel stores it.
+    [InlineData("Old!B7:$D$10", "Old", "A1", "'A1'!B7:$D$10")]
+    [InlineData("Old!B7:$D$10", "Old", "RC", "'RC'!B7:$D$10")]
+    [InlineData("Old!B7:$D$10", "Old", "A1B", "A1B!B7:$D$10")]
     public void ModifySheet_can_rename_sheet_name(string formula, string oldSheetName, string newSheetName, string modifiedFormula)
     {
         var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
@@ -137,12 +147,12 @@ public class FormulaModifierTests
     /// <summary>
     /// A bare <c>first:last!</c> is read as a name, a colon and a single sheet prefix, so a first
     /// sheet that is also a cell has to be quoted to be read back. The last sheet stands after the
-    /// colon, where a cell-like name is a sheet already.
+    /// colon, where a cell-like name reads as a sheet, but Excel quotes it there as well (#62).
     /// </summary>
     [Theory]
     [InlineData("Sheet1:Sheet5!A1", "Sheet1", "PWD1", "'PWD1:Sheet5'!A1")]
     [InlineData("Sheet1:Sheet5!A1", "Sheet1", "LOG10", "'LOG10:Sheet5'!A1")]
-    [InlineData("Sheet1:Sheet5!A1", "Sheet5", "PWD1", "Sheet1:PWD1!A1")]
+    [InlineData("Sheet1:Sheet5!A1", "Sheet5", "PWD1", "'Sheet1:PWD1'!A1")]
     [InlineData("[1]Sheet1:Sheet5!A1", "Sheet1", "PWD1", "[1]Sheet1:Sheet5!A1")]
     public void Reference3D_quotes_a_first_sheet_that_is_also_a_cell(string formula, string oldSheetName, string newSheetName, string modifiedFormula)
     {

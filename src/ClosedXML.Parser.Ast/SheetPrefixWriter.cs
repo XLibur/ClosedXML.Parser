@@ -24,7 +24,10 @@ internal static class SheetPrefixWriter
             return $"{book}!";
 
         // A quote wraps the whole prefix, the book index included: '[2]Jane''s'!
-        return NameUtils.ShouldQuote(sheet)
+        var quote = workbookIndex is null
+            ? NameUtils.ShouldQuote(sheet)
+            : NameUtils.ShouldQuoteForCharacters(sheet);
+        return quote
             ? $"'{book}{Escape(sheet)}'!"
             : $"{book}{sheet}!";
     }
@@ -42,10 +45,13 @@ internal static class SheetPrefixWriter
         // so the name behind one is judged like any other.
         var quoteFirstSheet = workbookIndex is null
             ? NameUtils.ShouldQuoteAsFirstSheet(firstSheet)
-            : NameUtils.ShouldQuote(firstSheet);
+            : NameUtils.ShouldQuoteForCharacters(firstSheet);
+        var quoteLastSheet = workbookIndex is null
+            ? NameUtils.ShouldQuote(lastSheet)
+            : NameUtils.ShouldQuoteForCharacters(lastSheet);
 
         // One quote covers both sheets, so either of them needing one quotes the pair.
-        return quoteFirstSheet || NameUtils.ShouldQuote(lastSheet)
+        return quoteFirstSheet || quoteLastSheet
             ? $"'{book}{Escape(firstSheet)}:{Escape(lastSheet)}'!"
             : $"{book}{firstSheet}:{lastSheet}!";
     }

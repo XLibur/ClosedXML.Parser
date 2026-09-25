@@ -142,7 +142,9 @@ internal static class ParserExtensions
     public static bool TryGetUnquotedSheet<T, TContext>(this Parser<T, TContext> parser, Token identToken, out ReadOnlySpan<char> sheetName)
     {
         var text = identToken.GetText(parser.Input);
-        var isUnquotedSheet = NameUtils.IsSheetNameValid(text) && !NameUtils.ShouldQuote(text);
+        // Only the characters decide it. A name ShouldQuote quotes for its shape alone, such as R5Z or
+        // A1, is still read bare, because workbooks written before #62 store it that way.
+        var isUnquotedSheet = NameUtils.IsSheetNameValid(text) && !NameUtils.ShouldQuoteForCharacters(text);
         if (isUnquotedSheet)
         {
             sheetName = text;

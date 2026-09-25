@@ -139,6 +139,97 @@ public class NameUtilsTests
     }
 
     [Theory]
+    // Unquoted, each of these made Excel refuse to open the workbook (#62). Excel reads an R1C1
+    // reference at the start of the name whatever the reference style of the file, so the name
+    // stops being one token: R5 and then Z.
+    [InlineData("R5Z")]
+    [InlineData("C5A")]
+    [InlineData("C05A")]
+    [InlineData("R1CX")]
+    [InlineData("RC1X")]
+    [InlineData("R2C3X")]
+    [InlineData("R1C1Z")]
+    // Excel quotes the rest of the family the same way, whatever follows and in any case.
+    [InlineData("r5z")]
+    [InlineData("c1x")]
+    [InlineData("Rc5x")]
+    [InlineData("R5_")]
+    [InlineData("R5.x")]
+    [InlineData("R5Z9")]
+    [InlineData("R01X")] // Row 1
+    [InlineData("R1R")]
+    [InlineData("C1C")]
+    [InlineData("R2CX5")]
+    [InlineData("R1C1R1C1")]
+    [InlineData("R1C0X")] // R1 is enough, although C0 is no column
+    [InlineData("R1C16385X")] // R1 is enough, although C16385 is past the last column
+    [InlineData("R5C0X")]
+    [InlineData("R1048576X")] // The last row
+    [InlineData("C16384X")] // The last column
+    public void Name_starting_with_an_R1C1_reference_is_quoted(string sheetName)
+    {
+        Assert.True(NameUtils.ShouldQuote(sheetName));
+    }
+
+    [Theory]
+    // Excel quotes a name that is a reference, in either style. Unquoted these still load, but
+    // quoting them is what Excel stores (#62).
+    [InlineData("A1")]
+    [InlineData("a1")]
+    [InlineData("A01")]
+    [InlineData("AB12")]
+    [InlineData("CA1")]
+    [InlineData("XR1")]
+    [InlineData("LOG10")]
+    [InlineData("XFD1048576")]
+    [InlineData("xfd1048576")]
+    [InlineData("R1C1")]
+    [InlineData("R2C3")]
+    [InlineData("R1")]
+    [InlineData("RC1")]
+    [InlineData("C05")]
+    [InlineData("R2C")]
+    [InlineData("R")]
+    [InlineData("r")]
+    [InlineData("C")]
+    [InlineData("RC")]
+    [InlineData("rc")]
+    public void Name_that_is_a_reference_is_quoted(string sheetName)
+    {
+        Assert.True(NameUtils.ShouldQuote(sheetName));
+    }
+
+    [Theory]
+    // Excel stores each of these bare (#62).
+    [InlineData("A1B")] // An A1 cell at the start doesn't matter; only an R1C1 one does
+    [InlineData("A01B")]
+    [InlineData("AB12C")]
+    [InlineData("LOG10X")]
+    [InlineData("RX")] // R, C and RC need a number to start a reference
+    [InlineData("CX")]
+    [InlineData("RCX")]
+    [InlineData("R0X")] // No row 0
+    [InlineData("C0X")]
+    [InlineData("RC0X")]
+    [InlineData("R0C5X")] // A bad row isn't passed over to read the column
+    [InlineData("R0C5")]
+    [InlineData("R1048577X")] // Past the last row
+    [InlineData("C16385X")] // Past the last column
+    [InlineData("C99999X")]
+    [InlineData("C99999999999X")]
+    [InlineData("R9999999999C5X")]
+    [InlineData("R99999999999999999999X")]
+    [InlineData("XFE1")] // Past the last column, so no cell
+    [InlineData("A1048577")] // Past the last row
+    [InlineData("A0")]
+    [InlineData("AAAA1")]
+    [InlineData("ÀR1")]
+    public void Name_that_only_resembles_a_reference_is_not_quoted(string sheetName)
+    {
+        Assert.False(NameUtils.ShouldQuote(sheetName));
+    }
+
+    [Theory]
     [InlineData("", "it's", "'it''s'")]
     [InlineData("SUM(", "it's", "SUM('it''s'")]
     [InlineData("SUM(Alpha!A1,", "it's", "SUM(Alpha!A1,'it''s'")]
@@ -260,11 +351,12 @@ public class NameUtilsTests
     {
         // The bitmasks in NameUtils are a compiled copy of the two data files. Nothing
         // rebuilds them automatically, so without this the two can drift apart and the
-        // only symptom is a workbook Excel refuses to open.
+        // only symptom is a workbook Excel refuses to open. The names are checked for their
+        // characters alone, because "a1" or "Ra" is quoted for its shape (#62), not for a character.
         var mismatches = new List<string>();
         foreach (var (codepoint, shouldQuote) in ReadQuotationData("ident-sheet-first.txt"))
         {
-            if (NameUtils.ShouldQuote(((char)codepoint) + "a") != shouldQuote)
+            if (NameUtils.ShouldQuoteForCharacters(((char)codepoint) + "a") != shouldQuote)
                 mismatches.Add($"first U+{codepoint:X4}");
         }
 
@@ -275,7 +367,7 @@ public class NameUtilsTests
             if (codepoint is >= 0xD800 and <= 0xDFFF)
                 continue;
 
-            if (NameUtils.ShouldQuote("a" + (char)codepoint) != shouldQuote)
+            if (NameUtils.ShouldQuoteForCharacters("a" + (char)codepoint) != shouldQuote)
                 mismatches.Add($"next U+{codepoint:X4}");
         }
 

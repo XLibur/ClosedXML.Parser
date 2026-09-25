@@ -16,6 +16,33 @@ or Fixed.
 
 ## Unreleased
 
+### Sheet names and quoting
+
+#### Added
+
+- `NameUtils.ShouldQuoteForCharacters`, which answers whether a name's characters alone call for
+  quotes, for the places where a reference-shaped name can't mislead. Behind a book index, as in
+  `[1]SO2!A1`, the index has already said a sheet prefix has started, and Excel stores
+  `[1]SO2!$DZ$3` bare although it quotes `'SO2'!A1`. The application and the topic of a DDE link,
+  as in `R5|tik!'item'`, aren't sheet names. Every writer of a prefix with a book index, the Ast's
+  DDE node and the reader ask it.
+
+#### Fixed
+
+- `NameUtils.ShouldQuote` quotes a sheet name for its shape as well as for its characters, as Excel
+  does ([#62](https://github.com/XLibur/ClosedXML.Parser/issues/62)). A name that starts with an
+  R1C1 reference that has a number, such as `R5Z`, `C05A`, `RC1X` or `R1CX`, was written bare, and
+  Excel refused to open a workbook that stored `R5Z!A1`: it reads the reference at the start of the
+  name whatever the reference style of the file. Renaming a sheet to such a name through a
+  `FormulaModifier` wrote exactly that. A name that is a whole reference, such as `A1`, `XFD1048576`,
+  `R1C1`, `R` or `RC`, is quoted too. Unquoted it loads, but Excel stores it quoted. The rule was
+  measured against the files Excel writes: `A1B`, `RCX`, `R0X` and `C16385X` stay bare, as they do in
+  Excel. Both ends of a 3D reference are judged, so `Jan:PWD1!A1` is written `'Jan:PWD1'!A1`.
+  Of the Excel-written formulas in the enron and euses data sets, 1,199 that lost their quotes in a
+  conversion now come back exactly as written. The reader still takes such a name bare, because
+  workbooks written before this change store it that way. A DDE link is written as before, and the
+  Ast node and the formula rewriter write the same text for it.
+
 ## v5.0.0 - 2026-09-16
 
 ### Packaging and tooling

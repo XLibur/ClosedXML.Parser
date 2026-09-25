@@ -23,6 +23,26 @@ public class DdeReferenceRuleTests
         AssertFormula.CstParsed(formula);
     }
 
+    /// <summary>
+    /// The Ast node and the formula rewriter each write a link, and must write the same text. An
+    /// application or topic isn't a sheet name, so a reference-shaped one (#62) gets no quotes from
+    /// either: <c>R5|tik!'item'</c> reads back as the same link.
+    /// </summary>
+    [Theory]
+    [InlineData("Sdemo123", "tik", "Sdemo123|tik!'item'")]
+    [InlineData("R5", "tik", "R5|tik!'item'")]
+    [InlineData("App", "R5Z", "App|R5Z!'item'")]
+    [InlineData("A1", "B2", "A1|B2!'item'")]
+    [InlineData("RC", "C05A", "RC|C05A!'item'")]
+    [InlineData("My App", "Topic 1", "'My App|Topic 1'!'item'")]
+    public void Ast_node_writes_a_link_as_the_rewriter_does(string application, string topic, string expected)
+    {
+        var written = new DynamicDataExchangeNode(application, topic, "item").GetDisplayString(A1);
+
+        Assert.Equal(expected, written);
+        Assert.Equal(expected, FormulaConverter.ToR1C1(written, 1, 1));
+    }
+
     [Theory]
     [InlineData("[1]!'id1?req'")]
     [InlineData("Sdemo123|tik!'id1?req'")]
