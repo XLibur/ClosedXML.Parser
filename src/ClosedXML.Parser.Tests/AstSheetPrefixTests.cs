@@ -90,14 +90,17 @@ public class AstSheetPrefixTests
     /// A bare <c>first:last!</c> reads back as a name, a colon and a single sheet prefix, so a
     /// first sheet that is also a cell has to be quoted. The name is written without knowing the
     /// reference style of the formula it ends up in, so it has to be a name in both styles. The
-    /// last sheet stands after the colon, where a cell-like name is a sheet already.
+    /// last sheet stands after the colon, where a cell-like name reads as a sheet, but Excel stores
+    /// <c>'Jan:PWD1'!A1</c> quoted all the same, as it quotes <c>'PWD1'!A1</c> (#62).
     /// </summary>
     [Theory]
     [InlineData("PWD1", "Dec", "'PWD1:Dec'!A1")]
     [InlineData("LOG10", "Dec", "'LOG10:Dec'!A1")]
     [InlineData("R1C1", "Dec", "'R1C1:Dec'!A1")]
     [InlineData("C", "Dec", "'C:Dec'!A1")]
-    [InlineData("Jan", "PWD1", "Jan:PWD1!A1")]
+    [InlineData("Jan", "PWD1", "'Jan:PWD1'!A1")]
+    [InlineData("Jan", "R5Z", "'Jan:R5Z'!A1")]
+    [InlineData("Jan", "A1B", "Jan:A1B!A1")]
     public void Reference_3d_quotes_a_first_sheet_that_is_also_a_cell(string firstSheet, string lastSheet, string expected)
     {
         var node = new Reference3DNode(firstSheet, lastSheet, Cell);

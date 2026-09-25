@@ -64,18 +64,45 @@ public static class NameUtils
     /// <exception cref="ArgumentException">If name is empty.</exception>
     public static bool ShouldQuote(ReadOnlySpan<char> name)
     {
+        // Excel also quotes a name for its shape, which no one of its characters gives away. A name
+        // that starts with an R1C1 reference (`R5Z`, `C05A`, `RC1X`) has to be quoted: Excel reads the
+        // reference at its start whatever the reference style of the file, and refuses to open a
+        // workbook that stores `R5Z!A1`. A name that is a whole reference (`A1`, `R1C1`, `RC`) loads
+        // bare, but Excel stores it quoted, so it is quoted here too (#62).
+        return ShouldQuoteForCharacters(name) || IsReference(name) || StartsWithR1C1Reference(name);
+    }
+
+    /// <summary>
+    /// Should the name be quoted as the sheet behind a book index, e.g. <c>[1]SO2!A1</c>?
+    /// </summary>
+    /// <remarks>
+    /// A book index has already said a sheet prefix has started, so a name shaped like a reference
+    /// reads as a sheet there and only its characters can call for quotes. Excel stores
+    /// <c>[1]SO2!$DZ$3</c> and <c>[1]Jun01!AF240</c> bare, though it quotes <c>'SO2'!A1</c>.
+    /// </remarks>
+    /// <param name="name">The name. Must be at least 1 char long.</param>
+    /// <returns>True, if the sheet name should be quoted behind a book index.</returns>
+    /// <exception cref="ArgumentException">If name is empty.</exception>
+    public static bool ShouldQuoteBehindBookIndex(ReadOnlySpan<char> name) => ShouldQuoteForCharacters(name);
+
+    /// <summary>
+    /// Should the name be quoted for its characters alone? That is <see cref="ShouldQuote"/> without
+    /// the rules about a name shaped like a reference.
+    /// </summary>
+    /// <remarks>
+    /// The reader asks this, not <see cref="ShouldQuote"/>, whether an identifier can be an unquoted
+    /// sheet name (see ParserExtensions.TryGetUnquotedSheet). Workbooks written before #62 store
+    /// reference-shaped names like <c>R5Z!A1</c> and <c>A1!A1</c> bare, and the parser still reads them.
+    /// </remarks>
+    /// <exception cref="ArgumentException">If name is empty.</exception>
+    internal static bool ShouldQuoteForCharacters(ReadOnlySpan<char> name)
+    {
         if (name.Length == 0)
             throw new ArgumentException("Sheet name is empty.");
 
         // Every character of TRUE/FALSE is fine on its own, so only the whole name gives
         // it away: unquoted, the reader takes `TRUE!A1` for a logical literal and rejects
         // the file. Excel quotes such a sheet name whatever the casing.
-        //
-        // Excel also quotes a name shaped like a reference (`A1`, `R1C1`, `XFD1048576`),
-        // and this method deliberately does not. Unlike TRUE/FALSE those load: a workbook
-        // storing `A1!A1` opens, so quoting them would be cosmetic. It would also cost
-        // something, because the reader decides an identifier is an unquoted sheet name
-        // by asking this method - see ParserExtensions.TryGetUnquotedSheet.
         if (IsLogicalLiteral(name))
             return true;
 
@@ -118,6 +145,98 @@ public static class NameUtils
         return name.Equals("TRUE".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
                name.Equals("FALSE".AsSpan(), StringComparison.OrdinalIgnoreCase);
     }
+
+    private const int MaxRow = 1048576;
+
+    private const int MaxColumn = 16384;
+
+    /// <summary>
+    /// Is the whole name a reference: an A1 cell (<c>A1</c>, <c>xfd1048576</c>, <c>A01</c>), or the
+    /// R1C1 row, column or cell of the formula itself (<c>R</c>, <c>C</c>, <c>RC</c>)? The R1C1 references
+    /// with a number are covered by <see cref="StartsWithR1C1Reference"/>.
+    /// </summary>
+    private static bool IsReference(ReadOnlySpan<char> name)
+    {
+        if (name.Equals("R".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("C".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("RC".AsSpan(), StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var letters = 0;
+        var column = 0;
+        while (letters < 3 && letters < name.Length && IsAsciiLetter(name[letters]))
+        {
+            column = column * 26 + (ToUpperAscii(name[letters]) - 'A' + 1);
+            letters++;
+        }
+
+        if (letters == 0 || column > MaxColumn)
+            return false;
+
+        var row = ReadNumber(name.Slice(letters), MaxRow, out var digits);
+        return digits > 0 && letters + digits == name.Length && row >= 1;
+    }
+
+    /// <summary>
+    /// Does the name start with an R1C1 reference that has a number: <c>R</c><em>n</em>,
+    /// <c>C</c><em>n</em> or <c>RC</c><em>n</em>, where <em>n</em> is a row or a column of a sheet? What
+    /// follows doesn't matter; <c>R5Z</c>, <c>r5_</c> and <c>R1CX</c> all do.
+    /// </summary>
+    /// <remarks>
+    /// Measured against what Excel stores. A row that is no row doesn't let the column behind it
+    /// count (<c>R0C5X</c> is bare), and neither does a number past the last row or column
+    /// (<c>R1048577X</c>, <c>C16385X</c>).
+    /// </remarks>
+    private static bool StartsWithR1C1Reference(ReadOnlySpan<char> name)
+    {
+        switch (ToUpperAscii(name[0]))
+        {
+            case 'R':
+                var row = ReadNumber(name.Slice(1), MaxRow, out var rowDigits);
+                if (rowDigits > 0)
+                    return row >= 1;
+
+                return name.Length > 1 && ToUpperAscii(name[1]) == 'C' && IsColumnNumber(name.Slice(2));
+            case 'C':
+                return IsColumnNumber(name.Slice(1));
+            default:
+                return false;
+        }
+    }
+
+    private static bool IsColumnNumber(ReadOnlySpan<char> text)
+    {
+        var column = ReadNumber(text, MaxColumn, out var digits);
+        return digits > 0 && column >= 1;
+    }
+
+    /// <summary>
+    /// Reads the ASCII digits <paramref name="text"/> starts with.
+    /// </summary>
+    /// <param name="text">The text.</param>
+    /// <param name="max">The largest value the caller accepts.</param>
+    /// <param name="digits">How many digits there were.</param>
+    /// <returns>Their value, or <c>0</c> when it is past <paramref name="max"/>, however many digits
+    /// there are.</returns>
+    private static int ReadNumber(ReadOnlySpan<char> text, int max, out int digits)
+    {
+        var value = 0;
+        digits = 0;
+        while (digits < text.Length && text[digits] is >= '0' and <= '9')
+        {
+            // Once past max the value no longer matters, so it stops growing and can't overflow.
+            if (value <= max)
+                value = value * 10 + (text[digits] - '0');
+
+            digits++;
+        }
+
+        return value <= max ? value : 0;
+    }
+
+    private static bool IsAsciiLetter(char c) => (uint)(ToUpperAscii(c) - 'A') <= 'Z' - 'A';
+
+    private static char ToUpperAscii(char c) => c is >= 'a' and <= 'z' ? (char)(c - ('a' - 'A')) : c;
 
     /// <summary>
     /// Should the name be quoted in the first position of a 3D reference, e.g.
