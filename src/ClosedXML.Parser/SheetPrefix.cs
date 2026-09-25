@@ -182,7 +182,7 @@ internal readonly record struct SheetPrefix
             if (BookIndex is null)
                 return NameUtils.EscapeName(sb, firstSheet).AppendReferenceSeparator();
 
-            if (!NameUtils.ShouldQuoteBehindBookIndex(firstSheet.AsSpan()))
+            if (!NameUtils.ShouldQuoteForCharacters(firstSheet.AsSpan()))
                 return sb.AppendBookIndex(BookIndex.Value).Append(firstSheet).AppendReferenceSeparator();
 
             return sb
@@ -201,10 +201,10 @@ internal readonly record struct SheetPrefix
         var lastSheet = LastSheet!;
         var quoteFirstSheet = BookIndex is null
             ? NameUtils.ShouldQuoteAsFirstSheet(firstSheet.AsSpan())
-            : NameUtils.ShouldQuoteBehindBookIndex(firstSheet.AsSpan());
+            : NameUtils.ShouldQuoteForCharacters(firstSheet.AsSpan());
         var quoteLastSheet = BookIndex is null
             ? NameUtils.ShouldQuote(lastSheet.AsSpan())
-            : NameUtils.ShouldQuoteBehindBookIndex(lastSheet.AsSpan());
+            : NameUtils.ShouldQuoteForCharacters(lastSheet.AsSpan());
 
         if (!quoteFirstSheet && !quoteLastSheet)
         {

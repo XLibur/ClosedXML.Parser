@@ -20,10 +20,12 @@ or Fixed.
 
 #### Added
 
-- `NameUtils.ShouldQuoteBehindBookIndex`, which answers whether a name needs quotes behind a book
-  index, as in `[1]SO2!A1`. There the index has already said a sheet prefix has started, so only a
-  name's characters can call for quotes, and Excel stores `[1]SO2!$DZ$3` bare although it quotes
-  `'SO2'!A1`. Every writer of a prefix with a book index asks it.
+- `NameUtils.ShouldQuoteForCharacters`, which answers whether a name's characters alone call for
+  quotes, for the places where a reference-shaped name can't mislead. Behind a book index, as in
+  `[1]SO2!A1`, the index has already said a sheet prefix has started, and Excel stores
+  `[1]SO2!$DZ$3` bare although it quotes `'SO2'!A1`. The application and the topic of a DDE link,
+  as in `R5|tik!'item'`, aren't sheet names. Every writer of a prefix with a book index, the Ast's
+  DDE node and the reader ask it.
 
 #### Fixed
 
@@ -38,8 +40,8 @@ or Fixed.
   Excel. Both ends of a 3D reference are judged, so `Jan:PWD1!A1` is written `'Jan:PWD1'!A1`.
   Of the Excel-written formulas in the enron and euses data sets, 1,199 that lost their quotes in a
   conversion now come back exactly as written. The reader still takes such a name bare, because
-  workbooks written before this change store it that way. The Ast's DDE node asks `ShouldQuote` too,
-  so a DDE application or topic shaped like a reference is now quoted; no measurement covers DDE.
+  workbooks written before this change store it that way. A DDE link is written as before, and the
+  Ast node and the formula rewriter write the same text for it.
 
 ## v5.0.0 - 2026-09-16
 

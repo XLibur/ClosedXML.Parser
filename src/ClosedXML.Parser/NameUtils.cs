@@ -51,13 +51,13 @@ public static class NameUtils
     private static readonly SearchValues<char> InvalidSheetChars = SearchValues.Create("*/:?[\\]");
 
     /// <summary>
-    /// Should the name be quoted?
+    /// Should the sheet name be quoted, standing on its own as in <c>'R5Z'!A1</c>?
     /// </summary>
     /// <remarks>
     /// Sheet names can't contain <c>*</c>,<c>/</c>,<c>:</c>,<c>?</c>,<c>[</c>,<c>\</c>,
-    /// <c>]</c>, but method doesn't check for that - see <see cref="IsSheetNameValid"/>. It answers
-    /// for the application and the topic of a DDE link too, which are held to none of those rules,
-    /// so it asks only how the text has to be written and not whether it could name a sheet.
+    /// <c>]</c>, but method doesn't check for that - see <see cref="IsSheetNameValid"/>. A name
+    /// shaped like a reference is quoted, so a name behind a book index or a part of a DDE link,
+    /// where its shape can't mislead, asks <see cref="ShouldQuoteForCharacters"/> instead.
     /// </remarks>
     /// <param name="name">The name. Must be at least 1 char long.</param>
     /// <returns>True, if the sheet name should be quoted in formula.</returns>
@@ -73,29 +73,24 @@ public static class NameUtils
     }
 
     /// <summary>
-    /// Should the name be quoted as the sheet behind a book index, e.g. <c>[1]SO2!A1</c>?
+    /// Should the name be quoted for its characters alone? That is <see cref="ShouldQuote"/> without
+    /// the rules about a name shaped like a reference, for the places where a shape can't mislead.
     /// </summary>
     /// <remarks>
-    /// A book index has already said a sheet prefix has started, so a name shaped like a reference
-    /// reads as a sheet there and only its characters can call for quotes. Excel stores
-    /// <c>[1]SO2!$DZ$3</c> and <c>[1]Jun01!AF240</c> bare, though it quotes <c>'SO2'!A1</c>.
+    /// <list type="bullet">
+    /// <item>A sheet behind a book index, e.g. <c>[1]SO2!A1</c>. The index has already said a sheet
+    /// prefix has started, so a reference-shaped name reads as a sheet: Excel stores
+    /// <c>[1]SO2!$DZ$3</c> and <c>[1]Jun01!AF240</c> bare, though it quotes <c>'SO2'!A1</c>.</item>
+    /// <item>The application and the topic of a DDE link, e.g. <c>R5|tik!'item'</c>. Neither is a sheet
+    /// name, and the <c>|</c> keeps the link one prefix, so it reads back bare.</item>
+    /// <item>The reader, asking whether an identifier can be an unquoted sheet name. Workbooks written
+    /// before #62 store names like <c>R5Z!A1</c> and <c>A1!A1</c> bare, and the parser still reads them.</item>
+    /// </list>
     /// </remarks>
     /// <param name="name">The name. Must be at least 1 char long.</param>
-    /// <returns>True, if the sheet name should be quoted behind a book index.</returns>
+    /// <returns>True, if the name's characters call for quotes.</returns>
     /// <exception cref="ArgumentException">If name is empty.</exception>
-    public static bool ShouldQuoteBehindBookIndex(ReadOnlySpan<char> name) => ShouldQuoteForCharacters(name);
-
-    /// <summary>
-    /// Should the name be quoted for its characters alone? That is <see cref="ShouldQuote"/> without
-    /// the rules about a name shaped like a reference.
-    /// </summary>
-    /// <remarks>
-    /// The reader asks this, not <see cref="ShouldQuote"/>, whether an identifier can be an unquoted
-    /// sheet name (see ParserExtensions.TryGetUnquotedSheet). Workbooks written before #62 store
-    /// reference-shaped names like <c>R5Z!A1</c> and <c>A1!A1</c> bare, and the parser still reads them.
-    /// </remarks>
-    /// <exception cref="ArgumentException">If name is empty.</exception>
-    internal static bool ShouldQuoteForCharacters(ReadOnlySpan<char> name)
+    public static bool ShouldQuoteForCharacters(ReadOnlySpan<char> name)
     {
         if (name.Length == 0)
             throw new ArgumentException("Sheet name is empty.");
