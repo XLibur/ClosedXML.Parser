@@ -6,7 +6,6 @@
 >
 > The purpose of this fork is to bundle fixes and changes required by the [XLibur](https://github.com/XLibur/XLibur) library. It is published as the `XLibur.ClosedXML.Parser` NuGet package.
 >
-> Where appropriate, fixes will be contributed back to upstream [ClosedXML.Parser](https://github.com/ClosedXML/ClosedXML.Parser). Some changes are intentionally specific to XLibur and may remain in this fork, particularly where they do not align with upstream goals, such as dropping `netstandard2.0` support.
 
 ClosedParser parses Excel formulas, in the form stored in OOXML workbooks, into an abstract syntax tree (AST) suitable for evaluation and transformation.
 
