@@ -30,14 +30,21 @@ public static class ReferenceParser
             throw new ArgumentNullException(nameof(text));
 
         sheetName = null;
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
-        if (TryParse(tokens, text, TokenParser.A1Style, out area))
-            return true;
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        try
+        {
+            if (TryParse(tokens, text, TokenParser.A1Style, out area))
+                return true;
 
-        if (TryParseSheetA1(tokens, text, out sheetName, out area))
-            return true;
+            if (TryParseSheetA1(tokens, text, out sheetName, out area))
+                return true;
 
-        return false;
+            return false;
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     /// <summary>
@@ -59,8 +66,15 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
-        return TryParse(tokens, text, TokenParser.A1Style, out area);
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        try
+        {
+            return TryParse(tokens, text, TokenParser.A1Style, out area);
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     /// <summary>
@@ -83,8 +97,15 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.R1C1Style.DfaTable);
-        return TryParse(tokens, text, TokenParser.R1C1Style, out area);
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.R1C1Style.DfaTable);
+        try
+        {
+            return TryParse(tokens, text, TokenParser.R1C1Style, out area);
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     /// <summary>
@@ -130,8 +151,15 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
-        return TryParseSheetA1(tokens, text, out sheetName, out area);
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        try
+        {
+            return TryParseSheetA1(tokens, text, out sheetName, out area);
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     /// <summary>
@@ -151,17 +179,24 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
-        if (tokens.Count == 2 &&
-            tokens[0].SymbolId == Token.NAME &&
-            tokens[1].SymbolId == Token.EofSymbolId)
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        try
         {
-            sheetName = null;
-            name = text;
-            return true;
-        }
+            if (tokens.Count == 2 &&
+                tokens[0].SymbolId == Token.NAME &&
+                tokens[1].SymbolId == Token.EofSymbolId)
+            {
+                sheetName = null;
+                name = text;
+                return true;
+            }
 
-        return TryParseSheetName(tokens, text, out sheetName, out name);
+            return TryParseSheetName(tokens, text, out sheetName, out name);
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     /// <summary>
@@ -178,8 +213,15 @@ public static class ReferenceParser
         if (text is null)
             throw new ArgumentNullException(nameof(text));
 
-        var tokens = RolexLexer.GetTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
-        return TryParseSheetName(tokens, text, out sheetName, out name);
+        var tokens = RolexLexer.RentTokens(text.AsSpan(), TokenParser.A1Style.DfaTable);
+        try
+        {
+            return TryParseSheetName(tokens, text, out sheetName, out name);
+        }
+        finally
+        {
+            RolexLexer.ReturnTokens(tokens);
+        }
     }
 
     private static bool TryParse(List<Token> tokens, string text, IReferenceStyle style, out ReferenceArea area)

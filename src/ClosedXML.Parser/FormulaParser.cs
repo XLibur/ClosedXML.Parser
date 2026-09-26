@@ -17,17 +17,40 @@ namespace XLibur.Parser;
 public class FormulaParser<TScalarValue, TNode, TContext>
 {
     private const string REF_ERROR = "#REF!";
-    private readonly string _input;
-    private readonly List<Token> _tokens;
-    private readonly IAstFactory<TScalarValue, TNode, TContext> _factory;
-    private readonly TContext _context;
+
+    /// <summary>
+    /// The most arguments the buffer can have room for and still be kept for the next parse. One
+    /// huge formula shouldn't pin a large array for the life of a thread.
+    /// </summary>
+    private const int MaxKeptArguments = 256;
+
+    /// <summary>
+    /// A parser the thread keeps for its next parse, so a parse doesn't allocate a parser, a token
+    /// list and an argument buffer. It is null while a parse is using it, so a factory that parses
+    /// another formula while it builds a node gets a parser of its own.
+    /// </summary>
+    [ThreadStatic]
+    private static FormulaParser<TScalarValue, TNode, TContext>? t_parser;
+
+    private readonly List<Token> _tokens = new();
+
+    /// <summary>
+    /// The arguments of the function calls being parsed. A call nested in an argument puts its
+    /// arguments above those of its caller and takes them off once it is read, so one buffer serves
+    /// every call of the formula.
+    /// </summary>
+    private readonly List<TNode> _args = new();
+
+    private string _input = string.Empty;
+    private IAstFactory<TScalarValue, TNode, TContext> _factory = null!;
+    private TContext _context = default!;
 
     /// <summary>
     /// Reads the tokens and the references of the formula, in the style it is written in.
     /// </summary>
-    private readonly IReferenceStyle _style;
+    private IReferenceStyle _style = null!;
     private Token _tokenSource;
-    private int _tokenIndex = -1;
+    private int _tokenIndex;
 
     // Current lookahead token index
     private int _la;
@@ -47,7 +70,36 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// </summary>
     private int _nestingDepth;
 
-    private FormulaParser(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory, bool a1Mode)
+    private FormulaParser()
+    {
+    }
+
+    private static TNode Parse(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory, IReferenceStyle style)
+    {
+        var parser = t_parser ?? new FormulaParser<TScalarValue, TNode, TContext>();
+        t_parser = null;
+        try
+        {
+            parser.Start(formula, context, factory, style);
+            return parser.Formula();
+        }
+        finally
+        {
+            parser.Finish();
+            t_parser = parser;
+        }
+    }
+
+    /// <summary>
+    /// Set the parser up to read a formula. Nothing of a parse before it, finished or thrown out of,
+    /// is left.
+    /// </summary>
+    /// <param name="formula">Formula text that will be parsed.</param>
+    /// <param name="context">Context that is going to be passed to every method of the <paramref name="factory"/>.</param>
+    /// <param name="factory">Factory to create nodes of AST tree.</param>
+    /// <param name="style">The reference style of the formula. The DFA table and the reference reader
+    /// have to be of the same style, so both come from one adapter instead of deciding the style twice.</param>
+    private void Start(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory, IReferenceStyle style)
     {
         // Trim the end, so ref_intersection_expression that tried to parse SPACE as an operator
         // doesn't recognize spaces at the end of formula as operators. The control tokens of
@@ -57,12 +109,32 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         var trimmedFormula = formula.AsSpan().TrimEnd();
         _input = formula;
         _context = context;
-        // The DFA table and the reference reader have to be of the same style, so take both
-        // from one adapter instead of deciding the style twice.
-        _style = a1Mode ? TokenParser.A1Style : TokenParser.R1C1Style;
-        _tokens = RolexLexer.GetTokens(trimmedFormula, _style.DfaTable);
+        _style = style;
+        RolexLexer.GetTokens(trimmedFormula, _style.DfaTable, _tokens);
         _factory = factory;
+        _args.Clear();
+        _nestingDepth = 0;
+        _tokenIndex = -1;
         Consume();
+    }
+
+    /// <summary>
+    /// Let go of the formula, so the parser the thread keeps holds on to nothing the caller passed.
+    /// </summary>
+    private void Finish()
+    {
+        _input = string.Empty;
+        _context = default!;
+        _factory = null!;
+
+        // A parse that throws leaves the arguments it had read in the buffer.
+        _args.Clear();
+        if (_args.Capacity > MaxKeptArguments)
+            _args.Capacity = 0;
+
+        _tokens.Clear();
+        if (_tokens.Capacity > RolexLexer.MaxKeptTokens)
+            _tokens.Capacity = 0;
     }
 
     /// <summary>
@@ -74,8 +146,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// <exception cref="ParsingException">If the formula doesn't satisfy the grammar.</exception>
     public static TNode CellFormulaA1(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory)
     {
-        var parser = new FormulaParser<TScalarValue, TNode, TContext>(formula, context, factory, true);
-        return parser.Formula();
+        return Parse(formula, context, factory, TokenParser.A1Style);
     }
 
     /// <summary>
@@ -87,8 +158,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// <exception cref="ParsingException">If the formula doesn't satisfy the grammar.</exception>
     public static TNode CellFormulaR1C1(string formula, TContext context, IAstFactory<TScalarValue, TNode, TContext> factory)
     {
-        var parser = new FormulaParser<TScalarValue, TNode, TContext>(formula, context, factory, false);
-        return parser.Formula();
+        return Parse(formula, context, factory, TokenParser.R1C1Style);
     }
 
     private TNode Formula()
@@ -974,7 +1044,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
             return Array.Empty<TNode>();
         }
 
-        var args = new List<TNode>();
+        // The arguments of this call go above those of the calls it is nested in.
+        var first = _args.Count;
         while (true)
         {
             // At the start of the loop, previous argument
@@ -985,7 +1056,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 // two commas in a row and thus a blank argument.
                 var start = _tokenSource.StartIndex;
                 Consume();
-                args.Add(_factory.BlankNode(_context, new SymbolRange(start, start)));
+                _args.Add(_factory.BlankNode(_context, new SymbolRange(start, start)));
             }
             else if (_la == Token.CLOSE_BRACE)
             {
@@ -994,8 +1065,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 // thus there is a blank node and end of args.
                 var start = _tokenSource.StartIndex;
                 Consume();
-                args.Add(_factory.BlankNode(_context, new SymbolRange(start, start)));
-                return args;
+                _args.Add(_factory.BlankNode(_context, new SymbolRange(start, start)));
+                return TakeArguments(first);
             }
             else
             {
@@ -1003,17 +1074,30 @@ public class FormulaParser<TScalarValue, TNode, TContext>
                 EnterNesting();
                 var arg = Expression(true, out _);
                 _nestingDepth--;
-                args.Add(arg);
+                _args.Add(arg);
                 if (_la == Token.CLOSE_BRACE)
                 {
                     Consume();
-                    return args;
+                    return TakeArguments(first);
                 }
 
-                // Each argument must be followed by a comma. 
+                // Each argument must be followed by a comma.
                 Match(Token.COMMA);
             }
         }
+    }
+
+    /// <summary>
+    /// Take the arguments of a call off the top of the buffer, into an array of their count. The
+    /// factory is free to keep the array, so it can't be the buffer.
+    /// </summary>
+    /// <param name="first">Where the arguments of the call start in the buffer.</param>
+    private TNode[] TakeArguments(int first)
+    {
+        var args = new TNode[_args.Count - first];
+        _args.CopyTo(first, args, 0, args.Length);
+        _args.RemoveRange(first, args.Length);
+        return args;
     }
 
     private void Match(int expected)
@@ -1175,8 +1259,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// </summary>
     /// <remarks>
     /// Every caller pairs this with a decrement once the nested part is parsed. A formula that
-    /// throws in between leaves the count standing, which costs nothing: a parser reads one
-    /// formula and is thrown away with it, so the count is never read again.
+    /// throws in between leaves the count standing, which costs nothing: <see cref="Start"/> sets
+    /// it back to zero before the parser reads another formula.
     /// </remarks>
     /// <exception cref="ParsingException">The formula nests too deep.</exception>
     private void EnterNesting()

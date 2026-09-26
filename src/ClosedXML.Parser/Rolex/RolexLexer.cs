@@ -6,6 +6,42 @@ namespace XLibur.Parser.Rolex;
 internal class RolexLexer
 {
     /// <summary>
+    /// The most tokens a list can have room for and still be kept for the next lex. One huge formula
+    /// shouldn't pin a large array for the life of a thread.
+    /// </summary>
+    internal const int MaxKeptTokens = 256;
+
+    /// <summary>
+    /// A token list the thread keeps for the next caller of <see cref="RentTokens"/>. It is null while
+    /// a caller has it, so a caller that lexes again before it is done (a nested parse) gets a list
+    /// of its own.
+    /// </summary>
+    [ThreadStatic]
+    private static List<Token>? t_tokens;
+
+    /// <summary>
+    /// Get all tokens for a formula into a list the thread keeps, for a caller that drops the tokens
+    /// once it has read them. The caller must give the list back with <see cref="ReturnTokens"/> and
+    /// must not use it afterwards.
+    /// </summary>
+    internal static List<Token> RentTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
+    {
+        var tokens = t_tokens ?? new List<Token>();
+        t_tokens = null;
+        GetTokens(formula, lexerDfa, tokens);
+        return tokens;
+    }
+
+    /// <summary>
+    /// Give back a list from <see cref="RentTokens"/>, so the next caller on the thread can use it.
+    /// </summary>
+    internal static void ReturnTokens(List<Token> tokens)
+    {
+        if (tokens.Capacity <= MaxKeptTokens)
+            t_tokens = tokens;
+    }
+
+    /// <summary>
     /// Get all tokens for a formula. Use A1 semantic. If there is an error, add token with an error symbol at the end or EOF token at the end.
     /// </summary>
     /// <param name="formula">Formula to parse.</param>
@@ -26,20 +62,29 @@ internal class RolexLexer
     internal static List<Token> GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
     {
         var tokens = new List<Token>();
+        GetTokens(formula, lexerDfa, tokens);
+        return tokens;
+    }
+
+    /// <summary>
+    /// Get all tokens for a formula into <paramref name="tokens"/>, replacing what the list held.
+    /// </summary>
+    internal static void GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa, List<Token> tokens)
+    {
+        tokens.Clear();
         for (var i = 0; i < formula.Length;)
         {
             var (symbolId, length) = GetToken(formula, i, lexerDfa);
             tokens.Add(new Token(symbolId, i, length));
             if (symbolId < 0)
             {
-                return tokens;
+                return;
             }
 
             i += length;
         }
 
         tokens.Add(Token.EofSymbol(formula.Length));
-        return tokens;
     }
 
     private static int Next(ReadOnlySpan<char> input, ref int index)

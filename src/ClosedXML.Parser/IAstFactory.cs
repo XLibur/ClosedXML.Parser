@@ -187,7 +187,7 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
     /// <param name="range">Range in a formula that contains the function including arguments.</param>
     /// <param name="functionName">Name of a function.</param>
-    /// <param name="arguments">Nodes of argument values.</param>
+    /// <param name="arguments">Nodes of argument values. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
     TNode Function(TContext context, SymbolRange range, ReadOnlySpan<char> functionName, IReadOnlyList<TNode> arguments);
 
     /// <summary>
@@ -197,7 +197,7 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// <param name="range"></param>
     /// <param name="sheetName">Name of a sheet.</param>
     /// <param name="functionName">Name of a function.</param>
-    /// <param name="args">Nodes of argument values.</param>
+    /// <param name="args">Nodes of argument values. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
     TNode Function(TContext context, SymbolRange range, string sheetName, ReadOnlySpan<char> functionName,
         IReadOnlyList<TNode> args);
 
@@ -209,7 +209,7 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// <param name="workbookIndex">Id of an external workbook. The actual path to the file is in workbook part, <c>externalReferences</c> tag.</param>
     /// <param name="sheetName">Name of a sheet in external workbook.</param>
     /// <param name="functionName">Name of the function.</param>
-    /// <param name="arguments">Nodes of argument values.</param>
+    /// <param name="arguments">Nodes of argument values. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
     TNode ExternalFunction(TContext context, SymbolRange range, int workbookIndex, string sheetName,
         ReadOnlySpan<char> functionName, IReadOnlyList<TNode> arguments);
 
@@ -220,7 +220,7 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// <param name="range">Range in a formula that contains the function including arguments.</param>
     /// <param name="workbookIndex">Id of an external workbook. The actual path to the file is in workbook part, <c>externalReferences</c> tag.</param>
     /// <param name="functionName">Name of the function.</param>
-    /// <param name="arguments">Nodes of argument values.</param>
+    /// <param name="arguments">Nodes of argument values. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
     TNode ExternalFunction(TContext context, SymbolRange range, int workbookIndex, ReadOnlySpan<char> functionName, IReadOnlyList<TNode> arguments);
 
     /// <summary>
@@ -230,7 +230,7 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
     /// <param name="range">Range in a formula that contains the cell function.</param>
     /// <param name="cell">A reference to a cell with a LAMBDA. Is a single cell.</param>
-    /// <param name="arguments">Arguments to pass to a LAMBDA.</param>
+    /// <param name="arguments">Arguments to pass to a LAMBDA. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
     TNode CellFunction(TContext context, SymbolRange range, RowCol cell, IReadOnlyList<TNode> arguments);
 
     /// <summary>

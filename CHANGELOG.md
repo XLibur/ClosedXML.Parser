@@ -17,6 +17,32 @@ or Fixed.
 
 ## Unreleased
 
+### Formula parsers
+
+#### Changed
+
+- A parse allocates only what the factory keeps
+  ([#64](https://github.com/XLibur/ClosedXML.Parser/issues/64)). Each parse used to allocate a
+  parser, a token list that grew as the lexer filled it, and a growable list for the arguments of
+  each function call, and the caller kept none of them except the argument list. A thread now keeps
+  one parser and its token list for the next parse, and the factory gets the arguments of a call in
+  an array of their count. Over the formula samples of the data sets, a parse that builds no tree
+  allocates 47 B where it allocated 406 B (Enron) and 62 B where it allocated 473 B (EUSES), and a
+  parse to the AST of *ClosedXML.Parser.Ast* 334 B where it allocated 694 B, and 401 B where it
+  allocated 813 B. A parse is also about 7% faster. A factory that parses another formula while it
+  builds a node gets a parser of its own, so nesting is still safe. The parser a thread keeps holds
+  on to nothing the caller passed, and doesn't keep room for more than 256 tokens or arguments.
+  The factory's argument parameter is still an `IReadOnlyList<TNode>`; only a factory that cast it
+  to `List<TNode>` would notice, and the factory may keep it, as the parameter now says.
+
+### Standalone reference parsing
+
+#### Changed
+
+- The `ReferenceParser` methods lex into a token list the thread keeps, so reading a reference
+  without a sheet allocates nothing where it allocated 104 B, and `TryParseSheetName` allocates
+  80 B where it allocated 184 B.
+
 ## v5.0.1 - 2026-09-25
 
 ### Sheet names and quoting
