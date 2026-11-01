@@ -129,37 +129,71 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// </summary>
     private void SplitNameBeforeCell(ReadOnlySpan<char> formula)
     {
+        var splits = 0;
         for (var i = 0; i + 1 < _tokens.Count; i++)
         {
-            var span = _tokens[i];
-            var number = _tokens[i + 1];
-            if (span.SymbolId != Token.A1_SPAN_REFERENCE ||
-                number.SymbolId != Token.NUMERICAL_CONSTANT ||
-                number.StartIndex != span.StartIndex + span.Length)
-                continue;
-
-            // A sheet prefix owns the span after it (`Sheet1!A:B`), so there is no name to split off.
-            if (i > 0 && _tokens[i - 1].SymbolId is Token.SINGLE_SHEET_PREFIX or Token.SHEET_RANGE_PREFIX or Token.BOOK_PREFIX)
-                continue;
-
-            var text = formula.Slice(span.StartIndex, span.Length);
-            var colon = text.IndexOf(':');
-            if (!IsLetters(text.Slice(0, colon)) || !IsLetters(text.Slice(colon + 1)))
-                continue;
-
-            // The row must be plain digits that the lexer reads as a cell together with the column.
-            var cellStart = span.StartIndex + colon + 1;
-            var cellLength = span.Length - colon - 1 + number.Length;
-            var cell = formula.Slice(cellStart, cellLength);
-            var (cellSymbol, cellTokenLength) = RolexLexer.GetToken(cell, 0, _style.DfaTable);
-            if (cellSymbol != Token.A1_CELL || cellTokenLength != cellLength)
-                continue;
-
-            _tokens[i] = new Token(Token.NAME, span.StartIndex, colon);
-            _tokens[i + 1] = new Token(Token.A1_CELL, cellStart, cellLength);
-            _tokens.Insert(i + 1, new Token(Token.COLON, span.StartIndex + colon, 1));
-            i += 2;
+            if (IsNameBeforeCell(formula, i, out _))
+                splits++;
         }
+
+        if (splits == 0)
+            return;
+
+        // Every split turns two tokens into three. Grow the list once and fill it from the back,
+        // so each token moves once, however many splits there are.
+        var read = _tokens.Count - 1;
+        for (var i = 0; i < splits; i++)
+            _tokens.Add(default);
+
+        for (var write = _tokens.Count - 1; read >= 0; read--)
+        {
+            // The loop meets the number before the span, so look one token back for a split.
+            if (read > 0 && write > read && IsNameBeforeCell(formula, read - 1, out var colon))
+            {
+                var span = _tokens[read - 1];
+                var number = _tokens[read];
+                _tokens[write - 2] = new Token(Token.NAME, span.StartIndex, colon);
+                _tokens[write - 1] = new Token(Token.COLON, span.StartIndex + colon, 1);
+                _tokens[write] = new Token(Token.A1_CELL, span.StartIndex + colon + 1, span.Length - colon - 1 + number.Length);
+                write -= 3;
+                read--;
+            }
+            else
+            {
+                _tokens[write--] = _tokens[read];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Is the token at <paramref name="index"/> the column span of a name, a colon and a cell, with the
+    /// number that completes the cell next to it? Only the original tokens are looked at.
+    /// </summary>
+    /// <param name="colon">Index of the colon in the text of the span.</param>
+    private bool IsNameBeforeCell(ReadOnlySpan<char> formula, int index, out int colon)
+    {
+        colon = 0;
+        var span = _tokens[index];
+        var number = _tokens[index + 1];
+        if (span.SymbolId != Token.A1_SPAN_REFERENCE ||
+            number.SymbolId != Token.NUMERICAL_CONSTANT ||
+            number.StartIndex != span.StartIndex + span.Length)
+            return false;
+
+        // A sheet prefix owns the span after it (`Sheet1!A:B`), so there is no name to split off.
+        if (index > 0 && _tokens[index - 1].SymbolId is Token.SINGLE_SHEET_PREFIX or Token.SHEET_RANGE_PREFIX or Token.BOOK_PREFIX)
+            return false;
+
+        var text = formula.Slice(span.StartIndex, span.Length);
+        colon = text.IndexOf(':');
+        if (!IsLetters(text.Slice(0, colon)) || !IsLetters(text.Slice(colon + 1)))
+            return false;
+
+        // The row must be plain digits that the lexer reads as a cell together with the column.
+        var cellLength = span.Length - colon - 1 + number.Length;
+        var cell = formula.Slice(span.StartIndex + colon + 1, cellLength);
+        var (cellSymbol, cellTokenLength) = RolexLexer.GetToken(cell, 0, _style.DfaTable);
+        return cellSymbol == Token.A1_CELL && cellTokenLength == cellLength;
     }
 
     private static bool IsLetters(ReadOnlySpan<char> text)

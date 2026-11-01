@@ -106,6 +106,16 @@ public class FormulaModifierTests
         Assert.Equal(modifiedFormula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, modifier));
     }
 
+    [Theory]
+    [InlineData("LET(x,A1,x:A1)")]
+    [InlineData("LET(x,A1,SUM(x:A1,B2,x:A2,x:A3)+x:B4)")]
+    [InlineData("LET(x,A1,x:A1+SUM(A:B)+x:A2)")]
+    [InlineData("LET(x,A1,SUM(x:A1,1,x:A2,2,x:A3,3,x:A4)&\"x:A1\")")]
+    public void Several_names_before_a_colon_and_a_cell_in_one_formula_are_all_read(string formula)
+    {
+        Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
+    }
+
     /// <summary>
     /// The split only happens for a name, a colon and a cell. Every other shape stays as it was.
     /// </summary>
