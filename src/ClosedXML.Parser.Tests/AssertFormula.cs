@@ -15,6 +15,11 @@ internal static class AssertFormula
         Assert.Equal(expectedNode, node);
     }
 
+    public static void CheckParses(string formula)
+    {
+        FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F());
+    }
+
     public static void CheckParsingErrorContains(string formula, string errorSubstring)
     {
         var ex = Assert.Throws<ParsingException>(() => FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F()));

@@ -19,6 +19,19 @@ or Fixed.
 
 ## Unreleased
 
+### Formula parsers
+
+#### Changed
+
+- The parser refuses a structured reference to a table whose name starts like an R1C1 reference
+  ([#70](https://github.com/XLibur/ClosedXML.Parser/issues/70),
+  [#71](https://github.com/XLibur/ClosedXML.Parser/issues/71)): `c[a:c]`, `C2x[a]`, `R5Z[a]` and `[1]!R2D2[a]`
+  now throw a `ParsingException` saying the name doesn't name a table. Excel refuses such a table name
+  (`c`, `r`, `rc`, `C2`, `C2x`, `R5Z`, `R2D2` all fail in the Table Name box, while `Cx` is accepted), and a
+  table name can't be quoted, so the reference could not be written in R1C1: `c[` reads as the relative
+  column `C[`. Before, the A1 parser took the name and the formula then failed to convert to R1C1 or to
+  parse back. A formula that used such a name did not come from Excel.
+
 ## v5.1.0 - 2026-11-01
 
 ### Formula parsers

@@ -791,6 +791,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         Consume();
         if (_la == Token.INTRA_TABLE_REFERENCE)
         {
+            RequireTableName(localName, start);
             TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
             Consume();
             var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -845,6 +846,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         var externalName = TokenParser.ParseName(_input.AsSpan(), externalNameToken);
         if (_la == Token.INTRA_TABLE_REFERENCE)
         {
+            RequireTableName(externalName, start);
             TokenParser.ParseIntraTableReference(_input.AsSpan(), _tokenSource, out var specifics, out var firstColumn, out var lastColumn);
             Consume();
             var range = new SymbolRange(start, _tokenSource.StartIndex);
@@ -1284,6 +1286,18 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     {
         if (!NameUtils.IsSheetNameValid(sheet.AsSpan()))
             throw Error(startIndex, $"A sheet name is 1 to 31 characters long and holds none of * / : ? [ \\ ], so '{sheet}' doesn't name a sheet.");
+    }
+
+    /// <summary>
+    /// Refuse a structured reference to a table no workbook could hold, one whose name starts like an
+    /// R1C1 reference. A table name can't be quoted, so the reference couldn't be written in R1C1.
+    /// </summary>
+    /// <param name="table">The table name the reference gives.</param>
+    /// <param name="startIndex">Where the reference starts.</param>
+    private void RequireTableName(string table, int startIndex)
+    {
+        if (!NameUtils.IsTableNameValid(table.AsSpan()))
+            throw Error(startIndex, $"A table name doesn't start like an R1C1 reference (R, C, RC, R1, C2x), so '{table}' doesn't name a table.");
     }
 
     private Exception UnexpectedTokenError(params int[] expectedToken)
