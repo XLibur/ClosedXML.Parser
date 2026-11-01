@@ -18,8 +18,6 @@ or Fixed.
 
 ## Unreleased
 
-## v5.0.2 - 2026-09-26
-
 ### Formula parsers
 
 #### Added
@@ -31,6 +29,10 @@ or Fixed.
   argument list must follow the target without whitespace, because `(A1) (B1)` is an intersection.
   This is a breaking change: `IAstFactory` has a new `ExpressionCall` member, and the AST has an
   `ExpressionCallNode` whose first child is the target and the rest are the arguments.
+
+## v5.0.2 - 2026-09-26
+
+### Formula parsers
 
 #### Changed
 
