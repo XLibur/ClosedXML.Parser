@@ -289,6 +289,19 @@ public static class NameUtils
         return sheetName.IndexOfAny(InvalidSheetChars) == -1;
     }
 
+    /// <summary>
+    /// Can a workbook hold a table by this name? Excel refuses a table name that is an R1C1 reference
+    /// (<c>c</c>, <c>r</c>, <c>rc</c>, <c>R1C1</c>) or starts with one that has a number (<c>C2x</c>,
+    /// <c>R5Z</c>, <c>R2D2</c>), and accepts <c>Cx</c>. A table name can't be quoted, so such a name
+    /// has no spelling an R1C1 formula can be written in: <c>c[a:c]</c> reads as the relative column
+    /// <c>C[</c> (#70, #71). This is the rule <see cref="ShouldQuote"/> applies to a sheet name's shape.
+    /// </summary>
+    /// <param name="tableName">Name of the table. Must be at least 1 char long.</param>
+    internal static bool IsTableNameValid(ReadOnlySpan<char> tableName)
+    {
+        return tableName.Length > 0 && !IsReference(tableName) && !StartsWithR1C1Reference(tableName);
+    }
+
     internal static bool IsNameValid(ReadOnlySpan<char> name)
     {
         if (name.Length is < 1 or > 255)
