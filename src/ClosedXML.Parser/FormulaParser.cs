@@ -169,6 +169,8 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     /// Is the token at <paramref name="index"/> the column span of a name, a colon and a cell, with the
     /// number that completes the cell next to it? Only the original tokens are looked at.
     /// </summary>
+    /// <param name="formula">The formula the tokens were read from.</param>
+    /// <param name="index">Index of the token in the token list.</param>
     /// <param name="colon">Index of the colon in the text of the span.</param>
     private bool IsNameBeforeCell(ReadOnlySpan<char> formula, int index, out int colon)
     {
