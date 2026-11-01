@@ -111,11 +111,66 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         _context = context;
         _style = style;
         RolexLexer.GetTokens(trimmedFormula, _style.DfaTable, _tokens);
+        if (ReferenceEquals(_style, TokenParser.A1Style))
+            SplitNameBeforeCell(trimmedFormula);
         _factory = factory;
         _args.Clear();
         _nestingDepth = 0;
         _tokenIndex = -1;
         Consume();
+    }
+
+    /// <summary>
+    /// The lexer reads the longest token, so <c>r:A3</c> comes out as the column span <c>r:A</c> and the
+    /// number <c>3</c>. A column span needs a column after the colon, never a cell, so when a number
+    /// follows straight on, the text can only be a name, a colon and a cell: a <c>LET</c> name or a
+    /// <c>LAMBDA</c> parameter that is also a valid column, as an operand of the range operator.
+    /// Split the tokens that way.
+    /// </summary>
+    private void SplitNameBeforeCell(ReadOnlySpan<char> formula)
+    {
+        for (var i = 0; i + 1 < _tokens.Count; i++)
+        {
+            var span = _tokens[i];
+            var number = _tokens[i + 1];
+            if (span.SymbolId != Token.A1_SPAN_REFERENCE ||
+                number.SymbolId != Token.NUMERICAL_CONSTANT ||
+                number.StartIndex != span.StartIndex + span.Length)
+                continue;
+
+            // A sheet prefix owns the span after it (`Sheet1!A:B`), so there is no name to split off.
+            if (i > 0 && _tokens[i - 1].SymbolId is Token.SINGLE_SHEET_PREFIX or Token.SHEET_RANGE_PREFIX or Token.BOOK_PREFIX)
+                continue;
+
+            var text = formula.Slice(span.StartIndex, span.Length);
+            var colon = text.IndexOf(':');
+            if (!IsLetters(text.Slice(0, colon)) || !IsLetters(text.Slice(colon + 1)))
+                continue;
+
+            // The row must be plain digits that the lexer reads as a cell together with the column.
+            var cellStart = span.StartIndex + colon + 1;
+            var cellLength = span.Length - colon - 1 + number.Length;
+            var cell = formula.Slice(cellStart, cellLength);
+            var (cellSymbol, cellTokenLength) = RolexLexer.GetToken(cell, 0, _style.DfaTable);
+            if (cellSymbol != Token.A1_CELL || cellTokenLength != cellLength)
+                continue;
+
+            _tokens[i] = new Token(Token.NAME, span.StartIndex, colon);
+            _tokens[i + 1] = new Token(Token.A1_CELL, cellStart, cellLength);
+            _tokens.Insert(i + 1, new Token(Token.COLON, span.StartIndex + colon, 1));
+            i += 2;
+        }
+    }
+
+    private static bool IsLetters(ReadOnlySpan<char> text)
+    {
+        foreach (var c in text)
+        {
+            if (!char.IsAsciiLetter(c))
+                return false;
+        }
+
+        return text.Length > 0;
     }
 
     /// <summary>
