@@ -359,7 +359,28 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), op, neutralAtom);
     }
 
+    /// <summary>
+    /// An atom, followed by the argument lists that call it: <c>LAMBDA(x,x)(3)</c> or <c>(f)(3)</c>. Only
+    /// a function call or an expression in braces can be called, and the brace of an argument list
+    /// must follow it without whitespace, because <c>(A1) (B1)</c> is an intersection.
+    /// </summary>
     private TNode AtomExpression(bool skipRangeUnion, out bool isPureRef)
+    {
+        var start = _tokenSource.StartIndex;
+        var callable = _la is Token.OPEN_BRACE or Token.CELL_FUNCTION_LIST or Token.USER_DEFINED_FUNCTION_NAME
+            or Token.SINGLE_SHEET_PREFIX or Token.BOOK_PREFIX;
+        var node = PrimaryAtomExpression(skipRangeUnion, out isPureRef);
+        while (callable && !isPureRef && _la == Token.OPEN_BRACE && !IsSpaceAfterPreviousToken())
+        {
+            Consume();
+            var args = ArgumentList();
+            node = _factory.ExpressionCall(_context, new SymbolRange(start, _tokenSource.StartIndex), node, args);
+        }
+
+        return node;
+    }
+
+    private TNode PrimaryAtomExpression(bool skipRangeUnion, out bool isPureRef)
     {
         switch (_la)
         {

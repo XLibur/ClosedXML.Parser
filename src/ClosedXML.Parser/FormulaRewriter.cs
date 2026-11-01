@@ -465,6 +465,18 @@ public partial class FormulaModifier
             return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
         }
 
+        public TransformedSymbol ExpressionCall(ModContext ctx, SymbolRange range, TransformedSymbol target, IReadOnlyList<TransformedSymbol> arguments)
+        {
+            if (target.IsOriginal && AllOriginal(arguments))
+                return TransformedSymbol.CopyOriginal(ctx.Formula, range);
+
+            var nodeText = new StringBuilder(target.Length + 2 + TotalLength(arguments) + arguments.Count)
+                .Append(target.AsSpan())
+                .AppendArguments(ctx, range, arguments)
+                .ToString();
+            return TransformedSymbol.ToText(ctx.Formula, range, nodeText);
+        }
+
         public TransformedSymbol Nested(ModContext ctx, SymbolRange range, TransformedSymbol node)
         {
             if (node.IsOriginal)

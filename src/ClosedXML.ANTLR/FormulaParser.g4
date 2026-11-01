@@ -57,6 +57,7 @@ prefix_atom_expression
  */
 atom_expression
         : constant
+        | expression_call
         | OPEN_BRACE expression CLOSE_BRACE
         | function_call
         | ref_expression
@@ -211,6 +212,7 @@ arg_prefix_atom_expression
  */
 arg_atom_expression
         : constant
+        | expression_call
         | OPEN_BRACE expression CLOSE_BRACE
         | function_call
         | ref_implicit_expression
@@ -270,6 +272,20 @@ table_name
 
 ref_function_call
         : REF_FUNCTION_LIST argument_list
+        ;
+
+/*
+ * A call of the value of an expression, e.g. `LAMBDA(x,x*2)(3)`. Only a function call or
+ * an expression in braces can be called. The brace of the argument list must follow it
+ * without whitespace, because `(A1) (B1)` is an intersection. The lexer puts the whitespace
+ * after `)` into its token, so the predicate looks at the end of the previous token.
+ */
+expression_call
+        : (function_call | OPEN_BRACE expression CLOSE_BRACE) expression_call_arguments+
+        ;
+
+expression_call_arguments
+        : {!IsSpaceAfterPreviousToken()}? OPEN_BRACE argument_list
         ;
 
 function_call

@@ -234,6 +234,16 @@ public interface IAstFactory<TScalarValue, TNode, in TContext>
     TNode CellFunction(TContext context, SymbolRange range, RowCol cell, IReadOnlyList<TNode> arguments);
 
     /// <summary>
+    /// Create a node that calls the value of an expression, e.g. <c>LAMBDA(x,x*2)(3)</c>. The target is a function
+    /// call or an expression in braces, and an argument list can follow another, as in <c>f(1)(2)</c>.
+    /// </summary>
+    /// <param name="context">User supplied context for parsing a tree that is an argument of a parsing method.</param>
+    /// <param name="range">Range in a formula that contains the target and the arguments.</param>
+    /// <param name="target">Node of the expression that gives the value to call, usually a LAMBDA.</param>
+    /// <param name="arguments">Arguments to pass to the value. The factory may keep the list: the parser doesn't touch it once the call returns.</param>
+    TNode ExpressionCall(TContext context, SymbolRange range, TNode target, IReadOnlyList<TNode> arguments);
+
+    /// <summary>
     /// Create a node to represent a structure reference without a table to a range of columns.
     /// Such reference is only allowed in the table (e.g. total formulas).
     /// </summary>

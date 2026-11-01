@@ -30,6 +30,10 @@ public class FormulaModifierTests
     // A structured reference keeps the braces it was written with.
     [InlineData("Table1[[#All]]")]
     [InlineData("[[#Headers]]")]
+    // A call of an expression.
+    [InlineData("LAMBDA(x, x*2)(3)")]
+    [InlineData("(LAMBDA(x,x))( 3 , 4 )")]
+    [InlineData("LAMBDA(x,x)()")]
     public void Modifier_that_changes_nothing_writes_the_formula_as_it_was(string formula)
     {
         Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
