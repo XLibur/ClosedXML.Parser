@@ -56,6 +56,54 @@ public partial class FormulaParser
     }
 
     /// <summary>
+    /// Does an argument list follow the function call or the expression in braces that starts at the current token,
+    /// with no whitespace before its brace? ANTLR doesn't evaluate a predicate that comes after a consumed token
+    /// while it predicts an alternative, so the check of <c>expression_call</c> has to be here, at its left edge:
+    /// without it, the prediction takes <c>IF(A1,B1,C1) (D1)</c>, an intersection, for a call.
+    /// </summary>
+    private bool IsExpressionCall()
+    {
+        var first = CurrentToken.Type;
+        var isPrefix = first == SINGLE_SHEET_PREFIX || first == BOOK_PREFIX;
+        if (isPrefix)
+        {
+            // A prefix starts a call only when the name of a function follows it.
+            if (TokenStream.LT(2).Type != USER_DEFINED_FUNCTION_NAME)
+                return false;
+        }
+        else if (first != OPEN_BRACE && first != USER_DEFINED_FUNCTION_NAME && first != REF_FUNCTION_LIST && first != CELL_FUNCTION_LIST)
+        {
+            return false;
+        }
+
+        var depth = 0;
+        for (var i = 1; ; i++)
+        {
+            var token = TokenStream.LT(i);
+            switch (token.Type)
+            {
+                case Antlr4.Runtime.TokenConstants.EOF:
+                    return false;
+                case OPEN_BRACE:
+                case USER_DEFINED_FUNCTION_NAME:
+                case REF_FUNCTION_LIST:
+                case CELL_FUNCTION_LIST:
+                    depth++;
+                    break;
+                case CLOSE_BRACE:
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return TokenStream.LT(i + 1).Type == OPEN_BRACE &&
+                               !TokenParser.IsSpaceAtEnd(token.Text.AsSpan(), WholeToken(token.Type, token.Text));
+                    }
+
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
     /// A predicate gets the text of one token, so the token spans all of it.
     /// </summary>
     private static ParserToken WholeToken(int symbolId, string text) => new(symbolId, 0, text.Length);

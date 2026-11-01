@@ -132,12 +132,6 @@ As a consequence:
 
 * Formula syntaxes used by other spreadsheet implementations may differ from OOXML formula syntax and are outside the scope of this project.
 
-The parser also does not currently support invoking the result of a function expression, for example:
-
-```text
-LAMBDA(x,x+1)(2)
-```
-
 # Architecture
 
 ## Grammar

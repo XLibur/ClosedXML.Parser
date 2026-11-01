@@ -59,6 +59,8 @@ internal class NoOpFactory : IAstFactory<object, object, object?>
 
     public object CellFunction(object? context, SymbolRange range, RowCol cell, IReadOnlyList<object> arguments) => Node;
 
+    public object ExpressionCall(object? context, SymbolRange range, object target, IReadOnlyList<object> arguments) => Node;
+
     public object StructureReference(object? context, SymbolRange range, StructuredReferenceArea area, string? firstColumn, string? lastColumn) => Node;
 
     public object StructureReference(object? context, SymbolRange range, string table, StructuredReferenceArea area, string? firstColumn, string? lastColumn) => Node;

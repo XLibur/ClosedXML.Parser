@@ -71,6 +71,9 @@ public sealed class RangeRecordingFactory : IAstFactory<ScalarValue, AstNode, Ct
     public AstNode CellFunction(Ctx context, SymbolRange range, RowCol cell, IReadOnlyList<AstNode> args) =>
         Record(_factory.CellFunction(context, range, cell, args), range);
 
+    public AstNode ExpressionCall(Ctx context, SymbolRange range, AstNode target, IReadOnlyList<AstNode> args) =>
+        Record(_factory.ExpressionCall(context, range, target, args), range);
+
     public AstNode StructureReference(Ctx context, SymbolRange range, StructuredReferenceArea area, string? firstColumn, string? lastColumn) =>
         Record(_factory.StructureReference(context, range, area, firstColumn, lastColumn), range);
 

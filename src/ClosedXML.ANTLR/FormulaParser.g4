@@ -57,6 +57,7 @@ prefix_atom_expression
  */
 atom_expression
         : constant
+        | expression_call
         | OPEN_BRACE expression CLOSE_BRACE
         | function_call
         | ref_expression
@@ -211,6 +212,7 @@ arg_prefix_atom_expression
  */
 arg_atom_expression
         : constant
+        | expression_call
         | OPEN_BRACE expression CLOSE_BRACE
         | function_call
         | ref_implicit_expression
@@ -270,6 +272,22 @@ table_name
 
 ref_function_call
         : REF_FUNCTION_LIST argument_list
+        ;
+
+/*
+ * A call of the value of an expression, e.g. `LAMBDA(x,x*2)(3)`. Only a function call, a
+ * reference function such as `IF` or an expression in braces can be called. The brace of the argument list must follow it
+ * without whitespace, because `(A1) (B1)` is an intersection. The lexer puts the whitespace
+ * after `)` into its token, so the predicates look at the end of the closing token. The first
+ * predicate is at the left edge, where ANTLR evaluates it while predicting between this rule
+ * and ref_expression. The second one stops a chain at the first brace that follows a space.
+ */
+expression_call
+        : {IsExpressionCall()}? (function_call | ref_function_call | OPEN_BRACE expression CLOSE_BRACE) expression_call_arguments+
+        ;
+
+expression_call_arguments
+        : {!IsSpaceAfterPreviousToken()}? OPEN_BRACE argument_list
         ;
 
 function_call

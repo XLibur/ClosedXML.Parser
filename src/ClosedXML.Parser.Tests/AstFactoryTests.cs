@@ -723,6 +723,11 @@ public class AstFactoryTests
             return _defaultNode;
         }
 
+        public virtual TNode ExpressionCall(TContext context, SymbolRange range, TNode target, IReadOnlyList<TNode> arguments)
+        {
+            return _defaultNode;
+        }
+
         public virtual TNode StructureReference(TContext context, SymbolRange range, StructuredReferenceArea area, string? firstColumn, string? lastColumn)
         {
             return _defaultNode;

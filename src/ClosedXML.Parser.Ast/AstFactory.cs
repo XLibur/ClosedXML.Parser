@@ -138,6 +138,14 @@ public class F : IAstFactory<ScalarValue, AstNode, Ctx>
         };
     }
 
+    public AstNode ExpressionCall(Ctx _, SymbolRange range, AstNode target, IReadOnlyList<AstNode> args)
+    {
+        return new ExpressionCallNode
+        {
+            Children = args.Prepend(target).ToArray()
+        };
+    }
+
     public AstNode Name(Ctx _, SymbolRange range, string name)
     {
         return new NameNode(name);

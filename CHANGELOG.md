@@ -22,6 +22,16 @@ or Fixed.
 
 ### Formula parsers
 
+#### Added
+
+- Both parsers read a call of the value of an expression, such as `LAMBDA(x,x*2)(3)`
+  ([#66](https://github.com/XLibur/ClosedXML.Parser/issues/66)). The target is a function call or an
+  expression in braces, or a reference function that can pick a lambda (`IF`, `CHOOSE`), and argument lists can
+  follow one another (`f(1)(2)`). The brace of the
+  argument list must follow the target without whitespace, because `(A1) (B1)` is an intersection.
+  This is a breaking change: `IAstFactory` has a new `ExpressionCall` member, and the AST has an
+  `ExpressionCallNode` whose first child is the target and the rest are the arguments.
+
 #### Changed
 
 - A parse allocates only what the factory keeps

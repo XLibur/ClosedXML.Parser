@@ -30,6 +30,10 @@ public class FormulaModifierTests
     // A structured reference keeps the braces it was written with.
     [InlineData("Table1[[#All]]")]
     [InlineData("[[#Headers]]")]
+    // A call of an expression.
+    [InlineData("LAMBDA(x, x*2)(3)")]
+    [InlineData("(LAMBDA(x,x))( 3 , 4 )")]
+    [InlineData("LAMBDA(x,x)()")]
     public void Modifier_that_changes_nothing_writes_the_formula_as_it_was(string formula)
     {
         Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
@@ -77,6 +81,27 @@ public class FormulaModifierTests
     public void ModifySheet_can_rename_sheet_name(string formula, string oldSheetName, string newSheetName, string modifiedFormula)
     {
         var modifier = new SheetModifier { SheetMap = { { oldSheetName, newSheetName } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
+    /// <summary>
+    /// A call of an expression is written back from its parts, so a change in the target or in an
+    /// argument must keep both the target and every set of braces.
+    /// </summary>
+    [Theory]
+    [InlineData("LAMBDA(x,Old!A1)(3)", "LAMBDA(x,New!A1)(3)")]
+    [InlineData("LAMBDA(x,x)(Old!B1)", "LAMBDA(x,x)(New!B1)")]
+    [InlineData("LAMBDA(x,Old!A1)(Old!B1,2)", "LAMBDA(x,New!A1)(New!B1,2)")]
+    [InlineData("LAMBDA(x,Old!A1)()", "LAMBDA(x,New!A1)()")]
+    [InlineData("LAMBDA(x,Old!A1)( )", "LAMBDA(x,New!A1)( )")]
+    [InlineData("LAMBDA(x,LAMBDA(y,Old!A1))(1)(Old!B1)", "LAMBDA(x,LAMBDA(y,New!A1))(1)(New!B1)")]
+    [InlineData("LAMBDA(x,LAMBDA(y,x))(Old!A1)(2)", "LAMBDA(x,LAMBDA(y,x))(New!A1)(2)")]
+    [InlineData("(LAMBDA(x,Old!A1))( Old!B1 , 2 )", "(LAMBDA(x,New!A1))( New!B1 , 2 )")]
+    [InlineData("IF(Old!A1,LAMBDA(x,x),LAMBDA(x,-x))(3)", "IF(New!A1,LAMBDA(x,x),LAMBDA(x,-x))(3)")]
+    [InlineData("1+SUM(LAMBDA(x,Old!A1)(Old!B1),4)*2", "1+SUM(LAMBDA(x,New!A1)(New!B1),4)*2")]
+    public void ModifySheet_changes_the_parts_of_a_called_expression(string formula, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { "Old", "New" } } };
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 

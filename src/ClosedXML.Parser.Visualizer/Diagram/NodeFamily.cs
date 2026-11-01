@@ -23,6 +23,7 @@ public static class NodeFamilies
         ["Function"] = NodeFamily.Function,
         ["ExternalFunction"] = NodeFamily.Function,
         ["CellFunction"] = NodeFamily.Function,
+        ["ExpressionCall"] = NodeFamily.Function,
 
         ["Reference"] = NodeFamily.Reference,
         ["SheetReference"] = NodeFamily.Reference,

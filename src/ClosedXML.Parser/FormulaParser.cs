@@ -359,7 +359,50 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         return _factory.Unary(_context, new SymbolRange(start, _tokenSource.StartIndex), op, neutralAtom);
     }
 
+    /// <summary>
+    /// An atom, followed by the argument lists that call it: <c>LAMBDA(x,x)(3)</c> or <c>(f)(3)</c>. Only
+    /// a function call, a reference function such as <c>IF</c>, or an expression in braces can be called, and the brace of an argument list
+    /// must follow it without whitespace, because <c>(A1) (B1)</c> is an intersection.
+    /// </summary>
     private TNode AtomExpression(bool skipRangeUnion, out bool isPureRef)
+    {
+        var start = _tokenSource.StartIndex;
+        var callable = _la is Token.OPEN_BRACE or Token.CELL_FUNCTION_LIST or Token.USER_DEFINED_FUNCTION_NAME
+            or Token.SINGLE_SHEET_PREFIX or Token.BOOK_PREFIX;
+
+        // IF and CHOOSE are reference functions that can pick a lambda. The call is only known to be
+        // one once the brace follows, so otherwise the parser goes on as ref_expression with the atom it read.
+        if (_la == Token.REF_FUNCTION_LIST)
+        {
+            var functionNode = LocalFunctionCall();
+            if (_la == Token.OPEN_BRACE && !IsSpaceAfterPreviousToken())
+            {
+                isPureRef = false;
+                return CallSuffixes(functionNode, start);
+            }
+
+            isPureRef = true;
+            var readAtom = new ReadAtom(functionNode, start);
+            return skipRangeUnion ? RefImplicitExpression(readAtom) : RefExpression(readAtom);
+        }
+
+        var node = PrimaryAtomExpression(skipRangeUnion, out isPureRef);
+        return callable && !isPureRef ? CallSuffixes(node, start) : node;
+    }
+
+    private TNode CallSuffixes(TNode node, int start)
+    {
+        while (_la == Token.OPEN_BRACE && !IsSpaceAfterPreviousToken())
+        {
+            Consume();
+            var args = ArgumentList();
+            node = _factory.ExpressionCall(_context, new SymbolRange(start, _tokenSource.StartIndex), node, args);
+        }
+
+        return node;
+    }
+
+    private TNode PrimaryAtomExpression(bool skipRangeUnion, out bool isPureRef)
     {
         switch (_la)
         {
