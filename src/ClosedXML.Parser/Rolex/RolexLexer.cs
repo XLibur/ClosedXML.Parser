@@ -109,7 +109,7 @@ internal class RolexLexer
         return c;
     }
 
-    private static (int SymbolId, int Length) GetToken(ReadOnlySpan<char> input, int startIdx, DfaEntry[] dfaTable)
+    internal static (int SymbolId, int Length) GetToken(ReadOnlySpan<char> input, int startIdx, DfaEntry[] dfaTable)
     {
         int dfaState = 0;
 
