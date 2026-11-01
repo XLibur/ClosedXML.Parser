@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <!-- net11.0 needs a .NET 11 SDK, which the pinned global.json does not select; CI sets this.
+         Run: dotnet test -p:TestNet11=true (with a .NET 11 SDK and global.json out of the way). -->
+    <TargetFrameworks Condition="'$(TestNet11)' == 'true'">$(TargetFrameworks);net11.0</TargetFrameworks>
     <RootNamespace>XLibur.Parser.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

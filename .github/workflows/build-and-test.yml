@@ -88,6 +88,45 @@ jobs:
           name: test-results
           path: '**/TestResults/*.trx'
 
+  # .NET 11 release candidate. The libraries still target net8.0; this runs the tests on the
+  # .NET 11 runtime. global.json pins SDK 10 without prereleases, so it is removed here.
+  # Not required to pass for a merge while .NET 11 is a prerelease.
+  test-net11-rc:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            11.0.x
+          dotnet-quality: preview
+
+      - name: Use the .NET 11 SDK
+        run: rm global.json
+
+      - name: Test on net11.0
+        run: >
+          dotnet test src/ClosedXML.Parser.Tests/ClosedXML.Parser.Tests.csproj
+          --configuration Release
+          --framework net11.0
+          -p:TestNet11=true
+          --logger "trx;LogFileName=net11-test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-net11
+          path: '**/TestResults/*.trx'
+
   # The Rolex DFA tables are generated from the Rolex grammars (Lexer*.rl) by the vendored
   # Rolex 91a2d6d build, a .NET Framework executable, so this check runs on Windows.
   # RolexGrammarConverterTests covers the step before it, from FormulaLexer.g4 to the grammars.
