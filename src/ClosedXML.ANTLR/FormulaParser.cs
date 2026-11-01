@@ -2415,6 +2415,9 @@ public partial class FormulaParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public Function_callContext function_call() {
 			return GetRuleContext<Function_callContext>(0);
 		}
+		[System.Diagnostics.DebuggerNonUserCode] public Ref_function_callContext ref_function_call() {
+			return GetRuleContext<Ref_function_callContext>(0);
+		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACE() { return GetToken(FormulaParser.OPEN_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
 			return GetRuleContext<ExpressionContext>(0);
@@ -2441,7 +2444,9 @@ public partial class FormulaParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 363;
+			State = 358;
+			if (!(IsExpressionCall())) throw new FailedPredicateException(this, "IsExpressionCall()");
+			State = 365;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case BOOK_PREFIX:
@@ -2449,24 +2454,30 @@ public partial class FormulaParser : Parser {
 			case CELL_FUNCTION_LIST:
 			case USER_DEFINED_FUNCTION_NAME:
 				{
-				State = 358;
+				State = 359;
 				function_call();
+				}
+				break;
+			case REF_FUNCTION_LIST:
+				{
+				State = 360;
+				ref_function_call();
 				}
 				break;
 			case OPEN_BRACE:
 				{
-				State = 359;
-				Match(OPEN_BRACE);
-				State = 360;
-				expression();
 				State = 361;
+				Match(OPEN_BRACE);
+				State = 362;
+				expression();
+				State = 363;
 				Match(CLOSE_BRACE);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			State = 366;
+			State = 368;
 			ErrorHandler.Sync(this);
 			_alt = 1;
 			do {
@@ -2474,7 +2485,7 @@ public partial class FormulaParser : Parser {
 				case 1:
 					{
 					{
-					State = 365;
+					State = 367;
 					expression_call_arguments();
 					}
 					}
@@ -2482,7 +2493,7 @@ public partial class FormulaParser : Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				State = 368;
+				State = 370;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,42,Context);
 			} while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER );
@@ -2518,11 +2529,11 @@ public partial class FormulaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 370;
-			if (!(!IsSpaceAfterPreviousToken())) throw new FailedPredicateException(this, "!IsSpaceAfterPreviousToken()");
-			State = 371;
-			Match(OPEN_BRACE);
 			State = 372;
+			if (!(!IsSpaceAfterPreviousToken())) throw new FailedPredicateException(this, "!IsSpaceAfterPreviousToken()");
+			State = 373;
+			Match(OPEN_BRACE);
+			State = 374;
 			argument_list();
 			}
 		}
@@ -2560,12 +2571,12 @@ public partial class FormulaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 379;
+			State = 381;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case CELL_FUNCTION_LIST:
 				{
-				State = 374;
+				State = 376;
 				Match(CELL_FUNCTION_LIST);
 				}
 				break;
@@ -2573,12 +2584,12 @@ public partial class FormulaParser : Parser {
 			case SINGLE_SHEET_PREFIX:
 			case USER_DEFINED_FUNCTION_NAME:
 				{
-				State = 376;
+				State = 378;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==BOOK_PREFIX || _la==SINGLE_SHEET_PREFIX) {
 					{
-					State = 375;
+					State = 377;
 					_la = TokenStream.LA(1);
 					if ( !(_la==BOOK_PREFIX || _la==SINGLE_SHEET_PREFIX) ) {
 					ErrorHandler.RecoverInline(this);
@@ -2590,14 +2601,14 @@ public partial class FormulaParser : Parser {
 					}
 				}
 
-				State = 378;
+				State = 380;
 				Match(USER_DEFINED_FUNCTION_NAME);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			State = 381;
+			State = 383;
 			argument_list();
 			}
 		}
@@ -2617,6 +2628,7 @@ public partial class FormulaParser : Parser {
 		case 11: return ref_intersection_expression_sempred((Ref_intersection_expressionContext)_localctx, predIndex);
 		case 29: return name_reference_sempred((Name_referenceContext)_localctx, predIndex);
 		case 30: return dde_reference_sempred((Dde_referenceContext)_localctx, predIndex);
+		case 35: return expression_call_sempred((Expression_callContext)_localctx, predIndex);
 		case 36: return expression_call_arguments_sempred((Expression_call_argumentsContext)_localctx, predIndex);
 		}
 		return true;
@@ -2640,15 +2652,21 @@ public partial class FormulaParser : Parser {
 		}
 		return true;
 	}
+	private bool expression_call_sempred(Expression_callContext _localctx, int predIndex) {
+		switch (predIndex) {
+		case 4: return IsExpressionCall();
+		}
+		return true;
+	}
 	private bool expression_call_arguments_sempred(Expression_call_argumentsContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 4: return !IsSpaceAfterPreviousToken();
+		case 5: return !IsSpaceAfterPreviousToken();
 		}
 		return true;
 	}
 
 	private static int[] _serializedATN = {
-		4,1,41,384,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		4,1,41,386,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
 		7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,
 		2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,
 		2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,2,28,7,28,
@@ -2676,26 +2694,26 @@ public partial class FormulaParser : Parser {
 		1,28,1,28,1,28,1,28,1,28,3,28,328,8,28,1,29,1,29,1,29,1,29,1,29,3,29,335,
 		8,29,1,30,1,30,1,30,1,30,1,30,3,30,342,8,30,1,31,3,31,345,8,31,1,31,1,
 		31,1,32,3,32,350,8,32,1,32,1,32,1,33,1,33,1,34,1,34,1,34,1,35,1,35,1,35,
-		1,35,1,35,3,35,364,8,35,1,35,4,35,367,8,35,11,35,12,35,368,1,36,1,36,1,
-		36,1,36,1,37,1,37,3,37,377,8,37,1,37,3,37,380,8,37,1,37,1,37,1,37,0,0,
-		38,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,
-		48,50,52,54,56,58,60,62,64,66,68,70,72,74,0,4,1,0,12,17,1,0,9,10,1,0,7,
-		8,2,0,29,29,32,32,410,0,76,1,0,0,0,2,79,1,0,0,0,4,87,1,0,0,0,6,95,1,0,
-		0,0,8,103,1,0,0,0,10,111,1,0,0,0,12,119,1,0,0,0,14,129,1,0,0,0,16,139,
-		1,0,0,0,18,141,1,0,0,0,20,152,1,0,0,0,22,154,1,0,0,0,24,169,1,0,0,0,26,
-		182,1,0,0,0,28,200,1,0,0,0,30,210,1,0,0,0,32,212,1,0,0,0,34,222,1,0,0,
-		0,36,247,1,0,0,0,38,254,1,0,0,0,40,257,1,0,0,0,42,270,1,0,0,0,44,278,1,
-		0,0,0,46,286,1,0,0,0,48,294,1,0,0,0,50,302,1,0,0,0,52,310,1,0,0,0,54,317,
-		1,0,0,0,56,327,1,0,0,0,58,334,1,0,0,0,60,341,1,0,0,0,62,344,1,0,0,0,64,
-		349,1,0,0,0,66,353,1,0,0,0,68,355,1,0,0,0,70,363,1,0,0,0,72,370,1,0,0,
-		0,74,379,1,0,0,0,76,77,3,2,1,0,77,78,5,0,0,1,78,1,1,0,0,0,79,84,3,4,2,
-		0,80,81,7,0,0,0,81,83,3,4,2,0,82,80,1,0,0,0,83,86,1,0,0,0,84,82,1,0,0,
-		0,84,85,1,0,0,0,85,3,1,0,0,0,86,84,1,0,0,0,87,92,3,6,3,0,88,89,5,11,0,
-		0,89,91,3,6,3,0,90,88,1,0,0,0,91,94,1,0,0,0,92,90,1,0,0,0,92,93,1,0,0,
-		0,93,5,1,0,0,0,94,92,1,0,0,0,95,100,3,8,4,0,96,97,7,1,0,0,97,99,3,8,4,
-		0,98,96,1,0,0,0,99,102,1,0,0,0,100,98,1,0,0,0,100,101,1,0,0,0,101,7,1,
-		0,0,0,102,100,1,0,0,0,103,108,3,10,5,0,104,105,7,2,0,0,105,107,3,10,5,
-		0,106,104,1,0,0,0,107,110,1,0,0,0,108,106,1,0,0,0,108,109,1,0,0,0,109,
+		1,35,1,35,1,35,1,35,3,35,366,8,35,1,35,4,35,369,8,35,11,35,12,35,370,1,
+		36,1,36,1,36,1,36,1,37,1,37,3,37,379,8,37,1,37,3,37,382,8,37,1,37,1,37,
+		1,37,0,0,38,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,
+		42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,0,4,1,0,12,17,1,0,9,
+		10,1,0,7,8,2,0,29,29,32,32,413,0,76,1,0,0,0,2,79,1,0,0,0,4,87,1,0,0,0,
+		6,95,1,0,0,0,8,103,1,0,0,0,10,111,1,0,0,0,12,119,1,0,0,0,14,129,1,0,0,
+		0,16,139,1,0,0,0,18,141,1,0,0,0,20,152,1,0,0,0,22,154,1,0,0,0,24,169,1,
+		0,0,0,26,182,1,0,0,0,28,200,1,0,0,0,30,210,1,0,0,0,32,212,1,0,0,0,34,222,
+		1,0,0,0,36,247,1,0,0,0,38,254,1,0,0,0,40,257,1,0,0,0,42,270,1,0,0,0,44,
+		278,1,0,0,0,46,286,1,0,0,0,48,294,1,0,0,0,50,302,1,0,0,0,52,310,1,0,0,
+		0,54,317,1,0,0,0,56,327,1,0,0,0,58,334,1,0,0,0,60,341,1,0,0,0,62,344,1,
+		0,0,0,64,349,1,0,0,0,66,353,1,0,0,0,68,355,1,0,0,0,70,358,1,0,0,0,72,372,
+		1,0,0,0,74,381,1,0,0,0,76,77,3,2,1,0,77,78,5,0,0,1,78,1,1,0,0,0,79,84,
+		3,4,2,0,80,81,7,0,0,0,81,83,3,4,2,0,82,80,1,0,0,0,83,86,1,0,0,0,84,82,
+		1,0,0,0,84,85,1,0,0,0,85,3,1,0,0,0,86,84,1,0,0,0,87,92,3,6,3,0,88,89,5,
+		11,0,0,89,91,3,6,3,0,90,88,1,0,0,0,91,94,1,0,0,0,92,90,1,0,0,0,92,93,1,
+		0,0,0,93,5,1,0,0,0,94,92,1,0,0,0,95,100,3,8,4,0,96,97,7,1,0,0,97,99,3,
+		8,4,0,98,96,1,0,0,0,99,102,1,0,0,0,100,98,1,0,0,0,100,101,1,0,0,0,101,
+		7,1,0,0,0,102,100,1,0,0,0,103,108,3,10,5,0,104,105,7,2,0,0,105,107,3,10,
+		5,0,106,104,1,0,0,0,107,110,1,0,0,0,108,106,1,0,0,0,108,109,1,0,0,0,109,
 		9,1,0,0,0,110,108,1,0,0,0,111,116,3,12,6,0,112,113,5,6,0,0,113,115,3,12,
 		6,0,114,112,1,0,0,0,115,118,1,0,0,0,116,114,1,0,0,0,116,117,1,0,0,0,117,
 		11,1,0,0,0,118,116,1,0,0,0,119,123,3,14,7,0,120,122,5,18,0,0,121,120,1,
@@ -2766,16 +2784,17 @@ public partial class FormulaParser : Parser {
 		343,1,0,0,0,344,345,1,0,0,0,345,346,1,0,0,0,346,347,5,39,0,0,347,63,1,
 		0,0,0,348,350,5,29,0,0,349,348,1,0,0,0,349,350,1,0,0,0,350,351,1,0,0,0,
 		351,352,3,66,33,0,352,65,1,0,0,0,353,354,5,38,0,0,354,67,1,0,0,0,355,356,
-		5,35,0,0,356,357,3,40,20,0,357,69,1,0,0,0,358,364,3,74,37,0,359,360,5,
-		21,0,0,360,361,3,2,1,0,361,362,5,22,0,0,362,364,1,0,0,0,363,358,1,0,0,
-		0,363,359,1,0,0,0,364,366,1,0,0,0,365,367,3,72,36,0,366,365,1,0,0,0,367,
-		368,1,0,0,0,368,366,1,0,0,0,368,369,1,0,0,0,369,71,1,0,0,0,370,371,4,36,
-		4,0,371,372,5,21,0,0,372,373,3,40,20,0,373,73,1,0,0,0,374,380,5,36,0,0,
-		375,377,7,3,0,0,376,375,1,0,0,0,376,377,1,0,0,0,377,378,1,0,0,0,378,380,
-		5,37,0,0,379,374,1,0,0,0,379,376,1,0,0,0,380,381,1,0,0,0,381,382,3,40,
-		20,0,382,75,1,0,0,0,45,84,92,100,108,116,123,129,139,146,152,159,161,167,
-		174,180,184,189,200,210,217,222,227,231,241,247,254,257,261,265,275,283,
-		291,299,307,312,317,327,334,341,344,349,363,368,376,379
+		5,35,0,0,356,357,3,40,20,0,357,69,1,0,0,0,358,365,4,35,4,0,359,366,3,74,
+		37,0,360,366,3,68,34,0,361,362,5,21,0,0,362,363,3,2,1,0,363,364,5,22,0,
+		0,364,366,1,0,0,0,365,359,1,0,0,0,365,360,1,0,0,0,365,361,1,0,0,0,366,
+		368,1,0,0,0,367,369,3,72,36,0,368,367,1,0,0,0,369,370,1,0,0,0,370,368,
+		1,0,0,0,370,371,1,0,0,0,371,71,1,0,0,0,372,373,4,36,5,0,373,374,5,21,0,
+		0,374,375,3,40,20,0,375,73,1,0,0,0,376,382,5,36,0,0,377,379,7,3,0,0,378,
+		377,1,0,0,0,378,379,1,0,0,0,379,380,1,0,0,0,380,382,5,37,0,0,381,376,1,
+		0,0,0,381,378,1,0,0,0,382,383,1,0,0,0,383,384,3,40,20,0,384,75,1,0,0,0,
+		45,84,92,100,108,116,123,129,139,146,152,159,161,167,174,180,184,189,200,
+		210,217,222,227,231,241,247,254,257,261,265,275,283,291,299,307,312,317,
+		327,334,341,344,349,365,370,378,381
 	};
 
 	public static readonly ATN _ATN =

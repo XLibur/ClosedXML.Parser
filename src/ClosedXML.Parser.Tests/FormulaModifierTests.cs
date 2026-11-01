@@ -84,6 +84,27 @@ public class FormulaModifierTests
         AssertModifiedA1(formula, modifier, modifiedFormula);
     }
 
+    /// <summary>
+    /// A call of an expression is written back from its parts, so a change in the target or in an
+    /// argument must keep both the target and every set of braces.
+    /// </summary>
+    [Theory]
+    [InlineData("LAMBDA(x,Old!A1)(3)", "LAMBDA(x,New!A1)(3)")]
+    [InlineData("LAMBDA(x,x)(Old!B1)", "LAMBDA(x,x)(New!B1)")]
+    [InlineData("LAMBDA(x,Old!A1)(Old!B1,2)", "LAMBDA(x,New!A1)(New!B1,2)")]
+    [InlineData("LAMBDA(x,Old!A1)()", "LAMBDA(x,New!A1)()")]
+    [InlineData("LAMBDA(x,Old!A1)( )", "LAMBDA(x,New!A1)( )")]
+    [InlineData("LAMBDA(x,LAMBDA(y,Old!A1))(1)(Old!B1)", "LAMBDA(x,LAMBDA(y,New!A1))(1)(New!B1)")]
+    [InlineData("LAMBDA(x,LAMBDA(y,x))(Old!A1)(2)", "LAMBDA(x,LAMBDA(y,x))(New!A1)(2)")]
+    [InlineData("(LAMBDA(x,Old!A1))( Old!B1 , 2 )", "(LAMBDA(x,New!A1))( New!B1 , 2 )")]
+    [InlineData("IF(Old!A1,LAMBDA(x,x),LAMBDA(x,-x))(3)", "IF(New!A1,LAMBDA(x,x),LAMBDA(x,-x))(3)")]
+    [InlineData("1+SUM(LAMBDA(x,Old!A1)(Old!B1),4)*2", "1+SUM(LAMBDA(x,New!A1)(New!B1),4)*2")]
+    public void ModifySheet_changes_the_parts_of_a_called_expression(string formula, string modifiedFormula)
+    {
+        var modifier = new SheetModifier { SheetMap = { { "Old", "New" } } };
+        AssertModifiedA1(formula, modifier, modifiedFormula);
+    }
+
     [Theory]
     [InlineData("Old!#REF!", "Old", "New", "New!#REF!")]
     [InlineData("'Old sheet'!#REF!", "Old sheet", "New", "New!#REF!")]

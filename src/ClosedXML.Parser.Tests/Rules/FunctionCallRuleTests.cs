@@ -105,6 +105,13 @@ public class FunctionCallRuleTests
     [InlineData("SUM(LAMBDA(x,x)(3),4)")]
     [InlineData("Sheet!Func(1)(2)")]
     [InlineData("[1]!Func(1)(2)")]
+    [InlineData("IF(TRUE,LAMBDA(x,x),LAMBDA(x,-x))(3)")]
+    [InlineData("CHOOSE(1,LAMBDA(x,x))(1)(2)")]
+    [InlineData("1+IF(A1,f,g)(3)*2")]
+    // A reference function that isn't called goes on as a reference.
+    [InlineData("IF(TRUE,A1,B1):C3")]
+    [InlineData("IF(TRUE,A1,B1) (C1)")]
+    [InlineData("SUM(INDEX(A1:B2,1):B2)")]
     public void Both_parsers_accept_a_called_expression(string formula)
     {
         AssertFormula.CstParsed(formula);
