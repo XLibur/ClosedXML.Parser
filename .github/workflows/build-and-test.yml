@@ -120,6 +120,13 @@ jobs:
           -p:TestNet11=true
           --logger "trx;LogFileName=net11-test-results.trx"
 
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-net11
+          path: '**/TestResults/*.trx'
+
   # The Rolex DFA tables are generated from the Rolex grammars (Lexer*.rl) by the vendored
   # Rolex 91a2d6d build, a .NET Framework executable, so this check runs on Windows.
   # RolexGrammarConverterTests covers the step before it, from FormulaLexer.g4 to the grammars.
