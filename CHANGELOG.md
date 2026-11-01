@@ -31,6 +31,12 @@ or Fixed.
   table name can't be quoted, so the reference could not be written in R1C1: `c[` reads as the relative
   column `C[`. Before, the A1 parser took the name and the formula then failed to convert to R1C1 or to
   parse back. A formula that used such a name did not come from Excel.
+- The A1 parser reads a name that is also a valid column as an operand of the range operator when a cell
+  follows the colon (XLibur [#870](https://github.com/XLibur/XLibur/issues/870)): `LET(r,A1,SUM(r:A3))` and
+  `LAMBDA(x,x:B3)(A1)` now parse as the name, the range operator and the cell. The lexer read the longest
+  token, the column span `r:A`, and left `3` over, so the formula was refused. A column span needs a column
+  after the colon, so a span followed straight on by digits can only be a name and a cell. A span after a
+  sheet prefix (`Sheet1!A:B3`) is still refused.
 
 ## v5.1.0 - 2026-11-01
 

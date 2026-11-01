@@ -34,6 +34,10 @@ public class FormulaModifierTests
     [InlineData("LAMBDA(x, x*2)(3)")]
     [InlineData("(LAMBDA(x,x))( 3 , 4 )")]
     [InlineData("LAMBDA(x,x)()")]
+    // A name that is also a column, then a colon and a cell (#870 in XLibur).
+    [InlineData("LET(r,A1,SUM(r:A3))")]
+    [InlineData("LET(ab,A1,SUM(A$1:ab:C3))")]
+    [InlineData("LAMBDA(x,x:B3)(A1)")]
     public void Modifier_that_changes_nothing_writes_the_formula_as_it_was(string formula)
     {
         Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
@@ -88,6 +92,40 @@ public class FormulaModifierTests
     /// A call of an expression is written back from its parts, so a change in the target or in an
     /// argument must keep both the target and every set of braces.
     /// </summary>
+    /// <summary>
+    /// A LET name that is also a valid column reads as a name when a cell follows the colon: the lexer
+    /// reads <c>r:A</c> as a column span, but a span needs a column after the colon, not a cell.
+    /// </summary>
+    [Theory]
+    [InlineData("LET(r,A1,SUM(r:A3))", "LET(r,Z9,SUM(r:A3))")]
+    [InlineData("LET(r,A1,SUM(r:B3))", "LET(r,Z9,SUM(r:D5))")]
+    [InlineData("LAMBDA(x,x:B3)(A1)", "LAMBDA(x,x:D5)(Z9)")]
+    public void Modify_reads_a_name_that_is_a_column_before_a_colon_and_a_cell(string formula, string modifiedFormula)
+    {
+        var modifier = new ShiftReferenceModifier { ReferenceMap = { { "A1", "Z9" }, { "B3", "D5" } } };
+        Assert.Equal(modifiedFormula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, modifier));
+    }
+
+    /// <summary>
+    /// The split only happens for a name, a colon and a cell. Every other shape stays as it was.
+    /// </summary>
+    [Theory]
+    [InlineData("A:B")]
+    [InlineData("SUM(A:B)")]
+    public void A_column_span_is_not_split_when_no_cell_follows(string formula)
+    {
+        Assert.Equal(formula, FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
+    }
+
+    [Theory]
+    [InlineData("SUM(A:B3.5)")]
+    [InlineData("Sheet1!A:B3")]
+    [InlineData("SUM(A:B 3)")]
+    public void A_column_span_with_something_else_after_it_is_refused(string formula)
+    {
+        Assert.Throws<ParsingException>(() => FormulaConverter.ModifyA1(formula, "Sheet", 1, 1, new FormulaModifier()));
+    }
+
     [Theory]
     [InlineData("LAMBDA(x,Old!A1)(3)", "LAMBDA(x,New!A1)(3)")]
     [InlineData("LAMBDA(x,x)(Old!B1)", "LAMBDA(x,x)(New!B1)")]
