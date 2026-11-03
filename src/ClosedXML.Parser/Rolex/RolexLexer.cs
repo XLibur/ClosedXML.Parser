@@ -24,7 +24,7 @@ internal class RolexLexer
     /// once it has read them. The caller must give the list back with <see cref="ReturnTokens"/> and
     /// must not use it afterwards.
     /// </summary>
-    internal static List<Token> RentTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
+    internal static List<Token> RentTokens(ReadOnlySpan<char> formula, int[] lexerDfa)
     {
         var tokens = t_tokens ?? new List<Token>();
         t_tokens = null;
@@ -59,7 +59,7 @@ internal class RolexLexer
         return GetTokens(formula, RolexR1C1Dfa.DfaTable);
     }
 
-    internal static List<Token> GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa)
+    internal static List<Token> GetTokens(ReadOnlySpan<char> formula, int[] lexerDfa)
     {
         var tokens = new List<Token>();
         GetTokens(formula, lexerDfa, tokens);
@@ -69,7 +69,7 @@ internal class RolexLexer
     /// <summary>
     /// Get all tokens for a formula into <paramref name="tokens"/>, replacing what the list held.
     /// </summary>
-    internal static void GetTokens(ReadOnlySpan<char> formula, DfaEntry[] lexerDfa, List<Token> tokens)
+    internal static void GetTokens(ReadOnlySpan<char> formula, int[] lexerDfa, List<Token> tokens)
     {
         tokens.Clear();
         for (var i = 0; i < formula.Length;)
@@ -109,9 +109,19 @@ internal class RolexLexer
         return c;
     }
 
-    internal static (int SymbolId, int Length) GetToken(ReadOnlySpan<char> input, int startIdx, DfaEntry[] dfaTable)
+    /// <summary>
+    /// Read the longest token that starts at <paramref name="startIdx"/>.
+    /// </summary>
+    /// <param name="input">Formula to read from.</param>
+    /// <param name="startIdx">Index of the first char of the token.</param>
+    /// <param name="dfaTable">
+    /// A table in the flat layout Rolex emits. A state starts at an offset and holds its accept
+    /// symbol (-1 for none), its transition count, then each transition as a destination offset, a
+    /// range count and that many (min, max) pairs, sorted by min. The start state is at offset 0.
+    /// </param>
+    internal static (int SymbolId, int Length) GetToken(ReadOnlySpan<char> input, int startIdx, int[] dfaTable)
     {
-        int dfaState = 0;
+        var dfaState = 0;
 
         // Best token and its length found so far
         var symbolId = Token.ErrorSymbolId;
@@ -121,33 +131,7 @@ internal class RolexLexer
         {
             var ch = Next(input, ref idx);
 
-            // We are at some state and are looking for another state
-            // That is indicated by a `found` flag.
-            int nextDfaState = -1;
-            for (var i = 0; i < dfaTable[dfaState].Transitions.Length; ++i)
-            {
-                DfaTransitionEntry entry = dfaTable[dfaState].Transitions[i];
-                bool found = false;
-                for (var j = 0; j < entry.PackedRanges.Length; ++j)
-                {
-                    int first = entry.PackedRanges[j];
-                    j++;
-                    int last = entry.PackedRanges[j];
-                    if (ch <= last)
-                    {
-                        if (first <= ch)
-                        {
-                            found = true;
-                        }
-                        j = int.MaxValue - 1; // Equivalent of a break.
-                    }
-                }
-                if (found)
-                {
-                    nextDfaState = entry.Destination;
-                    i = int.MaxValue - 1; // Equivalent of a break.
-                }
-            }
+            var nextDfaState = FindTransition(dfaTable, dfaState, ch);
 
             // No valid transition was found from dfaState
             if (nextDfaState == -1)
@@ -162,7 +146,7 @@ internal class RolexLexer
 
             // There is a valid transition.
             dfaState = nextDfaState;
-            var currentSymbolId = dfaTable[dfaState].AcceptSymbolId;
+            var currentSymbolId = dfaTable[dfaState];
 
             // The substring from startIdx to the current idx are a valid token
             if (currentSymbolId != -1)
@@ -183,5 +167,37 @@ internal class RolexLexer
         // symbol, e.g. `"Text ` without the ending. This method is not called when lexer is at the end of
         // a stream, thus it has to be an error.
         return (Token.ErrorSymbolId, 0);
+    }
+
+    /// <summary>
+    /// Find the offset of the state that <paramref name="ch"/> leads to from the state at
+    /// <paramref name="state"/>, or -1 if no transition takes it.
+    /// </summary>
+    private static int FindTransition(int[] dfaTable, int state, int ch)
+    {
+        var transitionCount = dfaTable[state + 1];
+        var pos = state + 2;
+        for (var t = 0; t < transitionCount; ++t)
+        {
+            var destination = dfaTable[pos];
+            var rangeCount = dfaTable[pos + 1];
+            pos += 2;
+            for (var r = 0; r < rangeCount; ++r)
+            {
+                // Ranges of a transition are sorted, so a char below this one is below the rest.
+                if (ch < dfaTable[pos])
+                {
+                    pos += (rangeCount - r) * 2;
+                    break;
+                }
+
+                if (ch <= dfaTable[pos + 1])
+                    return destination;
+
+                pos += 2;
+            }
+        }
+
+        return -1;
     }
 }

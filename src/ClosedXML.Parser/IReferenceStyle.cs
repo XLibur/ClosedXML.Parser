@@ -12,7 +12,7 @@ internal interface IReferenceStyle
     /// <summary>
     /// The DFA table the lexer has to use for this reference style.
     /// </summary>
-    DfaEntry[] DfaTable { get; }
+    int[] DfaTable { get; }
 
     /// <summary>
     /// Extract the reference from a <c>A1_CELL</c>, <c>A1_SPAN_REFERENCE</c> or <c>BANG_REFERENCE</c> token.

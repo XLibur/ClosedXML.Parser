@@ -370,10 +370,12 @@ RolexR1C1Dfa.cs
 The tables are generated from the Rolex grammars using the vendored Rolex build under:
 
 ```text
-tools/rolex/91a2d6d
+tools/rolex/v0.2
 ```
 
-This is currently the only known build whose output exactly matches the committed DFA tables.
+It is a build of the [jafin/Rolex](https://github.com/jafin/Rolex) fork, which carries the fixes a
+current Rolex needs for these grammars; `tools/rolex/README.md` lists them. A table takes under a
+second.
 
 Rolex is a .NET Framework executable, so the script should be run from Git Bash on Windows.
 

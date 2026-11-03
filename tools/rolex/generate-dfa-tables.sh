@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Regenerates the Rolex DFA tables (src/ClosedXML.Parser/Rolex/Rolex*Dfa.cs) from the Rolex
-# grammars (Lexer*.rl) with the vendored Rolex 91a2d6d build, the only build whose output
-# matches the tables. It is a .NET Framework executable, so run this on Windows (Git Bash).
+# grammars (Lexer*.rl) with the vendored Rolex build in tools/rolex/v0.2 (see tools/rolex/README.md).
+# It is a .NET Framework executable, so run this on Windows (Git Bash).
 #
 #   tools/rolex/generate-dfa-tables.sh           write both tables
 #   tools/rolex/generate-dfa-tables.sh --check   change nothing, fail if a committed table differs
@@ -17,7 +17,7 @@ case "${1:-}" in
 esac
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
-rolex="$root/tools/rolex/91a2d6d/rolex.exe"
+rolex="$root/tools/rolex/v0.2/rolex.exe"
 tables="$root/src/ClosedXML.Parser/Rolex"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -29,7 +29,13 @@ status=0
 for style in A1 R1C1; do
     cp "$tables/Lexer$style.rl" "$work/"
     # Rolex names the class after the output file, so the file name is the class name.
-    (cd "$work" && "$rolex" "Lexer$style.rl" /noshared /output "Rolex${style}Dfa.cs" /namespace XLibur.Parser.Rolex > /dev/null)
+    # Rolex draws a progress bar on stderr, so show its output only when it fails.
+    if ! log=$(cd "$work" && "$rolex" "Lexer$style.rl" /noshared /output "Rolex${style}Dfa.cs" /namespace XLibur.Parser.Rolex 2>&1); then
+        echo "$log" >&2
+        echo "Rolex failed on Lexer$style.rl" >&2
+        status=1
+        continue
+    fi
 
     generated="$work/Rolex${style}Dfa.cs"
     committed="$tables/Rolex${style}Dfa.cs"
