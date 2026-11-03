@@ -762,7 +762,7 @@ internal static class TokenParser
 
     private sealed class A1ReferenceStyle : IReferenceStyle
     {
-        public DfaEntry[] DfaTable => RolexA1Dfa.DfaTable;
+        public int[] DfaTable => RolexA1Dfa.DfaTable;
 
         public ReferenceArea ParseReference(ReadOnlySpan<char> formula, Token token) => ParseA1Reference(ReferenceText(formula, token));
 
@@ -776,7 +776,7 @@ internal static class TokenParser
 
     private sealed class R1C1ReferenceStyle : IReferenceStyle
     {
-        public DfaEntry[] DfaTable => RolexR1C1Dfa.DfaTable;
+        public int[] DfaTable => RolexR1C1Dfa.DfaTable;
 
         public ReferenceArea ParseReference(ReadOnlySpan<char> formula, Token token) => ParseR1C1Reference(ReferenceText(formula, token));
 

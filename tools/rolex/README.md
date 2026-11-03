@@ -4,6 +4,7 @@ Rolex is a DFA based lexer generator for C#, by codewitch-honey-crisis. It takes
 regular expressions and emits a state machine as a C# source file.
 
 * Source: <https://github.com/codewitch-honey-crisis/Rolex>
+* Fork used here: <https://github.com/jafin/Rolex>
 * Licence: MIT
 * Background: [Rolex: Unicode Enabled Lexer Generator in C#](https://www.codeproject.com/Articles/5257489/Rolex-Unicode-Enabled-Lexer-Generator-in-Csharp)
 
@@ -18,11 +19,9 @@ twice as fast as the ANTLR lexer.
 
 | file | what it is |
 |------|------------|
-| `generate-dfa-tables.sh` | regenerates both DFA tables with the `91a2d6d` build, or checks them with `--check` |
-| `91a2d6d/rolex.exe` | Rolex at `91a2d6d` with the `pc.Advance()` and `Optional` patches: the build that generates the committed tables |
-| `91a2d6d/rolex.exe.config` | targets .NET Framework 4.7.2 |
-| `rolex.exe` | a build of Rolex `master` with a local fix to `_Determinize` in `FA.brick.cs` |
-| `rolex.exe.config` | targets .NET Framework 4.7.2 |
+| `generate-dfa-tables.sh` | regenerates both DFA tables, or checks them with `--check` |
+| `v0.2/rolex.exe` | the Rolex build that generates the committed tables |
+| `v0.2/rolex.exe.config` | targets .NET Framework 4.7.2 |
 
 Debug symbols and the sample grammars that ship with Rolex are deliberately not vendored.
 
@@ -33,82 +32,63 @@ tools/rolex/generate-dfa-tables.sh           # write both tables
 tools/rolex/generate-dfa-tables.sh --check   # change nothing, fail if a committed table differs
 ```
 
-Rolex is a .NET Framework executable, so run the script from Git Bash on Windows. The
-`rolex-tables` job of the *Build and Test* workflow runs it with `--check` on
-`windows-latest`, so a `.rl` committed without its regenerated table fails the build.
-`RolexGrammarConverterTests` checks the step before it, from `FormulaLexer.g4` to the `.rl`
-files. Line ends are not compared, because Rolex writes CRLF and git stores the tables with
-LF.
+Rolex is a .NET Framework executable, so run the script from Git Bash on Windows. A table
+takes under a second. The `rolex-tables` job of the *Build and Test* workflow runs the script
+with `--check` on `windows-latest`, so a `.rl` committed without its regenerated table fails
+the build. `RolexGrammarConverterTests` checks the step before it, from `FormulaLexer.g4` to
+the `.rl` files. Line ends are not compared, because Rolex writes CRLF and git stores the
+tables with LF.
 
-## The 91a2d6d build
+## The table format
 
-Rolex changed its output format after these tables were generated, so only an old build
-can produce them. The version history is misleading:
+Rolex emits one flat `int[]` per lexer. A state starts at an offset and holds:
 
-* The `DfaEntry` format was replaced in Rolex at `73a7c20` (2023-11-17, "simplified DFA
-  generation"). The last commit that still has it is **`91a2d6d` (2020-03-14)**.
-* These tables were first generated on **2023-10-22** (`ad412b8` in this repository, which
-  updated both the `.rl` files and both tables together).
-* The Rolex repository has **no commit at all between 2020-03-14 and 2023-11-17**.
+* its accept symbol, or -1;
+* its transition count;
+* for each transition, the offset of the destination state, the number of ranges, and that
+  many `(min, max)` pairs of code points, sorted by `min`.
 
-So on dates alone it looks as though the generator that built these tables is not in
-Rolex's history. It is. Building `91a2d6d` unpatched produces a table that compiles and
-fails ten tests; building it with the `pc.Advance()` patch below reproduces the tables as
-they were committed until #69, byte for byte from the unmodified `.rl` files. The gap is
-explained by the missing patch, not by a missing version. The `Optional` patch then changed
-exactly one rule, `INTRA_TABLE_REFERENCE`, on purpose.
+The start state is at offset 0. `RolexLexer.GetToken` walks it and stops looking at a
+transition's ranges once a code point is below one. The generated class also derives from a
+`TableTokenizer` and has a constructor over a `TextReader`; neither is used here, and
+`TableTokenizer.cs` holds stubs so the file compiles.
 
-The vendored `91a2d6d/rolex.exe` was built from:
+Until [#69](https://github.com/XLibur/ClosedXML.Parser/issues/69) the tables were an object
+graph of `DfaEntry` and `DfaTransitionEntry`, which only a Rolex from 2020 could emit. That
+build needed two hand patches and was the only one whose output matched. Moving to the format
+the maintained generator emits removed the patches, about 2,700 heap arrays per table set, and
+roughly 45 percent of the generated source (491 KB to 274 KB for A1).
 
-* Rolex commit `91a2d6d102ef5354d3e929e80d1751c27dc4e072`.
-* `Rolex/FastFA.brick.cs`: `pc.Advance();` added before the final return of the four-digit
-  Unicode escape case in both `_ParseEscapePart` and `_ParseRangeEscapePart`. Without it,
-  every such escape in a grammar loses its last digit.
-* `Rolex/FastFA.brick.cs`: `FFA.Optional` replaced by `return Or(new FFA[]{expr,null},accept);`
-  ([#69](https://github.com/XLibur/ClosedXML.Parser/issues/69)). The original cloned the
-  expression and added an epsilon from its start to each accepting state, so a skipped group
-  left the start state standing in the state the group ends in, with that state's outgoing
-  transitions. When the group ends in a loop the start state inherited it: `(ab*)?a` accepted
-  `ba`, and the grammar's `(X Y*)? X` column name accepted `[ ]`. `Or` already gives the skipped
-  path a fresh final state. Only `INTRA_TABLE_REFERENCE` is affected: of the 41 rules in each of
-  `LexerA1.rl` and `LexerR1C1.rl` it is the only one whose DFA changes, growing from 689 to 863
-  states. The same fix, for the newer `FA.Optional`, is
-  [jafin/Rolex#7](https://github.com/jafin/Rolex/pull/7).
-* `Rolex/Rolex.csproj`: `PreBuildEvent` emptied, because the tools it runs are not in the
-  Rolex repository.
-* A Release build with MSBuild from Visual Studio.
+## The build
 
-Its SHA-256 is `309d9eff3479ede1f4a4c2e99b008946f9b96dc86a02bf789bc68b80f029183e`. Before the
-`Optional` patch it was `25ba48ecabd727228c1f9955c91615b94050efe65c6018d2b47d5decbc4135d7`, and
-that build, with only the `pc.Advance()` patch, is what generated the tables until #69. The
-full recipe, and what goes wrong at each step if you skip one, is in
-[issue #9](https://github.com/XLibur/ClosedXML.Parser/issues/9).
+`v0.2/rolex.exe` is a Release build of [jafin/Rolex](https://github.com/jafin/Rolex) at
+commit `ad2301fd0801a687f6b12cde87c38a989036f133`, the head of
+[jafin/Rolex#11](https://github.com/jafin/Rolex/pull/11). Its SHA-256 is
+`b5af453e300c56444235dc10aedae9ffe9e9a2ea31e3128d4505757e91c903fa`. It is a local build, to
+be replaced by the `v0.2` release asset of that repository once it is cut. The tables do not
+change when it is, because generation is deterministic; only this hash does.
 
-## The master build
+Every defect that stood in the way of using a current Rolex is fixed in the fork:
 
-The top-level `rolex.exe` is a build of Rolex `master`. It can't produce a drop-in table for
-this repository, because it emits a flat `int[]` table plus a dependency on
-`TextReaderEnumerable`, while the committed tables are the older `DfaEntry[]` object graph,
-backed by `DfaEntry.cs`, `DfaTransitionEntry.cs` and `TableTokenizer.cs` in
-`src/ClosedXML.Parser/Rolex/`. Swapping a table from this build into the project does not
-compile. `/noshared` does not help: it only controls whether the shared runtime is emitted
-alongside the table, not the table's shape.
+| defect | where |
+|--------|-------|
+| `\uXXXX` and `\xXXXX` escapes lost their last digit, so a range such as `[A-Z]` was `1-Z` | fixed in the fork, [issue 1](https://github.com/jafin/Rolex/issues/1) |
+| `OutOfMemoryException` determinising `LexerR1C1.rl`, after 6.5 minutes | fixed in the fork, [issue 2](https://github.com/jafin/Rolex/issues/2) |
+| `_KeySet.Add` cancelled its own hash, giving duplicate DFA states | fixed in the fork, [issue 4](https://github.com/jafin/Rolex/issues/4) |
+| `x?` after a group ending in a loop let the start state inherit the loop, so `(ab*)?a` accepted `ba` and `[ ]` was a table item ([#69](https://github.com/XLibur/ClosedXML.Parser/issues/69)) | [jafin/Rolex#7](https://github.com/jafin/Rolex/pull/7) |
+| a literal character above U+FFFF in a pattern was read as two surrogates, so the astral range of every name rule was missing | [jafin/Rolex#11](https://github.com/jafin/Rolex/pull/11) |
 
-It carries a local fix for an `OutOfMemoryException`: stock `master` cannot generate
-`LexerR1C1.rl` at all, dying after about 6.5 minutes even with 64 GB of RAM available. The
-epsilon closure of every state is recomputed inside the loop over character ranges,
-although the input automaton never changes during determinisation, and the closure routine
-uses a linear `IList.Contains` for its seen check while allocating a fresh list per call.
-Memoising the closures brings it down to about 2.6 seconds. That fix belongs upstream and
-is not specific to this project.
+All of these were silent: the generator exited 0, the table compiled, and the lexer
+recognised a different language. The fork keeps a regression test for each.
 
-Keep this build for the memory fix and for experimenting with current Rolex. Run it with:
+## Using the build elsewhere
 
 ```
 rolex.exe <input.rl> /noshared /class <ClassName> /namespace <Namespace> /output <output.cs>
 ```
 
-`/class` matters: without it the class is named after the input file.
+Without `/class` the class is named after the input file, which is what the script relies on.
+Rolex draws a progress bar on stderr, so the script shows its output only when it fails.
 
 ## The rule that keeps this safe
 
@@ -116,5 +96,6 @@ Whichever build you use, **regenerate from the unmodified `.rl` first and diff t
 against the committed table** - `generate-dfa-tables.sh --check` does exactly that. If it is
 not byte for byte identical, the toolchain is wrong and nothing generated with it can be
 trusted - a mismatched generator produces a table that compiles, looks reasonable, and
-silently mis-tokenises. That check is the only reliable signal, because nobody reads an
-8,000 line table by eye.
+silently mis-tokenises. That check, together with `AntlrCompatibilityTests`, which lexes every
+short input with both this lexer and the ANTLR one and requires the same tokens, is the only
+reliable signal, because nobody reads an 11,000 line table by eye.
