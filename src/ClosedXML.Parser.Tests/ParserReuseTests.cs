@@ -10,6 +10,7 @@ namespace XLibur.Parser.Tests;
 public class ParserReuseTests
 {
     private const int Iterations = 1_000;
+    private const int Rounds = 5;
 
     /// <summary>
     /// The lexer, the parser and a growable argument list used to allocate about 380 bytes per
@@ -146,17 +147,27 @@ public class ParserReuseTests
     /// <summary>
     /// The bytes a call allocates on this thread, on average, once it is warm.
     /// </summary>
+    /// <summary>
+    /// The fewest bytes per call over several rounds. A call that allocates does so in every round, while
+    /// a one-off allocation (a tiered-JIT promotion landing mid-round on a busy CI runner) hits one round at most.
+    /// </summary>
     private static long MeasureBytesPerCall<T>(Func<T> call)
     {
         for (var i = 0; i < Iterations; ++i)
             call();
 
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var i = 0; i < Iterations; ++i)
-            call();
+        var fewest = long.MaxValue;
+        for (var round = 0; round < Rounds; ++round)
+        {
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            for (var i = 0; i < Iterations; ++i)
+                call();
 
-        var after = GC.GetAllocatedBytesForCurrentThread();
-        return (after - before) / Iterations;
+            var after = GC.GetAllocatedBytesForCurrentThread();
+            fewest = Math.Min(fewest, (after - before) / Iterations);
+        }
+
+        return fewest;
     }
 
     private sealed record Call(string Name, IReadOnlyList<object> Args);
