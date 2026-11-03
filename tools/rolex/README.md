@@ -19,7 +19,7 @@ twice as fast as the ANTLR lexer.
 | file | what it is |
 |------|------------|
 | `generate-dfa-tables.sh` | regenerates both DFA tables with the `91a2d6d` build, or checks them with `--check` |
-| `91a2d6d/rolex.exe` | Rolex at `91a2d6d` with the `pc.Advance()` patch: the build that generates the committed tables |
+| `91a2d6d/rolex.exe` | Rolex at `91a2d6d` with the `pc.Advance()` and `Optional` patches: the build that generates the committed tables |
 | `91a2d6d/rolex.exe.config` | targets .NET Framework 4.7.2 |
 | `rolex.exe` | a build of Rolex `master` with a local fix to `_Determinize` in `FA.brick.cs` |
 | `rolex.exe.config` | targets .NET Framework 4.7.2 |
@@ -53,9 +53,10 @@ can produce them. The version history is misleading:
 
 So on dates alone it looks as though the generator that built these tables is not in
 Rolex's history. It is. Building `91a2d6d` unpatched produces a table that compiles and
-fails ten tests; building it with the patch below reproduces **both** committed tables byte
-for byte from the unmodified `.rl` files. The gap is explained by the missing patch, not by
-a missing version.
+fails ten tests; building it with the `pc.Advance()` patch below reproduces the tables as
+they were committed until #69, byte for byte from the unmodified `.rl` files. The gap is
+explained by the missing patch, not by a missing version. The `Optional` patch then changed
+exactly one rule, `INTRA_TABLE_REFERENCE`, on purpose.
 
 The vendored `91a2d6d/rolex.exe` was built from:
 
@@ -63,12 +64,24 @@ The vendored `91a2d6d/rolex.exe` was built from:
 * `Rolex/FastFA.brick.cs`: `pc.Advance();` added before the final return of the four-digit
   Unicode escape case in both `_ParseEscapePart` and `_ParseRangeEscapePart`. Without it,
   every such escape in a grammar loses its last digit.
+* `Rolex/FastFA.brick.cs`: `FFA.Optional` replaced by `return Or(new FFA[]{expr,null},accept);`
+  ([#69](https://github.com/XLibur/ClosedXML.Parser/issues/69)). The original cloned the
+  expression and added an epsilon from its start to each accepting state, so a skipped group
+  left the start state standing in the state the group ends in, with that state's outgoing
+  transitions. When the group ends in a loop the start state inherited it: `(ab*)?a` accepted
+  `ba`, and the grammar's `(X Y*)? X` column name accepted `[ ]`. `Or` already gives the skipped
+  path a fresh final state. Only `INTRA_TABLE_REFERENCE` is affected: of the 41 rules in each of
+  `LexerA1.rl` and `LexerR1C1.rl` it is the only one whose DFA changes, growing from 689 to 863
+  states. The same fix, for the newer `FA.Optional`, is
+  [jafin/Rolex#7](https://github.com/jafin/Rolex/pull/7).
 * `Rolex/Rolex.csproj`: `PreBuildEvent` emptied, because the tools it runs are not in the
   Rolex repository.
 * A Release build with MSBuild from Visual Studio.
 
-Its SHA-256 is `25ba48ecabd727228c1f9955c91615b94050efe65c6018d2b47d5decbc4135d7`. The full
-recipe, and what goes wrong at each step if you skip one, is in
+Its SHA-256 is `309d9eff3479ede1f4a4c2e99b008946f9b96dc86a02bf789bc68b80f029183e`. Before the
+`Optional` patch it was `25ba48ecabd727228c1f9955c91615b94050efe65c6018d2b47d5decbc4135d7`, and
+that build, with only the `pc.Advance()` patch, is what generated the tables until #69. The
+full recipe, and what goes wrong at each step if you skip one, is in
 [issue #9](https://github.com/XLibur/ClosedXML.Parser/issues/9).
 
 ## The master build

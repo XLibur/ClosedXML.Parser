@@ -629,8 +629,10 @@ internal static class TokenParser
     /// <remarks>
     /// The grammar has no alternative for an empty item: an inner reference is a keyword list or a
     /// column range, a simple column name has to start and end with a non-space, and neither can be
-    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright; the Rolex lexer
-    /// accepts it as a whole token, so the refusal has to happen when the token is read.
+    /// nothing. The ANTLR lexer, the source of truth, refuses <c>[ ]</c> outright. The Rolex lexer
+    /// used to accept it as a whole token (#69), so the refusal had to happen when the token was
+    /// read; it refuses it now, and this check stays so that no token the lexer emits can make the
+    /// parser read past its end.
     /// <para>
     /// Until it did, the peeks that follow each call read past the end of the token: <c>[ ]</c> and
     /// <c>[[#Data], ]</c> both came out of the parser as an <see cref="IndexOutOfRangeException"/>.

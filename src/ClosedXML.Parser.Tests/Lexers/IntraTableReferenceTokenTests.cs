@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using XLibur.Parser.Rolex;
+using Xunit;
 
 namespace XLibur.Parser.Tests.Lexers;
 
@@ -119,10 +120,11 @@ public class IntraTableReferenceTokenTests
     /// ANTLR lexer refuses <c>[ ]</c> outright.
     /// </summary>
     /// <remarks>
-    /// The Rolex lexer accepts it as a whole <c>INTRA_TABLE_REFERENCE</c> token, which is a
-    /// divergence from ANTLR in its own right; the refusal therefore happens when the token is read.
-    /// A fuzzing run found this as an <see cref="IndexOutOfRangeException"/> out of a three
-    /// character formula, because reading the token peeked one character past its end.
+    /// The Rolex lexer used to accept <c>[ ]</c> as a whole <c>INTRA_TABLE_REFERENCE</c> token, a
+    /// divergence from ANTLR (#69), so the refusal happened when the token was read. A fuzzing run
+    /// found this as an <see cref="IndexOutOfRangeException"/> out of a three character formula,
+    /// because reading the token peeked one character past its end. The lexer now refuses these
+    /// itself, as ANTLR does; the cases stay as the end-to-end outcome.
     /// <para>
     /// Only a space counts: <c>[\t]</c> is a column named after a tab, because the whitespace of a
     /// structured reference is the space character alone.
@@ -140,5 +142,46 @@ public class IntraTableReferenceTokenTests
     {
         Assert.Throws<ParsingException>(
             () => FormulaParser<ScalarValue, AstNode, Ctx>.CellFormulaA1(formula, new Ctx(), new F()));
+    }
+
+    /// <summary>
+    /// The lexer itself refuses a bracket of nothing but spaces: no token for it, and an error
+    /// where it starts, as ANTLR does (#69). Rolex's DFA for <c>(X Y*)? X</c> used to let a skipped
+    /// group keep the loop it ends in, which let the start state take a leading space.
+    /// </summary>
+    [Theory]
+    [InlineData("[ ]", 0)]
+    [InlineData("[   ]", 0)]
+    [InlineData("A[ ]", 1)]
+    [InlineData("1,[ ]", 2)]
+    public void The_lexers_emit_no_token_for_a_bracket_holding_only_spaces(string formula, int errorIndex)
+    {
+        foreach (var tokens in new[] { RolexLexer.GetTokensA1(formula.AsSpan()), RolexLexer.GetTokensR1C1(formula.AsSpan()) })
+        {
+            Assert.DoesNotContain(tokens, t => t.SymbolId == Token.INTRA_TABLE_REFERENCE);
+            var last = tokens[^1];
+            Assert.Equal(Token.ErrorSymbolId, last.SymbolId);
+            Assert.Equal(errorIndex, last.StartIndex);
+        }
+    }
+
+    /// <summary>
+    /// The neighbours of that input stay tokens: a space is fine inside a column name, or inside the
+    /// spaced brackets, as long as the name starts and ends on something else.
+    /// </summary>
+    [Theory]
+    [InlineData("[a b]")]
+    [InlineData("[ a]")]
+    [InlineData("[a ]")]
+    [InlineData("[ [#Data] ]")]
+    [InlineData("[]")]
+    public void The_lexers_still_read_a_bracket_with_a_name_or_nothing_in_it(string formula)
+    {
+        foreach (var tokens in new[] { RolexLexer.GetTokensA1(formula.AsSpan()), RolexLexer.GetTokensR1C1(formula.AsSpan()) })
+        {
+            var token = Assert.Single(tokens, t => t.SymbolId != Token.EofSymbolId);
+            Assert.Equal(Token.INTRA_TABLE_REFERENCE, token.SymbolId);
+            Assert.Equal(formula.Length, token.Length);
+        }
     }
 }
