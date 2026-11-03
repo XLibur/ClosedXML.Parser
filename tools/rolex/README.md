@@ -61,12 +61,12 @@ roughly 45 percent of the generated source (491 KB to 274 KB for A1).
 
 ## The build
 
-`v0.2/rolex.exe` is a Release build of [jafin/Rolex](https://github.com/jafin/Rolex) at
-commit `ad2301fd0801a687f6b12cde87c38a989036f133`, the head of
-[jafin/Rolex#11](https://github.com/jafin/Rolex/pull/11). Its SHA-256 is
-`b5af453e300c56444235dc10aedae9ffe9e9a2ea31e3128d4505757e91c903fa`. It is a local build, to
-be replaced by the `v0.2` release asset of that repository once it is cut. The tables do not
-change when it is, because generation is deterministic; only this hash does.
+`v0.2/rolex.exe` is the `rolex.exe` asset of the
+[v0.2 release](https://github.com/jafin/Rolex/releases/tag/v0.2) of
+[jafin/Rolex](https://github.com/jafin/Rolex), built by that repository's release workflow
+from the merge of [jafin/Rolex#11](https://github.com/jafin/Rolex/pull/11). Its SHA-256 is
+`7e0ca22672a912bca5ec19a52af8d0ce39b168de48736e91ead84e0c170db984`, the value in the release's
+`rolex.exe.sha256`.
 
 Every defect that stood in the way of using a current Rolex is fixed in the fork:
 
