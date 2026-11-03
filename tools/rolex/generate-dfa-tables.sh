@@ -32,7 +32,9 @@ for style in A1 R1C1; do
     # Rolex draws a progress bar on stderr, so show its output only when it fails.
     if ! log=$(cd "$work" && "$rolex" "Lexer$style.rl" /noshared /output "Rolex${style}Dfa.cs" /namespace XLibur.Parser.Rolex 2>&1); then
         echo "$log" >&2
-        exit 1
+        echo "Rolex failed on Lexer$style.rl" >&2
+        status=1
+        continue
     fi
 
     generated="$work/Rolex${style}Dfa.cs"

@@ -36,10 +36,10 @@ or Fixed.
   2020 build of Rolex with two hand patches, the only build whose output matched; they now come from a build
   of the [jafin/Rolex](https://github.com/jafin/Rolex) fork, which carries those fixes, and a table takes under
   a second to generate. The generated source is about 45 percent smaller, each table is one array instead of
-  some 1,350, and lexing a formula takes about 22 percent less time on a short BenchmarkDotNet run
-  (`FormulaShapeBenchmarks.Lex`: every one of the 13 shapes between 0.74 and 0.82 of the old time, same
-  allocations). The tokens are the same: the sweep of every short input against the ANTLR lexer passes with
-  no known differences.
+  some 1,350, and lexing a formula took less time on a short, three-iteration BenchmarkDotNet run
+  (`FormulaShapeBenchmarks.Lex`: each of the 13 shapes at 0.74 to 0.82 of the old time, same allocations;
+  treat the figure as indicative, not as a measurement). The sweep of every short input against the ANTLR
+  lexer passes with no known differences.
 
 #### Fixed
 
@@ -48,8 +48,10 @@ or Fixed.
   parser, but the lexer emitted it as a table reference token first. The cause was in Rolex, the generator
   of the lexer tables: its `?` let a skipped group keep the loop it ends in, so `(ab*)?a` accepted `ba` and
   the column name `(X Y*)? X` accepted a leading space. The generator carries the fix, and the
-  tables are regenerated; only the table-reference rule changes. No formula parses differently, since the
-  parser refused the token anyway, but the lexer now agrees with ANTLR on every short input the sweep covers.
+  tables are regenerated. The table-reference rule is where this was found; the sweep and the test suite show
+  no other rule reading differently, but the sweep covers short inputs only. The parser refused the token
+  anyway, so no formula that parsed before parses differently, and the lexer now agrees with ANTLR on every
+  short input the sweep covers.
 
 ## v5.1.1 - 2026-11-01
 
