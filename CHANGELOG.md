@@ -20,6 +20,15 @@ or Fixed.
 
 ## Unreleased
 
+### Formula parsers
+
+#### Added
+
+- `ParsingException.Position` exposes the zero-based char offset into the input where parsing stopped
+  ([#77](https://github.com/XLibur/ClosedXML.Parser/issues/77)). It is the offset the message names, so a
+  caller reads it as data instead of parsing the text; the message is unchanged. A refusal with no more
+  precise place, such as `ReferenceParser.ParseA1` of a whole text, reports 0.
+
 ## v5.1.1 - 2026-11-01
 
 ### Formula parsers

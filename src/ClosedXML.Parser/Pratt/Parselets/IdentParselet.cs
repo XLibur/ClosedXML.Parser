@@ -70,7 +70,7 @@ internal class IdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContext
                 return new Node<T>(value, range);
             }
 
-            throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.");
+            throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.", token.Range.Start);
         }
 
         var tokenText = token.GetText(_parser.Input);
@@ -116,7 +116,7 @@ internal class IdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContext
                 return new Node<T>(value, range);
             }
 
-            throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.");
+            throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.", token.Range.Start);
         }
 
         // Check for rowspan `name`
@@ -126,7 +126,7 @@ internal class IdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContext
             return new Node<T>(value, token.Range);
         }
 
-        throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.");
+        throw new ParsingException($"Unable to parse value starting from position {token.Range.Start}.", token.Range.Start);
     }
 
     private static bool EqualCaseInsensitive(ReadOnlySpan<char> text, string other)

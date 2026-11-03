@@ -127,7 +127,7 @@ internal class Lexer
                 }
 
                 if (!IsXml10Char(_c))
-                    throw new ParsingException($"Invalid text character (codepoint {_c:x8}).");
+                    throw new ParsingException($"Invalid text character (codepoint {_c:x8}).", _cStart);
 
                 Advance();
             }
@@ -336,10 +336,10 @@ internal class Lexer
                 }
 
                 if (IsEof)
-                    throw new ParsingException($"Unable to find closing square bracket for token from position {_start}.");
+                    throw new ParsingException($"Unable to find closing square bracket for token from position {_start}.", _start);
 
                 if (level > 2)
-                    throw new ParsingException($"There can be at most two nested square brackets in a token from position {_start}.");
+                    throw new ParsingException($"There can be at most two nested square brackets in a token from position {_start}.", _start);
 
                 Advance();
             } while (level > 0);

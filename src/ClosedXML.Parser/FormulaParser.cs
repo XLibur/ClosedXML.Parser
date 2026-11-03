@@ -255,7 +255,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private TNode Formula()
     {
         if (_tokens[_tokens.Count - 1].SymbolId == Token.ErrorSymbolId)
-            throw new ParsingException($"Unable to determine token for '{_input}' at index {_tokens[_tokens.Count - 1].StartIndex}.");
+        {
+            var index = _tokens[_tokens.Count - 1].StartIndex;
+            throw new ParsingException($"Unable to determine token for '{_input}' at index {index}.", index);
+        }
 
         if (_la == Token.SPACE)
             Consume();
@@ -264,7 +267,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
         {
             var parsedPart = _input.Substring(0, _tokenSource.StartIndex);
             var remainder = _input.Substring(_tokenSource.StartIndex);
-            throw new ParsingException($"The formula `{_input}` wasn't parsed correctly. The expression `{parsedPart}` was parsed, but the rest `{remainder}` wasn't.");
+            throw new ParsingException($"The formula `{_input}` wasn't parsed correctly. The expression `{parsedPart}` was parsed, but the rest `{remainder}` wasn't.", _tokenSource.StartIndex);
         }
 
         return expression;
@@ -1424,7 +1427,7 @@ public class FormulaParser<TScalarValue, TNode, TContext>
 
     private Exception Error(int startIndex, string message)
     {
-        return new ParsingException($"Error at char {startIndex} of '{_input}': {message}");
+        return new ParsingException($"Error at char {startIndex} of '{_input}': {message}", startIndex);
     }
 
     private ReadOnlySpan<char> GetCurrentToken()
