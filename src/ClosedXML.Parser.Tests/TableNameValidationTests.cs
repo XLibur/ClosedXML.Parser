@@ -18,6 +18,9 @@ public class TableNameValidationTests
     [InlineData("r[a]")]
     [InlineData("rc[a]")]
     [InlineData("c[a:c]")]
+    [InlineData("c[é:c]")] // #71: the fuzzer's input shape, a non-ASCII char after the bracket
+    [InlineData("c[中:c]")]
+    [InlineData("c[𐐀:c]")]
     [InlineData("C2x[a]")]
     [InlineData("R5Z[a]")]
     [InlineData("C05A[[#Data],[a]]")]
