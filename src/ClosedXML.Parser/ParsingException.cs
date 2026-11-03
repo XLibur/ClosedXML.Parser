@@ -7,16 +7,24 @@ namespace XLibur.Parser;
 /// </summary>
 public class ParsingException : Exception
 {
-    internal ParsingException(string message) : base(message)
+    internal ParsingException(string message, int position) : base(message)
     {
+        Position = position;
     }
+
+    /// <summary>
+    /// Zero-based char offset into the input text where parsing stopped. It is the offset the
+    /// message names. For a failure without a more precise place (<see cref="ReferenceParser.ParseA1"/>
+    /// of a whole text) it is 0.
+    /// </summary>
+    public int Position { get; }
 
     /// <summary>
     /// There are problems with underlying stream.
     /// </summary>
     internal static ParsingException UnpairedSurrogate(int codepoint, int position)
     {
-        throw new ParsingException($"Found an unpaired surrogate 0x{codepoint:X4} at {position}.");
+        throw new ParsingException($"Found an unpaired surrogate 0x{codepoint:X4} at {position}.", position);
     }
 
     /// <summary>
@@ -24,7 +32,7 @@ public class ParsingException : Exception
     /// </summary>
     internal static Exception UnterminatedLiteral(int start, char delimiter)
     {
-        throw new ParsingException($"An unterminated literal (delimiter {delimiter}) found at position {start}.");
+        throw new ParsingException($"An unterminated literal (delimiter {delimiter}) found at position {start}.", start);
     }
 
     /// <summary>
@@ -32,7 +40,7 @@ public class ParsingException : Exception
     /// </summary>
     internal static Exception TokenPartialMatch(int start, TokenType type)
     {
-        throw new ParsingException($"Token {type} was parsed from position {start}, but was only partially matched.");
+        throw new ParsingException($"Token {type} was parsed from position {start}, but was only partially matched.", start);
     }
 
     /// <summary>
@@ -40,6 +48,6 @@ public class ParsingException : Exception
     /// </summary>
     internal static Exception UnableToSelectToken(int start)
     {
-        throw new ParsingException($"Unable to determine a token at position {start}.");
+        throw new ParsingException($"Unable to determine a token at position {start}.", start);
     }
 }

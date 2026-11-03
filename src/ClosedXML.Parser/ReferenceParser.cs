@@ -123,7 +123,7 @@ public static class ReferenceParser
     public static ReferenceArea ParseA1(string text)
     {
         if (!TryParseA1(text, out var area))
-            throw new ParsingException($"Unable to parse '{text}'.");
+            throw new ParsingException($"Unable to parse '{text}'.", 0);
 
         return area;
     }

@@ -98,6 +98,6 @@ internal class QIdentParselet<TScalar, T, TContext> : IPrefixParselet<T, TContex
 
     private static ParsingException Unparseable(Token token)
     {
-        return new ParsingException($"Unable to parse value starting from position {token.Range.Start}.");
+        return new ParsingException($"Unable to parse value starting from position {token.Range.Start}.", token.Range.Start);
     }
 }

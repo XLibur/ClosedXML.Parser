@@ -441,7 +441,7 @@ internal static class TokenParser
         if (absoluteNumber == 0)
             throw new ParsingException(
                 "An R1C1 axis number of 0 is not valid. Rows and columns are numbered from 1; " +
-                "use 'R'/'C' or 'R[0]'/'C[0]' for an axis relative to the current cell.");
+                "use 'R'/'C' or 'R[0]'/'C[0]' for an axis relative to the current cell.", 0);
 
         return (Absolute, absoluteNumber);
     }
@@ -641,7 +641,7 @@ internal static class TokenParser
     private static void RequireItem(ReadOnlySpan<char> input, int i, Token token)
     {
         if (i + 1 >= input.Length || input[i] == ']')
-            throw new ParsingException($"A structured reference at position {token.StartIndex} has an item with no column or keyword in it.");
+            throw new ParsingException($"A structured reference at position {token.StartIndex} has an item with no column or keyword in it.", token.StartIndex);
     }
 
     private static int SkipComma(ReadOnlySpan<char> input, int i)
