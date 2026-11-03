@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using XLibur.Parser.Pratt;
 
 namespace XLibur.Parser.Tests;
 
@@ -16,6 +17,7 @@ public class ParsingExceptionPositionTests
     [InlineData("1+c[a]")]
     [InlineData("1+Sheet1!")]
     [InlineData("A1+[abc")]
+    [InlineData("Table1[[#Data], ]")]
     public void Position_equals_the_offset_named_in_the_message(string formula)
     {
         var ex = Assert.Throws<ParsingException>(() => FormulaParser<object, object, object?>.CellFormulaA1(formula, null, new NoOpFactory()));
@@ -23,6 +25,23 @@ public class ParsingExceptionPositionTests
         var named = Regex.Match(ex.Message, @"(?:char|position|index) (\d+)");
         Assert.True(named.Success, ex.Message);
         Assert.Equal(int.Parse(named.Groups[1].Value), ex.Position);
+    }
+
+    [Theory]
+    [InlineData("\"\"", 1)]
+    [InlineData("1+\"ab\"", 5)]
+    public void Position_of_an_invalid_text_character_is_where_the_character_is(string input, int expected)
+    {
+        var lexer = new Lexer(input);
+
+        var ex = Assert.Throws<ParsingException>(() =>
+        {
+            while (lexer.Consume().Type != TokenType.Eof)
+            {
+            }
+        });
+
+        Assert.Equal(expected, ex.Position);
     }
 
     [Fact]

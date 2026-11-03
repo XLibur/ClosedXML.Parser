@@ -255,7 +255,10 @@ public class FormulaParser<TScalarValue, TNode, TContext>
     private TNode Formula()
     {
         if (_tokens[_tokens.Count - 1].SymbolId == Token.ErrorSymbolId)
-            throw new ParsingException($"Unable to determine token for '{_input}' at index {_tokens[_tokens.Count - 1].StartIndex}.", _tokens[_tokens.Count - 1].StartIndex);
+        {
+            var index = _tokens[_tokens.Count - 1].StartIndex;
+            throw new ParsingException($"Unable to determine token for '{_input}' at index {index}.", index);
+        }
 
         if (_la == Token.SPACE)
             Consume();
